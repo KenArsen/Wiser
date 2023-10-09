@@ -18,4 +18,4 @@ class UserSerializer(serializers.ModelSerializer):
 class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitation
-        fields = '__all__'
+        fields = ('email',)
