@@ -1,8 +1,9 @@
+
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from .models import User, Invitation
-from .serializers import UserSerializer, InvitationSerializer
+from apps.user.models import User, Invitation
+from api.serializers.user import UserSerializer, InvitationSerializer
 
 from django.core.mail import send_mail
 from rest_framework import status

@@ -1,8 +1,7 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
 
-from .views import UserViewSet
-from .views import InvitationView, PasswordSetupView
+from api.views.user import UserViewSet, InvitationView, PasswordSetupView
 
 
 router = DefaultRouter()

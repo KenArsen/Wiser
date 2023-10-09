@@ -1,7 +1,7 @@
 
 from rest_framework import serializers
 
-from apps.user.models import User, Invitation
+from apps.user.models import Invitation, User
 
 
 class UserSerializer(serializers.ModelSerializer):
