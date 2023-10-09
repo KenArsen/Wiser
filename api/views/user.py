@@ -1,11 +1,13 @@
+from django.core import signing
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation
-from api.serializers.user import UserSerializer, InvitationSerializer
+from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
+    ResetPasswordConfirmSerializer
 
 from django.core.mail import send_mail
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -30,7 +32,8 @@ class InvitationView(APIView):
             email = serializer.validated_data.get('email')
 
             if Invitation.objects.filter(email=email, is_used=False).exists():
-                return Response({"detail": "Invitation already sent to this email."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Invitation already sent to this email."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.create(email=email)
             invitation_token = str(uuid.uuid4())
@@ -71,3 +74,48 @@ class PasswordSetupView(APIView):
             return Response({"success": "Your password succussfully changed!"}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Invalid password."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordRequestView(generics.CreateAPIView):
+    serializer_class = ResetPasswordRequestSerializer
+
+    def generate_reset_token(self, user):
+        token = signing.dumps({'user_id': user.id})
+        return token
+
+    def send_password_reset_email(self, email, reset_token):
+        # Генерация текста и темы письма
+        subject = 'Сброс пароля'
+        message = f'Для сброса пароля перейдите по ссылке: https://api/reset-password/confirm/?token={reset_token}'
+        from_email = EMAIL_HOST_USER
+        recipient_list = [email]
+
+        # Отправка письма
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                user1 = User.objects.get(email=email)
+                reset_token = self.generate_reset_token(user1)
+                self.send_password_reset_email(email, reset_token)
+                return Response({'message': 'Email sent with reset instructions'}, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordConfirmView(generics.CreateAPIView):
+    serializer_class = ResetPasswordConfirmSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.user
+            new_password = serializer.validated_data['password']
+            user.set_password(new_password)
+            user.save()
+            return Response({'message': 'Password reset successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
