@@ -89,7 +89,6 @@ class ResetPasswordRequestView(generics.CreateAPIView):
         from_email = EMAIL_HOST_USER
         recipient_list = [email]
 
-        # Отправка письма
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
     def create(self, request):
