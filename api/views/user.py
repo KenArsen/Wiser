@@ -84,7 +84,6 @@ class ResetPasswordRequestView(generics.CreateAPIView):
         return token
 
     def send_password_reset_email(self, email, reset_token):
-        # Генерация текста и темы письма
         subject = 'Сброс пароля'
         message = f'Для сброса пароля перейдите по ссылке: https://api/reset-password/confirm/?token={reset_token}'
         from_email = EMAIL_HOST_USER
