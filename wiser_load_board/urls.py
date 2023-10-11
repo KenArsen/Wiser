@@ -33,6 +33,8 @@ urlpatterns = [
 
     path('api/users/', include('api.urls.user')),
 
+    path('api/v1/healthcheck', include('api.urls.healthcheck')),
+
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
