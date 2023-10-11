@@ -10,9 +10,9 @@ RUN pip install -r /wiser_load_board_back/requirements.txt
 
 ADD . /wiser_load_board_back/
 
-EXPOSE 8000
+EXPOSE 8080
 RUN mkdir "static"
 
 CMD sh -c "python manage.py migrate && python manage.py collectstatic --noinput"
 
-CMD ["gunicorn","--bind", ":8000", "wiser_load_board.wsgi:application"]
+CMD ["gunicorn","--bind", ":8080", "wiser_load_board.wsgi:application"]
