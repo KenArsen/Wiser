@@ -20,11 +20,11 @@ from wiser_load_board.settings import EMAIL_HOST_USER
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    #permission_classes = (IsAdminUser, IsAuthenticated)
+    permission_classes = (IsAdminUser, IsAuthenticated)
 
 
 class InvitationView(APIView):
-    #permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser,)
 
     def post(self, request):
         serializer = InvitationSerializer(data=request.data)
