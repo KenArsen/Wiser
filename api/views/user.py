@@ -1,11 +1,10 @@
 from django.core import signing
-from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
-    ResetPasswordConfirmSerializer
+    ResetPasswordConfirmSerializer, UserRetrieveSerializer
 
 from django.core.mail import send_mail
 from rest_framework import status, generics
@@ -23,12 +22,15 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated, )
 
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return UserRetrieveSerializer
+        return UserSerializer
+
     def get_permissions(self):
         if self.action in ['create']:
             return [AllowAny()]
         return [IsAuthenticated()]
-
-
 
 
 class InvitationView(APIView):
