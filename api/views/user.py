@@ -1,5 +1,6 @@
 from django.core import signing
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation
@@ -21,6 +22,12 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser, IsAuthenticated)
+
+
+class RegistrationView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
 
 class InvitationView(APIView):
