@@ -51,7 +51,10 @@ class InvitationView(APIView):
 
             # Отправьте приглашение на электронную почту пользователя здесь.
             subject = 'Приглашение для регистрации'
-            message = f'Пожалуйста, перейдите по ссылке для завершения регистрации: {invitation_token}'
+
+            invitation_url = f'http://127.0.0.1:8000/api/users/setup-password/?token={invitation_token}'
+            message = f'Для продолжении регистрации по ссылке: {invitation_url}'
+
             from_email = EMAIL_HOST_USER
             recipient_list = [email]
 
@@ -95,7 +98,10 @@ class ResetPasswordRequestView(generics.CreateAPIView):
 
     def send_password_reset_email(self, email, reset_token):
         subject = 'Сброс пароля'
-        message = f'Для сброса пароля перейдите по ссылке: https://api/reset-password/confirm/?token={reset_token}'
+
+        reset_url = f'http://127.0.0.1:8000/api/users/reset-password/confirm/?token={reset_token}'
+        message = f'Для сброса пароля перейдите по ссылке: {reset_url}'
+
         from_email = EMAIL_HOST_USER
         recipient_list = [email]
 
