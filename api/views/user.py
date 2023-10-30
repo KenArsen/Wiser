@@ -21,13 +21,14 @@ from wiser_load_board.settings import EMAIL_HOST_USER
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdminUser, IsAuthenticated)
+    permission_classes = (IsAuthenticated, )
+
+    def get_permissions(self):
+        if self.action in ['create']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 
-class RegistrationView(CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [AllowAny]
 
 
 class InvitationView(APIView):
