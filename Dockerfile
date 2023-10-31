@@ -12,5 +12,5 @@ ADD . /wiser_load_board_back/
 
 EXPOSE 8080
 RUN mkdir "static"
-RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@gmail.com', 'adminpassword')" | python manage.py shell
-CMD ["/bin/sh", "-c", "python manage.py migrate && gunicorn --bind :8000 wiser_load_board.wsgi:application"]
+
+CMD ["/bin/sh", "-c", "python manage.py migrate && python manage.py createsuperuser --noinput --username=admin --email=admin@gmail.com --password=adminpassword && gunicorn --bind :8000 wiser_load_board.wsgi:application"]
