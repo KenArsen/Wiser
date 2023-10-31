@@ -16,19 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('email', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
-    # def create(self, validated_data):
-    #     user = User.objects.create_user(**validated_data)
-    #     user.is_active = False
-    #     user.save()
-    #     return user
-
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
-        if not User.objects.filter(is_superuser=True).exists():
-            user.is_superuser = True
-            user.is_active = True
-        else:
-            user.is_active = False
+        user.is_active = False
         user.save()
         return user
 

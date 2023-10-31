@@ -1,10 +1,12 @@
 from django.core import signing
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
     ResetPasswordConfirmSerializer, UserRetrieveSerializer
+
+from api.utils.permissions import IsSuperAdminUser
 
 from django.core.mail import send_mail
 from rest_framework import status, generics
@@ -51,7 +53,7 @@ class UserViewSet(ModelViewSet):
 
 
 class InvitationView(APIView):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsSuperAdminUser,)
 
     def post(self, request):
         serializer = InvitationSerializer(data=request.data)
