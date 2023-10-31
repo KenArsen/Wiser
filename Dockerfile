@@ -12,5 +12,5 @@ ADD . /wiser_load_board_back/
 
 EXPOSE 8080
 RUN mkdir "static"
-
-CMD ["/bin/sh", "-c", "python manage.py migrate && gunicorn --bind :8000 easy_shop_back.wsgi:application"]
+RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@gmail.com', 'adminpassword')" | python manage.py shell
+CMD ["/bin/sh", "-c", "python manage.py migrate && gunicorn --bind :8000 wiser_load_board.wsgi:application"]
