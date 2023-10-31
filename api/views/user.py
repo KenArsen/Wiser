@@ -101,6 +101,13 @@ class PasswordSetupView(APIView):
         if user:
             invitation.is_used = True
             invitation.save()
+
+            subject = "Password Change Confirmation"
+            message = "Your password has been successfully changed."
+            from_email = EMAIL_HOST_USER
+            recipient_list = [email]
+            send_mail(subject, message, from_email, recipient_list)
+
             return Response({"success": "Your password succussfully changed!"}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Invalid password."}, status=status.HTTP_400_BAD_REQUEST)
@@ -148,5 +155,12 @@ class ResetPasswordConfirmView(generics.CreateAPIView):
             new_password = serializer.validated_data['password']
             user.set_password(new_password)
             user.save()
+
+            subject = "Password Reset Confirmation"
+            message = "Your password has been successfully reset."
+            from_email = EMAIL_HOST_USER
+            recipient_list = [user.email]
+            send_mail(subject, message, from_email, recipient_list)
+
             return Response({'message': 'Password reset successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
