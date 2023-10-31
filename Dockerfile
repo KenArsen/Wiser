@@ -13,4 +13,4 @@ ADD . /wiser_load_board_back/
 EXPOSE 8080
 RUN mkdir "static"
 
-CMD ["/bin/sh", "-c", "python manage.py migrate && python manage.py createsuperuser --noinput --username=admin --email=admin@gmail.com --password=adminpassword && gunicorn --bind :8000 wiser_load_board.wsgi:application"]
+CMD ["/bin/sh", "-c", "python manage.py migrate && python manage.py createsuperuser --noinput --username=admin --email=admin@gmail.com --password=adminpassword && gunicorn --bind :8080 wiser_load_board.wsgi:application"]
