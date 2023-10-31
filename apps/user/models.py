@@ -85,13 +85,6 @@ def user_avatar(sender, instance, **kwargs):
     instance.avatar.delete(False)
 
 
-@receiver(post_migrate)
-def create_superuser(sender, **kwargs):
-    if sender.name == 'auth' and kwargs.get('using') == 'default':
-        from django.contrib.auth.models import User
-        User.objects.create_superuser('interner0206@gmail.com', '123')
-
-
 class Invitation(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
