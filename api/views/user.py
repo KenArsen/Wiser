@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import uuid
+from rest_framework.decorators import action
 
 from django.contrib.auth import authenticate
 from wiser_load_board.settings import EMAIL_HOST_USER
@@ -31,6 +32,22 @@ class UserViewSet(ModelViewSet):
         if self.action in ['create']:
             return [AllowAny()]
         return [IsAuthenticated()]
+
+    """Активация пользователя СуперАдмином"""
+    @action(detail=False, methods=['POST'])
+    def activate_by_email(self, request):
+        email = request.data.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'message': 'Пользователь с таким email не найден.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user.is_superuser:
+            user.is_active = True
+            user.save()
+            return Response({'message': 'Пользователь активирован.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'У вас нет прав для активации пользователя.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class InvitationView(APIView):
