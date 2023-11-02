@@ -1,5 +1,5 @@
 # Start Celery worker in the background
-python -m celery -A wiser_load_board.celery worker -l info &
+python -m celery -A wiser_load_board worker -l info &
 python -m celery -A wiser_load_board beat --loglevel=info &
 
 
