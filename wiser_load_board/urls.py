@@ -32,6 +32,7 @@ urlpatterns = [
     path('auth-social/', include('social_django.urls', namespace='social')),
 
     path('api/v1/users/', include('api.urls.user')),
+    path('api/v1/read_email/', include('api.urls.read_email')),
 
     path('api/v1/healthcheck', include('api.urls.healthcheck')),
 
