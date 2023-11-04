@@ -13,7 +13,6 @@ ADD . /wiser_load_board_back/
 EXPOSE 8080
 RUN mkdir "static"
 
-#CMD ["/bin/sh", "-c", "python manage.py migrate && gunicorn --bind :8080 wiser_load_board.wsgi:application"]
 
 RUN chmod +x /wiser_load_board_back/entrypoint.sh
 
