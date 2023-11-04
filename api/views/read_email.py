@@ -1,8 +1,8 @@
-from rest_framework import viewsets
+from rest_framework import generics
 from apps.read_email.models import Order
 from api.serializers.read_email import OrderSerializer
 
 
-class OrderView(viewsets.ModelViewSet):
+class OrderView(generics.ListAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
