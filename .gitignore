@@ -326,3 +326,4 @@ fabric.properties
 /staticfiles
 /static_in_pro
 /verstka
+/email_html
