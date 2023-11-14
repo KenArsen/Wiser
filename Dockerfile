@@ -9,6 +9,7 @@ COPY requirements.txt /wiser_load_board_back/
 RUN pip install -r /wiser_load_board_back/requirements.txt
 
 ADD . /wiser_load_board_back/
+RUN apt-get update && apt-get install -y redis-server
 
 EXPOSE 8080
 RUN mkdir "static"
