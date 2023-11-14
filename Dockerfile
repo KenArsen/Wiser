@@ -13,7 +13,7 @@ ADD . /wiser_load_board_back/
 EXPOSE 8080
 RUN mkdir "static"
 
-
+COPY entrypoint.sh /wiser_load_board_back/
 RUN chmod +x /wiser_load_board_back/entrypoint.sh
 
 # Use the entrypoint script to start both Celery and your Django app
