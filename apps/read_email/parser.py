@@ -82,6 +82,11 @@ def process_email(email_data, file_path):
         formatted_posting_cen = datetime.datetime.strptime(this_posting_expires_cen, "%m/%d/%Y %H:%M") if this_posting_expires_cen else None
         formatted_posting_est = datetime.datetime.strptime(this_posting_expires_est, "%m/%d/%Y %H:%M") if this_posting_expires_est else None
 
+        try:
+            print(Order.objects.get(order_number=order_number).order_number)
+        except Order.DoesNotExist:
+            print("Этот заказ не существует в бд")
+
         if Order.objects.filter(order_number=order_number).exists():
             print("Order с таким номером уже существует!")
         else:
@@ -127,7 +132,10 @@ def read_gmail():
 
     status, message_ids = mail.search(None, 'UNSEEN')
 
+    print(message_ids)
+
     for num in message_ids[0].split():
+        print(num)
         status, msg_data = mail.fetch(num, '(RFC822)')
         raw_email = msg_data[0][1]
         msg = email.message_from_bytes(raw_email)
