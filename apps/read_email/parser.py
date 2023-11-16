@@ -169,7 +169,6 @@ def process_email_task(email_data, file_path):
         process_email(email_data, file_path)
         try:
             os.remove(file_path)
-            print("delete file: ", file_path)
             logging.info(f"Удален файл: {file_path}")
         except Exception as e:
             logging.error(f"Ошибка при удалении файла: {file_path}, {str(e)}")
