@@ -15,6 +15,7 @@ def process_email(email_data, file_path):
     body = email_data['body']
 
     if not body:
+        print("Пустое body")
         return {"status": "Пустое письмо"}
 
     try:
@@ -26,6 +27,8 @@ def process_email(email_data, file_path):
         if div:
             h = div.text.strip()
         else:
+            print("Ошибка при обработке почты")
+            print(body)
             return {"status": "Ошибка при обработке почты"}
 
         from_filed = soup.find('a').text.strip()
