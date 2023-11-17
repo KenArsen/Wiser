@@ -148,6 +148,12 @@ def read_gmail():
             for part in msg.walk():
                 if part.get_content_type() == "text/html":
                     body = part.get_payload(decode=True).decode()
+                    print("Body content:")
+                    print(body)
+        else:
+            body = msg.get_payload(decode=True).decode()
+            print("Body content:")
+            print(body)
         current_datetime = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
         filename = f'{current_datetime}.html'
         file_path = os.path.join(save_dir, filename)
