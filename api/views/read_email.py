@@ -19,12 +19,13 @@ class OrderFilterView(APIView):
         miles = request.query_params.get('miles')
 
         filtered_orders = Order.objects.all()
+
         if pick_up_at:
             filtered_orders = filtered_orders.filter(pick_up_at__icontains=pick_up_at)
         if deliver_to:
             filtered_orders = filtered_orders.filter(deliver_to__icontains=deliver_to)
-        if deliver_to:
-            filtered_orders = filtered_orders.filter(miles__contains=miles)
+        if miles:
+            filtered_orders = filtered_orders.filter(miles__exact=miles)
 
         serialized_data = OrderSerializer(filtered_orders, many=True)
         return Response(serialized_data.data)
