@@ -8,6 +8,6 @@ router = DefaultRouter()
 router.register(r'orders', OrderView)
 
 urlpatterns = [
-    path('read-email/', read_gmail, name='read-email'),
+    #path('read-email/', read_gmail, name='read-email'),
     path('', include(router.urls)),
 ]
