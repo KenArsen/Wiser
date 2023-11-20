@@ -5,6 +5,7 @@ from api.serializers.read_email import OrderSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db.models import Q
 
 
 class OrderView(viewsets.ModelViewSet):
@@ -19,13 +20,17 @@ class OrderFilterView(APIView):
         miles = request.query_params.get('miles')
 
         filtered_orders = Order.objects.all()
+        filter_conditions = Q()
 
         if pick_up_at:
-            filtered_orders = filtered_orders.filter(pick_up_at__icontains=pick_up_at)
+            filter_conditions |= Q(pick_up_at__icontains=pick_up_at)
         if deliver_to:
-            filtered_orders = filtered_orders.filter(deliver_to__icontains=deliver_to)
+            filter_conditions |= Q(deliver_to__icontains=deliver_to)
         if miles:
-            filtered_orders = filtered_orders.filter(miles__exact=miles)
+            filter_conditions |= Q(miles__exact=miles)
+
+        if filter_conditions:
+            filtered_orders = filtered_orders.filter(filter_conditions)
 
         serialized_data = OrderSerializer(filtered_orders, many=True)
         return Response(serialized_data.data)
