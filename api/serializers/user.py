@@ -7,7 +7,7 @@ from apps.user.models import Invitation, User, Roles
 class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Roles
-        fields = ('name',)
+        fields = '__all__'
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):

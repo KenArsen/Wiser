@@ -2,9 +2,9 @@ from django.core import signing
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
-from apps.user.models import User, Invitation
+from apps.user.models import User, Invitation, Roles
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
-    ResetPasswordConfirmSerializer, UserRetrieveSerializer
+    ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer
 
 from api.utils.permissions import IsSuperAdminUser
 
@@ -18,6 +18,11 @@ from rest_framework.decorators import action
 
 from django.contrib.auth import authenticate
 from wiser_load_board.settings import EMAIL_HOST_USER
+
+
+class RolesViewSet(ModelViewSet):
+    queryset = Roles.objects.all()
+    serializer_class = RolesSerializer
 
 
 class UserViewSet(ModelViewSet):
