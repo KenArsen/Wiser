@@ -1,7 +1,13 @@
 from django.core import signing
 from rest_framework import serializers
 
-from apps.user.models import Invitation, User
+from apps.user.models import Invitation, User, Roles
+
+
+class RolesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Roles
+        fields = ('name',)
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):

@@ -8,6 +8,10 @@ from django.utils.translation import gettext_lazy as _
 from api.utils.image import ImageService
 
 
+class Roles(models.Model):
+    name = models.CharField(max_length=255, unique=True, null=True, blank=True)
+
+
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
@@ -31,6 +35,7 @@ class UserManager(BaseUserManager):
 
 
 class User(ImageService, AbstractBaseUser, PermissionsMixin):
+    roles = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
     last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Last Name")
