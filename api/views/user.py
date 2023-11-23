@@ -1,10 +1,11 @@
 from django.core import signing
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation, Roles
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
-    ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer
+    ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer
 
 from api.utils.permissions import IsSuperAdminUser
 
@@ -33,6 +34,8 @@ class UserViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return UserRetrieveSerializer
+        elif self.action == 'activate_by_email':
+            return UserActivationSerializer
         return UserSerializer
 
     def get_permissions(self):
@@ -43,6 +46,9 @@ class UserViewSet(ModelViewSet):
     """Активация пользователя СуперАдмином"""
     @action(detail=False, methods=['POST'])
     def activate_by_email(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         email = request.data.get('email')
         try:
             user = User.objects.get(email=email)
@@ -55,6 +61,15 @@ class UserViewSet(ModelViewSet):
             return Response({'message': 'Пользователь активирован.'}, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'У вас нет прав для активации пользователя.'}, status=status.HTTP_403_FORBIDDEN)
+
+
+class DriverFilterViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        return User.objects.filter(roles__name='DRIVER')
 
 
 class InvitationView(APIView):

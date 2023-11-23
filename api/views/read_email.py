@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from apps.read_email.models import Order
 from api.serializers.read_email import OrderSerializer
@@ -14,6 +16,16 @@ class OrderView(viewsets.ModelViewSet):
 
 
 class OrderFilterView(APIView):
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('pick_up_at', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Pick up time"),
+            openapi.Parameter('deliver_to', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                              description="Delivery location"),
+            openapi.Parameter('miles', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description="Miles"),
+        ],
+        responses={200: openapi.Response('Order data description', OrderSerializer)}
+    )
     def get(self, request):
         pick_up_at = request.query_params.get('pick_up_at')
         deliver_to = request.query_params.get('deliver_to')

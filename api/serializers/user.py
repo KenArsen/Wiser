@@ -29,6 +29,12 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserActivationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email',)
+
+
 class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitation
@@ -51,7 +57,7 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
     def validate_token(self, value):
         try:
             # Проверяем, действителен ли токен
-            data = signing.loads(value, max_age=3600)  # Указывайте здесь желаемое время действия токена в секундах
+            data = signing.loads(value, max_age=3600)
             user_id = data.get('user_id')
             user = User.objects.get(id=user_id)
             self.user = user
