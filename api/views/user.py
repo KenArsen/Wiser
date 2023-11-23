@@ -46,9 +46,6 @@ class UserViewSet(ModelViewSet):
     """Активация пользователя СуперАдмином"""
     @action(detail=False, methods=['POST'])
     def activate_by_email(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
         email = request.data.get('email')
         try:
             user = User.objects.get(email=email)
