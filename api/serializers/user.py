@@ -47,6 +47,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', 'user_permissions', 'groups', 'vehicle_type', 'location', 'roles', 'distance_from_pickup',)
+
+
 class UserActivationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

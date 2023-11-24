@@ -1,12 +1,15 @@
 from django.core import signing
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation, Roles
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
     ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer, \
-    DriverRetrieveSerializers, UserCreateSerializer, UserListSerializer
+    DriverRetrieveSerializers, UserCreateSerializer, UserListSerializer, UserUpdateSerializer
 
 from api.utils.permissions import IsSuperAdminUser
 
@@ -41,6 +44,8 @@ class UserViewSet(ModelViewSet):
             return UserActivationSerializer
         elif self.action == 'create':
             return UserCreateSerializer
+        elif self.action == 'update' or self.action == 'partial_update':
+            return UserUpdateSerializer
         return UserSerializer
 
     def get_permissions(self):
@@ -67,15 +72,8 @@ class UserViewSet(ModelViewSet):
 
 class DriverFilterViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserListSerializer
+    serializer_class = DriverRetrieveSerializers
     permission_classes = (IsAuthenticated, )
-
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return DriverRetrieveSerializers
-        elif self.action == 'list':
-            return UserListSerializer
-        return UserSerializer
 
     def get_queryset(self):
         return User.objects.filter(roles__name='DRIVER')
@@ -84,6 +82,21 @@ class DriverFilterViewSet(ModelViewSet):
 class InvitationView(APIView):
     permission_classes = (IsSuperAdminUser,)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address for the invitation'),
+            },
+            required=['email'],
+        ),
+        responses={
+            201: 'Created - Invitation sent successfully',
+            400: 'Bad Request - Invitation already sent to this email',
+        },
+        operation_summary='Send Invitation',
+        operation_description='Send an invitation to the specified email address.',
+    )
     def post(self, request):
         serializer = InvitationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
