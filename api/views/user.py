@@ -72,7 +72,7 @@ class UserViewSet(ModelViewSet):
 
 class DriverFilterViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = DriverRetrieveSerializers
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
