@@ -38,6 +38,32 @@ class UserManager(BaseUserManager):
 
 
 class User(ImageService, AbstractBaseUser, PermissionsMixin):
+
+    CARGO_VAN = "CARGO VAN"
+    SPRINTER_VAN = "SPRINTER VAN"
+    VAN = "VAN"
+    SPRINTER = "SPRINTER"
+    BOX_TRUCK = "BOX TRUCK"
+    SMALL_STRAIGHT = "SMALL STRAIGHT"
+    LARGE_STRAIGHT = "LARGE STRAIGHT"
+    LIFTGATE = "LIFTGATE"
+    FLATBED = "FLATBED"
+    TRACTOR = "TRACTOR"
+    REEFER = "REEFER"
+    TYPE_OF_ADS = (
+        (CARGO_VAN, "CARGO VAN"),
+        (SPRINTER_VAN, "SPRINTER VAN"),
+        (VAN, "VAN"),
+        (SPRINTER, "SPRINTER"),
+        (BOX_TRUCK, "BOX TRUCK"),
+        (SMALL_STRAIGHT, "SMALL STRAIGHT"),
+        (LARGE_STRAIGHT, "LARGE STRAIGHT"),
+        (LIFTGATE, "LIFTGATE"),
+        (FLATBED, "FLATBED"),
+        (TRACTOR, "TRACTOR"),
+        (REEFER, "REEFER"),
+    )
+
     roles = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
@@ -49,6 +75,10 @@ class User(ImageService, AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    distance_from_pickup = models.CharField(max_length=255, blank=True, null=True)
+    vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN, verbose_name="vehicle")
+    location = models.CharField(max_length=255, null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

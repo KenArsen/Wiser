@@ -7,7 +7,19 @@ from apps.user.models import Invitation, User, Roles
 class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Roles
-        fields = '__all__'
+        fields = ('id', 'name',)
+
+
+class DriverRetrieveSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('distance_from_pickup', 'vehicle_type', 'location', 'phone_number',)
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email',)
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
@@ -17,6 +29,12 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', 'user_permissions', 'groups')
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password')

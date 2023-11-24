@@ -8,7 +8,7 @@ from .models import User, Invitation
 
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'first_name', 'last_name', 'avatar')}),
+        (None, {'fields': ('email', 'password', 'first_name', 'last_name', 'avatar', 'roles')}),
         (_('Permissions'), {'fields': ('is_active', 'is_superuser', 'user_permissions')}),
     )
     list_filter = ['is_active', 'is_superuser']

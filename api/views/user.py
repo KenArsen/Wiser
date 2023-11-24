@@ -5,7 +5,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.user.models import User, Invitation, Roles
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
-    ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer
+    ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer, \
+    DriverRetrieveSerializers, UserCreateSerializer, UserListSerializer
 
 from api.utils.permissions import IsSuperAdminUser
 
@@ -34,8 +35,12 @@ class UserViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return UserRetrieveSerializer
+        elif self.action == 'list':
+            return UserListSerializer
         elif self.action == 'activate_by_email':
             return UserActivationSerializer
+        elif self.action == 'create':
+            return UserCreateSerializer
         return UserSerializer
 
     def get_permissions(self):
@@ -62,8 +67,15 @@ class UserViewSet(ModelViewSet):
 
 class DriverFilterViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserListSerializer
     permission_classes = (IsAuthenticated, )
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return DriverRetrieveSerializers
+        elif self.action == 'list':
+            return UserListSerializer
+        return UserSerializer
 
     def get_queryset(self):
         return User.objects.filter(roles__name='DRIVER')
