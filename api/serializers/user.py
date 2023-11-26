@@ -13,7 +13,7 @@ class RolesSerializer(serializers.ModelSerializer):
 class DriverRetrieveSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('distance_from_pickup', 'vehicle_type', 'location', 'phone_number',)
+        fields = ('first_name', 'distance_from_pickup', 'vehicle_type', 'location', 'phone_number',)
 
 
 class UserListSerializer(serializers.ModelSerializer):
