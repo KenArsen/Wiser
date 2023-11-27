@@ -11,7 +11,7 @@ from api.serializers.user import UserSerializer, InvitationSerializer, ResetPass
     ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer, \
     DriverRetrieveSerializers, UserCreateSerializer, UserListSerializer
 
-from api.utils.permissions import IsSuperAdminUser
+from api.utils.permissions import IsHR, IsDispatcher, IsAccounting, IsAdmin, IsAdminOrHR
 
 from django.core.mail import send_mail
 from rest_framework import status, generics
@@ -28,12 +28,13 @@ from wiser_load_board.settings import EMAIL_HOST_USER
 class RolesViewSet(ModelViewSet):
     queryset = Roles.objects.all()
     serializer_class = RolesSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -49,7 +50,7 @@ class UserViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action in ['create']:
             return [AllowAny()]
-        return [IsAuthenticated()]
+        return [IsAdminOrHR()]
 
     """Активация пользователя СуперАдмином"""
     @action(detail=False, methods=['POST'])
@@ -71,14 +72,14 @@ class UserViewSet(ModelViewSet):
 class DriverFilterViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = DriverRetrieveSerializers
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get_queryset(self):
         return User.objects.filter(roles__name='DRIVER')
 
 
 class InvitationView(APIView):
-    permission_classes = (IsSuperAdminUser,)
+    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
