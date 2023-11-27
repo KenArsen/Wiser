@@ -28,13 +28,13 @@ from wiser_load_board.settings import EMAIL_HOST_USER
 class RolesViewSet(ModelViewSet):
     queryset = Roles.objects.all()
     serializer_class = RolesSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
+    #permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
+    #permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -50,7 +50,7 @@ class UserViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action in ['create']:
             return [AllowAny()]
-        return [IsAdminOrHR()]
+        return [IsAuthenticated()]
 
     """Активация пользователя СуперАдмином"""
     @action(detail=False, methods=['POST'])
@@ -72,14 +72,14 @@ class UserViewSet(ModelViewSet):
 class DriverFilterViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = DriverRetrieveSerializers
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    #permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get_queryset(self):
         return User.objects.filter(roles__name='DRIVER')
 
 
 class InvitationView(APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
+    #permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
