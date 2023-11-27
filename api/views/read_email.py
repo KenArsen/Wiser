@@ -7,6 +7,7 @@ from api.serializers.read_email import OrderSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.utils import timezone
 from django.db.models import Q
 
 
@@ -18,6 +19,24 @@ class OrderView(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+
+    def get_delivery_time(self, request, pk=None):
+        order = self.get_object()
+
+        delivery_time = order.deliver_date_EST
+
+        if not delivery_time:
+            return Response({"error": "Delivery time not specified for the order."}, status=400)
+
+        current_time = timezone.now()
+
+        time_until_delivery = delivery_time - current_time
+
+        hours, remainder = divmod(time_until_delivery.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        time_until_delivery_readable = f"{int(hours)}:{int(minutes)}:{int(seconds)}"
+
+        return Response({"time_until_delivery": time_until_delivery_readable})
 
 
 class OrderFilterView(APIView):
