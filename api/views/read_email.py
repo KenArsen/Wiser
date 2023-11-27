@@ -17,12 +17,12 @@ from api.utils.permissions import IsDispatcher, IsAdmin
 class OrderView(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    #permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
 
 
 class OrderFilterView(APIView):
 
-    #permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
 
     @swagger_auto_schema(
         manual_parameters=[
