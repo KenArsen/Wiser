@@ -9,5 +9,7 @@ router.register(r'orders', OrderView)
 urlpatterns = [
     path('orders/filter/', OrderFilterView.as_view(), name='order-filter'),
     path('orders/<int:pk>/delivery-time/', OrderView.as_view({'get': 'get_delivery_time'}), name='order-delivery-time'),
+    path('orders/<int:pk>/location-order/', OrderView.as_view({'get': 'get_location_order'}), name='order-location'),
+
     path('', include(router.urls)),
 ]

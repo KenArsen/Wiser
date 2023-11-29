@@ -5,6 +5,7 @@ from apps.user.models import User
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created = models.TimeField(auto_now_add=True, null=True, blank=True)
     from_whom = models.EmailField(null=True, blank=True)
 
     pick_up_at = models.CharField(max_length=255, blank=True, null=True)

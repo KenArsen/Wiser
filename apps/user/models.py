@@ -76,9 +76,9 @@ class User(ImageService, AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    distance_from_pickup = models.CharField(max_length=255, blank=True, null=True)
     vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN, verbose_name="vehicle")
-    location = models.CharField(max_length=255, null=True, blank=True)
+    lat = models.FloatField(null=True, blank=True)
+    lon = models.FloatField(null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
