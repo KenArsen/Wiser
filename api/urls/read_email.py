@@ -1,10 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from api.views.read_email import OrderView, OrderFilterView
+from api.views.read_email import OrderView, OrderFilterView, OrderHistoryView
 
 router = DefaultRouter()
 router.register(r'orders', OrderView)
+router.register(r'order-history', OrderHistoryView, basename='orderhistory')
 
 urlpatterns = [
     path('orders/filter/', OrderFilterView.as_view(), name='order-filter'),

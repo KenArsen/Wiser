@@ -1,5 +1,6 @@
 import re
 import datetime
+from django.utils import timezone
 import imaplib
 import email
 from bs4 import BeautifulSoup
@@ -96,18 +97,18 @@ def process_and_save_emails():
                 order_number = re.search(r'Please reference our ORDER NUMBER : (.*?)\n', h).group(1)
 
                 # Форматирование дат
-                formatted_pickup_cen = datetime.datetime.strptime(pickup_date_cen,
-                                                                  "%m/%d/%Y %H:%M") if pickup_date_cen else None
-                formatted_pickup_est = datetime.datetime.strptime(pickup_date_est,
-                                                                  "%m/%d/%Y %H:%M") if pickup_date_est else None
-                formatted_deliver_cen = datetime.datetime.strptime(delivery_date_cen,
-                                                                   "%m/%d/%Y %H:%M") if delivery_date_cen else None
-                formatted_deliver_est = datetime.datetime.strptime(delivery_date_est,
-                                                                   "%m/%d/%Y %H:%M") if delivery_date_est else None
-                formatted_posting_cen = datetime.datetime.strptime(this_posting_expires_cen,
-                                                                   "%m/%d/%Y %H:%M") if this_posting_expires_cen else None
-                formatted_posting_est = datetime.datetime.strptime(this_posting_expires_est,
-                                                                   "%m/%d/%Y %H:%M") if this_posting_expires_est else None
+                formatted_pickup_cen = timezone.make_aware(
+                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) if pickup_date_cen else None
+                formatted_pickup_est = timezone.make_aware(
+                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) if pickup_date_est else None
+                formatted_deliver_cen = timezone.make_aware(
+                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) if delivery_date_cen else None
+                formatted_deliver_est = timezone.make_aware(
+                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) if delivery_date_est else None
+                formatted_posting_cen = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_cen,
+                                                                                       "%m/%d/%Y %H:%M")) if this_posting_expires_cen else None
+                formatted_posting_est = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_est,
+                                                                                       "%m/%d/%Y %H:%M")) if this_posting_expires_est else None
 
                 try:
                     print(Order.objects.get(order_number=order_number).order_number)

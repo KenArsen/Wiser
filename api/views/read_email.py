@@ -20,6 +20,12 @@ from api.utils.permissions import IsDispatcher, IsAdmin
 from apps.user.models import User
 
 
+class OrderHistoryView(viewsets.ModelViewSet):
+    queryset = Order.objects.filter(is_active=False)
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+
+
 class OrderView(viewsets.ModelViewSet):
     queryset = Order.objects.filter(is_active=True)
     serializer_class = OrderSerializer
