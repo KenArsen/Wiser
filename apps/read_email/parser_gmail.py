@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from wiser_load_board.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from .models import Order
 from celery import shared_task
+from .tasks_expires import deactivate_expired_order
 
 
 @shared_task
@@ -143,6 +144,10 @@ def process_and_save_emails():
                         order_number=order_number,
                     )
                     order.save()
+
+                    if order.this_posting_expires_est:
+                        eta_time = order.this_posting_expires_est
+                        deactivate_expired_order.apply_async((order.id,), eta=eta_time)
 
                 mail.store(num, '+FLAGS', '\\Seen')
 

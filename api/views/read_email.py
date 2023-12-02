@@ -21,7 +21,7 @@ from apps.user.models import User
 
 
 class OrderView(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.objects.filter(is_active=True)
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
 
@@ -32,20 +32,26 @@ class OrderView(viewsets.ModelViewSet):
     def get_delivery_time(self, request, pk=None):
         order = self.get_object()
 
-        delivery_time = order.deliver_date_EST
+        delivery_time = order.deliver_date_EST if order.is_active else None
 
-        if not delivery_time:
-            return Response({"error": "Delivery time not specified for the order."}, status=400)
+        if delivery_time is None:
+            return Response({"error": "Delivery time not specified or order is not active."}, status=400)
 
-        current_time = timezone.now()
+        current_time = timezone.localtime(timezone.now())
 
         time_until_delivery = delivery_time - current_time
 
-        hours, remainder = divmod(time_until_delivery.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        time_until_delivery_readable = f"{int(hours)}:{int(minutes)}:{int(seconds)}"
+        total_seconds = time_until_delivery.total_seconds()
 
-        return Response({"time_until_delivery": time_until_delivery_readable})
+        days, remainder = divmod(total_seconds, 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, _ = divmod(remainder, 60)
+
+        hours += days * 24
+
+        time_until_delivery_readable = f"{int(hours)}:{int(minutes)}"
+
+        return Response({"TIME LEFT TO DELIVER": time_until_delivery_readable})
 
     @swagger_auto_schema(
         responses=filtered_drivers_response,
@@ -53,7 +59,7 @@ class OrderView(viewsets.ModelViewSet):
     )
     def get_location_order(self, request, pk=None):
         order = self.get_object()
-        pick_up_at = order.pick_up_at
+        pick_up_at = order.pick_up_at if order.is_active else None
 
         if not pick_up_at:
             return Response({"error": "pick_up_at not specified for the order."}, status=400)
@@ -108,7 +114,7 @@ class OrderFilterView(APIView):
         deliver_to = request.query_params.get('deliver_to')
         miles = request.query_params.get('miles')
 
-        filtered_orders = Order.objects.all()
+        filtered_orders = Order.objects.filter(is_active=True)
         filter_conditions = Q()
 
         if pick_up_at:
