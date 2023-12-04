@@ -49,7 +49,9 @@ def process_and_save_emails():
                     continue
 
                 from_filed = soup.find('a').text.strip()
-                pickup_location = re.search(r'Pick-up at: (.*?)\n', h).group(1)
+
+                pickup_location_match = re.search(r'Pick-up at: (.*?)\n', h)
+                pickup_location = pickup_location_match.group(1) if pickup_location_match else None
 
                 pickup_date_cen_match = re.search(r'Pick-up date \(CEN\): (.*?)\n', h)
                 pickup_date_cen = pickup_date_cen_match.group(1) if pickup_date_cen_match else None
@@ -57,7 +59,8 @@ def process_and_save_emails():
                 pickup_date_est_match = re.search(r'Pick-up date \(EST\): (.*?)\n', h)
                 pickup_date_est = pickup_date_est_match.group(1) if pickup_date_est_match else None
 
-                delivery_location = re.search(r'Deliver to: (.*?)\n', h).group(1)
+                delivery_location_match = re.search(r'Deliver to: (.*?)\n', h)
+                delivery_location = delivery_location_match.group(1) if delivery_location_match else None
 
                 delivery_date_cen_match = re.search(r'Delivery date \(CEN\): (.*?)\n', h)
                 delivery_date_cen = delivery_date_cen_match.group(1) if delivery_date_cen_match else None
@@ -65,23 +68,35 @@ def process_and_save_emails():
                 delivery_date_est_match = re.search(r'Delivery date \(EST\): (.*?)\n', h)
                 delivery_date_est = delivery_date_est_match.group(1) if delivery_date_est_match else None
 
-                notes = re.search(r'Notes: (.*?)\n', h).group(1)
-                miles = re.search(r'Miles: (.*?)\n', h).group(1)
-                pieces = re.search(r'Pieces: (.*?)\n', h).group(1)
-                weight = re.search(r'Weight: (.*?)\n', h).group(1)
+                notes_match = re.search(r'Notes: (.*?)\n', h)
+                notes = notes_match.group(1) if notes_match else None
 
-                dims_match = re.search(r'Dims: (.*?) in.\n', h)
+                miles_match = re.search(r'Miles: (.*?)\n', h)
+                miles = miles_match.group(1) if miles_match else None
+
+                pieces_match = re.search(r'Pieces: (.*?)\n', h)
+                pieces = pieces_match.group(1) if pieces_match else None
+
+                weight_match = re.search(r'Weight: (.*?)\n', h)
+                weight = weight_match.group(1) if weight_match else None
+
+                dims_match = re.search(r'Dims: (.*?) in.\n', h) or re.search(r'Dims: (.*?)in.\n', h)
                 dims = dims_match.group(1) if dims_match else None
 
-                stackable_match = re.search(r'Stackable \? : (.*?)\n', h)
+                stackable_match = re.search(r'Stackable \? : (.*?)\n', h) or re.search(r'Stackable: (.*?)\n', h)
                 stackable = stackable_match.group(1) if stackable_match else None
 
-                hazardous_match = re.search(r'Hazardous \? : (.*?)\n', h)
+                hazardous_match = re.search(r'Hazardous \? : (.*?)\n', h) or re.search(r'Hazardous: (.*?)\n', h)
                 hazardous = hazardous_match.group(1) if hazardous_match else None
 
-                fast_load = re.search(r'FAST Load \? : (.*?)\n', h).group(1)
-                dock_level = re.search(r'Dock Level \? : (.*?)\n', h).group(1)
-                truck_size = re.search(r'Suggested Truck Size : (.*?)\n', h).group(1)
+                fast_load_match = re.search(r'FAST Load \? : (.*?)\n', h) or re.search(r'FAST load: (.*?)\n', h)
+                fast_load = fast_load_match.group(1) if fast_load_match else None
+
+                dock_level_match = re.search(r'Dock Level \? : (.*?)\n', h) or re.search(r'Dock Level: (.*?)\n', h)
+                dock_level = dock_level_match.group(1) if dock_level_match else None
+
+                truck_size_match = re.search(r'Suggested Truck Size : (.*?)\n', h) or re.search(r'Suggested Truck Size: (.*?)\n', h)
+                truck_size = truck_size_match.group(1) if truck_size_match else None
 
                 this_posting_expires_cen_match = re.search(r'This posting expires \(CEN\): (.*?)\n', h)
                 this_posting_expires_cen = this_posting_expires_cen_match.group(
@@ -91,10 +106,18 @@ def process_and_save_emails():
                 this_posting_expires_est = this_posting_expires_est_match.group(
                     1) if this_posting_expires_est_match else None
 
-                load_posted_by = re.search(r'Load posted by: (.*?)\n', h).group(1)
-                phone = re.search(r'Phone: (.*?)\n', h).group(1)
-                fax = re.search(r'Fax: (.*?)\n', h).group(1)
-                order_number = re.search(r'Please reference our ORDER NUMBER : (.*?)\n', h).group(1)
+                load_posted_by_match = re.search(r'Load posted by: (.*?)\n', h)
+                load_posted_by = load_posted_by_match.group(1) if load_posted_by_match else None
+
+                phone_match = re.search(r'Phone: (.*?)\n', h)
+                phone = phone_match.group(1) if phone_match else None
+
+                fax_match = re.search(r'Fax: (.*?)\n', h)
+                fax = fax_match.group(1) if fax_match else None
+
+                order_number_match = (re.search(r'Please reference our ORDER NUMBER : (.*?)\n', h)
+                                      or re.search(r'Please reference our ORDER NUMBER: (.*?)\n', h))
+                order_number = order_number_match.group(1) if order_number_match else None
 
                 # Форматирование дат
                 formatted_pickup_cen = timezone.make_aware(
@@ -149,11 +172,12 @@ def process_and_save_emails():
                     if order.this_posting_expires_est:
                         eta_time = order.this_posting_expires_est
                         deactivate_expired_order.apply_async((order.id,), eta=eta_time)
+                        print(f"Запуск задачи для Expires {order.order_number}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
 
             except Exception as e:
-                print("Ошибка", e)
+                print(f"Ошибка {num}", e)
                 continue
 
         mail.logout()

@@ -10,7 +10,10 @@ def deactivate_expired_order(order_id):
         current_time = timezone.localtime(timezone.now())
 
         if order.this_posting_expires_est <= current_time:
-            Order.objects.filter(pk=order_id).update(is_active=False)
+            print(f"Время действия заказа: {order.order_number} истекло в: {order.this_posting_expires_est}")
+            #Order.objects.filter(pk=order_id).update(is_active=False)
+            Order.objects.filter(pk=order_id).delete()
+            print(f"Заказ с номером {order.order_number} удален")
     except Order.DoesNotExist:
         pass
 
