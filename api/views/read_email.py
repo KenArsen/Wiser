@@ -91,14 +91,14 @@ class OrderView(viewsets.ModelViewSet):
                 if distance_km <= 100:
                     estimated_speed_kmph = 50
                     estimated_time_hours = distance_km / estimated_speed_kmph
-                    transit_time = round(estimated_time_hours * 60)
+                    transit_time = round(estimated_time_hours * 60, 1)
 
                     filtered_drivers.append({
                         "id": driver.id,
                         "first_name": driver.first_name,
                         "vehicle_type": driver.vehicle_type,
                         "phone_number": driver.phone_number,
-                        "MILES OUT": distance_km,
+                        "MILES OUT": round(distance_km, 1),
                         "transit_time": transit_time,
                         "lat": driver.lat,
                         "lon": driver.lon
