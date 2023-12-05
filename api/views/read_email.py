@@ -89,6 +89,9 @@ class OrderView(viewsets.ModelViewSet):
                 distance_km = geodesic((lat_order, lon_order), (lat_driver, lon_driver)).kilometers
 
                 if distance_km <= 100:
+                    estimated_speed_kmph = 50
+                    estimated_time_hours = distance_km / estimated_speed_kmph
+                    transit_time = round(estimated_time_hours * 60)
 
                     filtered_drivers.append({
                         "id": driver.id,
@@ -96,6 +99,7 @@ class OrderView(viewsets.ModelViewSet):
                         "vehicle_type": driver.vehicle_type,
                         "phone_number": driver.phone_number,
                         "MILES OUT": distance_km,
+                        "transit_time": transit_time,
                         "lat": driver.lat,
                         "lon": driver.lon
                     })

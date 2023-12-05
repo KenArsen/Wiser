@@ -18,6 +18,7 @@ filtered_drivers_response = {
                             "vehicle_type": openapi.Schema(type="string"),
                             "phone_number": openapi.Schema(type="string"),
                             "MILES OUT": openapi.Schema(type="number"),
+                            "transit_time": openapi.Schema(type="number"),
                             "lat": openapi.Schema(type="number"),
                             "lon": openapi.Schema(type="number"),
                         },
