@@ -9,7 +9,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        exclude = ('user', 'created',)
+        exclude = ('created',)
 
     def get_created_time(self, obj):
         formatted_time = dateformat.format(obj.created, 'h:i A')

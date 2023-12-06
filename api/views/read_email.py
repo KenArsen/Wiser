@@ -99,7 +99,7 @@ class OrderView(viewsets.ModelViewSet):
                         "vehicle_type": driver.vehicle_type,
                         "phone_number": driver.phone_number,
                         "MILES OUT": round(distance_km, 1),
-                        "transit_time": transit_time,
+                        "TRANSIT TIME": transit_time,
                         "lat": driver.lat,
                         "lon": driver.lon
                     })
