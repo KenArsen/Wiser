@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 
 from api.utils.decorators_swagger import filtered_drivers_response, time_until_delivery_response, order_data_spec
 from apps.read_email.models import Order
@@ -59,6 +61,7 @@ class OrderView(viewsets.ModelViewSet):
 
         return Response({"TIME LEFT TO DELIVER": time_until_delivery_readable})
 
+    @action(detail=True, methods=['get', 'post'])
     @swagger_auto_schema(
         responses=filtered_drivers_response,
         operation_summary="Get location order details"
@@ -79,32 +82,45 @@ class OrderView(viewsets.ModelViewSet):
 
             lat_order, lon_order = location.latitude, location.longitude
 
-            active_drivers = User.objects.filter(is_active=True, roles__name='DRIVER', lat__isnull=False,
-                                                 lon__isnull=False)
+            if request.method == 'GET':
+                active_drivers = User.objects.filter(is_active=True, roles__name='DRIVER', lat__isnull=False,
+                                                     lon__isnull=False)
 
-            filtered_drivers = []
-            for driver in active_drivers:
-                lat_driver, lon_driver = driver.lat, driver.lon
+                filtered_drivers = []
+                for driver in active_drivers:
+                    lat_driver, lon_driver = driver.lat, driver.lon
 
-                distance_km = geodesic((lat_order, lon_order), (lat_driver, lon_driver)).kilometers
+                    distance_km = geodesic((lat_order, lon_order), (lat_driver, lon_driver)).kilometers
 
-                if distance_km <= 100:
-                    estimated_speed_kmph = 50
-                    estimated_time_hours = distance_km / estimated_speed_kmph
-                    transit_time = round(estimated_time_hours * 60, 1)
+                    if distance_km <= 100:
+                        estimated_speed_kmph = 50
+                        estimated_time_hours = distance_km / estimated_speed_kmph
+                        transit_time = round(estimated_time_hours * 60, 1)
 
-                    filtered_drivers.append({
-                        "id": driver.id,
-                        "first_name": driver.first_name,
-                        "vehicle_type": driver.vehicle_type,
-                        "phone_number": driver.phone_number,
-                        "MILES OUT": round(distance_km, 1),
-                        "TRANSIT TIME": transit_time,
-                        "lat": driver.lat,
-                        "lon": driver.lon
-                    })
+                        filtered_drivers.append({
+                            "id": driver.id,
+                            "first_name": driver.first_name,
+                            "vehicle_type": driver.vehicle_type,
+                            "phone_number": driver.phone_number,
+                            "MILES OUT": round(distance_km, 1),
+                            "TRANSIT TIME": transit_time,
+                            "lat": driver.lat,
+                            "lon": driver.lon
+                        })
 
-            return Response({"available_drivers": filtered_drivers})
+                return Response({"available_drivers": filtered_drivers})
+
+            elif request.method == 'POST':
+                selected_driver_id = request.data.get('selected_driver_id')
+                if selected_driver_id:
+                    selected_driver = get_object_or_404(User, id=selected_driver_id, is_active=True,
+                                                        roles__name='DRIVER')
+                    order.user = selected_driver
+                    order.save()
+
+                    return Response({"message": "Driver assigned successfully."})
+                else:
+                    return Response({"error": "selected_driver_id not provided in the request data."}, status=400)
 
         except GeocoderTimedOut:
             return Response({"error": "Geocoding timed out."}, status=500)
