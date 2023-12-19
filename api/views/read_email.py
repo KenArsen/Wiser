@@ -81,10 +81,13 @@ class OrderView(viewsets.ModelViewSet):
                 return Response({"error": "Failed to geocode pick_up_at location."}, status=400)
 
             lat_order, lon_order = location.latitude, location.longitude
+            distance_km = 0
 
             if request.method == 'GET':
                 active_drivers = User.objects.filter(is_active=True, roles__name='DRIVER', lat__isnull=False,
                                                      lon__isnull=False)
+
+                selected_driver_id = request.query_params.get('selected_driver_id')
 
                 filtered_drivers = []
                 for driver in active_drivers:
@@ -97,7 +100,7 @@ class OrderView(viewsets.ModelViewSet):
                         estimated_time_hours = distance_km / estimated_speed_kmph
                         transit_time = round(estimated_time_hours * 60, 1)
 
-                        filtered_drivers.append({
+                        driver_data = {
                             "id": driver.id,
                             "first_name": driver.first_name,
                             "vehicle_type": driver.vehicle_type,
@@ -106,7 +109,12 @@ class OrderView(viewsets.ModelViewSet):
                             "TRANSIT TIME": transit_time,
                             "lat": driver.lat,
                             "lon": driver.lon
-                        })
+                        }
+
+                        filtered_drivers.append(driver_data)
+
+                        if selected_driver_id and int(selected_driver_id) == driver.id:
+                            return Response(driver_data)
 
                 return Response({"available_drivers": filtered_drivers})
 
@@ -118,7 +126,18 @@ class OrderView(viewsets.ModelViewSet):
                     order.user = selected_driver
                     order.save()
 
-                    return Response({"message": "Driver assigned successfully."})
+                    driver_info = {
+                        "id": selected_driver.id,
+                        "first_name": selected_driver.first_name,
+                        "vehicle_type": selected_driver.vehicle_type,
+                        "phone_number": selected_driver.phone_number,
+                        "MILES OUT": round(distance_km, 1),
+                        "TRANSIT TIME": selected_driver.transit_time,
+                        "lat": selected_driver.lat,
+                        "lon": selected_driver.lon
+                    }
+
+                    return Response({"message": "Driver assigned successfully.", "selected_driver_info": driver_info})
                 else:
                     return Response({"error": "selected_driver_id not provided in the request data."}, status=400)
 

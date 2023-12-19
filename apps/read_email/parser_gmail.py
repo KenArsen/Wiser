@@ -48,7 +48,13 @@ def process_and_save_emails():
                     print("Ошибка при обработке почты")
                     continue
 
-                from_filed = soup.find('a').text.strip()
+                from_filed = ""
+                email_matches = re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', h)
+
+                if email_matches:
+                    from_filed = email_matches[1]
+                else:
+                    print("Адрес электронной почты не найден")
 
                 pickup_location_match = re.search(r'Pick-up at: (.*?)\n', h)
                 pickup_location = pickup_location_match.group(1) if pickup_location_match else None
@@ -106,6 +112,51 @@ def process_and_save_emails():
                 this_posting_expires_est = this_posting_expires_est_match.group(
                     1) if this_posting_expires_est_match else None
 
+                lines_after_contact_info = []
+                company_info_phrase = "If you are interested in this load, please contact"
+                company_info_match = re.search(f"{re.escape(company_info_phrase)}[ :]*([\s\S]+?)\n", h)
+
+                company_name = ""
+                company_address = ""
+                company_location = ""
+                company_phone = ""
+
+                try:
+                    if company_info_match:
+                        contact_info_start_index = h.find(company_info_phrase)
+
+                        if contact_info_start_index != -1:
+                            contact_info_end_index = h.find("\n", contact_info_start_index)
+                            if contact_info_end_index == -1:
+                                contact_info_end_index = len(h)
+
+                            rest_of_text = h[contact_info_end_index:].strip()
+                            rest_of_lines = rest_of_text.split('\n')
+
+                            contact_info_index = next(
+                                (i for i, line in enumerate(rest_of_lines) if line.strip()), None)
+
+                            if contact_info_index is not None and len(rest_of_lines) >= contact_info_index + 4:
+                                lines_after_contact_info = rest_of_lines[contact_info_index: contact_info_index + 4]
+
+                                for i, line in enumerate(lines_after_contact_info, start=1):
+                                    if i == 1:
+                                        company_name = line.strip()
+                                    elif i == 2:
+                                        company_address = line.strip()
+                                    elif i == 3:
+                                        company_location = line.strip()
+                                    elif i == 4:
+                                        company_phone = line.strip()
+                            else:
+                                raise ValueError("Недостаточно строк после текста.")
+                        else:
+                            raise ValueError("Информация о компании не найдена.")
+                    else:
+                        raise ValueError(f"Текст '{company_info_phrase}' не найдена.")
+                except Exception as e:
+                    print(f"Произошла ошибка: {e}")
+
                 load_posted_by_match = re.search(r'Load posted by: (.*?)\n', h)
                 load_posted_by = load_posted_by_match.group(1) if load_posted_by_match else None
 
@@ -162,6 +213,10 @@ def process_and_save_emails():
                         suggested_truck_size=truck_size,
                         this_posting_expires_cen=formatted_posting_cen,
                         this_posting_expires_est=formatted_posting_est,
+                        company_name=company_name,
+                        company_address=company_address,
+                        company_location=company_location,
+                        company_phone=company_phone,
                         load_posted_by=load_posted_by,
                         phone=phone,
                         fax=fax,

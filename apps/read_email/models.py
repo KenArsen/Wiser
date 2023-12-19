@@ -36,6 +36,11 @@ class Order(models.Model):
     this_posting_expires_cen = models.DateTimeField(blank=True, null=True)
     this_posting_expires_est = models.DateTimeField(blank=True, null=True)
 
+    company_name = models.CharField(max_length=255, blank=True, null=True)
+    company_address = models.TextField(blank=True, null=True)
+    company_location = models.CharField(max_length=255, blank=True, null=True)
+    company_phone = models.CharField(max_length=40, blank=True, null=True)
+
     load_posted_by = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     fax = models.CharField(max_length=255, blank=True, null=True)
@@ -43,4 +48,7 @@ class Order(models.Model):
 
     def __str__(self):
         return self.from_whom
+
+    class Meta:
+        ordering = ['-created']
 
