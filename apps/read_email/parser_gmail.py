@@ -183,6 +183,7 @@ def process_and_save_emails():
                                                                                        "%m/%d/%Y %H:%M")) if this_posting_expires_cen else None
                 formatted_posting_est = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_est,
                                                                                        "%m/%d/%Y %H:%M")) if this_posting_expires_est else None
+                formatted_posting_est_plus_6_hours = formatted_posting_est + datetime.timedelta(hours=6)
 
                 try:
                     print(Order.objects.get(order_number=order_number).order_number)
@@ -212,7 +213,7 @@ def process_and_save_emails():
                         dock_level=dock_level,
                         suggested_truck_size=truck_size,
                         this_posting_expires_cen=formatted_posting_cen,
-                        this_posting_expires_est=formatted_posting_est,
+                        this_posting_expires_est=formatted_posting_est_plus_6_hours,
                         company_name=company_name,
                         company_address=company_address,
                         company_location=company_location,
