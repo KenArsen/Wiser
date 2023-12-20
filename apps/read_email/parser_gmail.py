@@ -172,18 +172,19 @@ def process_and_save_emails():
 
                 # Форматирование дат
                 formatted_pickup_cen = timezone.make_aware(
-                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) if pickup_date_cen else None
+                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if pickup_date_cen else None
                 formatted_pickup_est = timezone.make_aware(
-                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) if pickup_date_est else None
+                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if pickup_date_est else None
+
                 formatted_deliver_cen = timezone.make_aware(
-                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) if delivery_date_cen else None
+                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if delivery_date_cen else None
                 formatted_deliver_est = timezone.make_aware(
-                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) if delivery_date_est else None
+                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if delivery_date_est else None
+
                 formatted_posting_cen = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_cen,
-                                                                                       "%m/%d/%Y %H:%M")) if this_posting_expires_cen else None
+                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if this_posting_expires_cen else None
                 formatted_posting_est = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_est,
-                                                                                       "%m/%d/%Y %H:%M")) if this_posting_expires_est else None
-                formatted_posting_est_plus_6_hours = formatted_posting_est + datetime.timedelta(hours=6)
+                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if this_posting_expires_est else None
 
                 try:
                     print(Order.objects.get(order_number=order_number).order_number)
@@ -213,7 +214,7 @@ def process_and_save_emails():
                         dock_level=dock_level,
                         suggested_truck_size=truck_size,
                         this_posting_expires_cen=formatted_posting_cen,
-                        this_posting_expires_est=formatted_posting_est_plus_6_hours,
+                        this_posting_expires_est=formatted_posting_est,
                         company_name=company_name,
                         company_address=company_address,
                         company_location=company_location,
