@@ -126,13 +126,22 @@ class OrderView(viewsets.ModelViewSet):
                     order.user = selected_driver
                     order.save()
 
+                    lat_order, lon_order = location.latitude, location.longitude
+                    lat_driver, lon_driver = selected_driver.lat, selected_driver.lon
+
+                    distance_km = geodesic((lat_order, lon_order), (lat_driver, lon_driver)).kilometers
+
+                    estimated_speed_kmph = 50
+                    estimated_time_hours = distance_km / estimated_speed_kmph
+                    transit_time = round(estimated_time_hours * 60, 1)
+
                     driver_info = {
                         "id": selected_driver.id,
                         "first_name": selected_driver.first_name,
                         "vehicle_type": selected_driver.vehicle_type,
                         "phone_number": selected_driver.phone_number,
                         "MILES OUT": round(distance_km, 1),
-                        "TRANSIT TIME": selected_driver.transit_time,
+                        "TRANSIT TIME": transit_time,
                         "lat": selected_driver.lat,
                         "lon": selected_driver.lon
                     }
