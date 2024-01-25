@@ -9,8 +9,10 @@ from rest_framework.response import Response
 from apps.read_email.models import Order
 from .models import Letter
 from .serializers import LetterSerializer
+from rest_framework.decorators import api_view
 
 
+@api_view(["GET"])
 def send_mail(request, pk, rate):
     letter = Letter()
     try:
@@ -18,7 +20,7 @@ def send_mail(request, pk, rate):
         letter.rate = rate
         letter.dims = order.dims
         letter.mc = '1220386'
-        letter.miles_out = order.miles
+        letter.miles = order.miles
         letter.eta_to_pick_up = get_delivery_time(order)
         letter.dock_high = True
         letter.account = order.from_whom
@@ -37,7 +39,8 @@ def send_mail(request, pk, rate):
             )
             email.attach_alternative(email_body, 'text/html')
             email.send()
-            return Response({"message": "Mail sent successfully!"}, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
