@@ -1,12 +1,14 @@
-import re
 import datetime
-from django.utils import timezone
-import imaplib
 import email
+import imaplib
+import re
+
 from bs4 import BeautifulSoup
+from celery import shared_task
+from django.utils import timezone
+
 from wiser_load_board.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from .models import Order
-from celery import shared_task
 from .tasks_expires import deactivate_expired_order
 
 
@@ -101,7 +103,8 @@ def process_and_save_emails():
                 dock_level_match = re.search(r'Dock Level \? : (.*?)\n', h) or re.search(r'Dock Level: (.*?)\n', h)
                 dock_level = dock_level_match.group(1) if dock_level_match else None
 
-                truck_size_match = re.search(r'Suggested Truck Size : (.*?)\n', h) or re.search(r'Suggested Truck Size: (.*?)\n', h)
+                truck_size_match = re.search(r'Suggested Truck Size : (.*?)\n', h) or re.search(
+                    r'Suggested Truck Size: (.*?)\n', h)
                 truck_size = truck_size_match.group(1) if truck_size_match else None
 
                 this_posting_expires_cen_match = re.search(r'This posting expires \(CEN\): (.*?)\n', h)
@@ -172,19 +175,25 @@ def process_and_save_emails():
 
                 # Форматирование дат
                 formatted_pickup_cen = timezone.make_aware(
-                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if pickup_date_cen else None
+                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if pickup_date_cen else None
                 formatted_pickup_est = timezone.make_aware(
-                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if pickup_date_est else None
+                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if pickup_date_est else None
 
                 formatted_deliver_cen = timezone.make_aware(
-                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if delivery_date_cen else None
+                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if delivery_date_cen else None
                 formatted_deliver_est = timezone.make_aware(
-                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if delivery_date_est else None
+                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if delivery_date_est else None
 
                 formatted_posting_cen = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_cen,
-                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if this_posting_expires_cen else None
+                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if this_posting_expires_cen else None
                 formatted_posting_est = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_est,
-                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(hours=6) if this_posting_expires_est else None
+                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if this_posting_expires_est else None
 
                 try:
                     print(Order.objects.get(order_number=order_number).order_number)

@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
 from .models import User, Invitation
@@ -21,7 +21,7 @@ class UserAdmin(BaseUserAdmin):
     list_display = ('email', 'first_name', 'is_active', 'created_at')
     list_display_links = ('email', 'first_name')
     list_editable = ('is_active',)
-    search_fields = ('email', )
+    search_fields = ('email',)
     form = UserChangeForm
     add_form = UserCreationForm
     ordering = ('-id',)

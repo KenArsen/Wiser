@@ -1,5 +1,6 @@
 from celery import shared_task
 from django.utils import timezone
+
 from .models import Order
 
 
@@ -19,4 +20,3 @@ def deactivate_expired_order(order_id):
                 Order.objects.filter(pk=order_id).update(is_active=False)
     except Order.DoesNotExist:
         pass
-

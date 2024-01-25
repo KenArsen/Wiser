@@ -1,21 +1,22 @@
-FROM public.ecr.aws/docker/library/python:3.11
+FROM public.ecr.aws/docker/library/python:3.10
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV ENV_FILE .env
 
-WORKDIR /wiser_load_board_back
-RUN pip install --upgrade pip
+WORKDIR /app
 
-COPY requirements.txt /wiser_load_board_back/
-RUN pip install -r /wiser_load_board_back/requirements.txt
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
 
-ADD . /wiser_load_board_back/
-RUN apt-get update && apt-get install -y redis-server
+#ADD . /wiser_load_board_back/
+#RUN apt-get update && apt-get install -y redis-server
 
-EXPOSE 8080
-RUN mkdir "static"
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 
-COPY entrypoint.sh /wiser_load_board_back/
-RUN chmod +x /wiser_load_board_back/entrypoint.sh
+COPY . /app/
+
+EXPOSE 8000
 
 # Use the entrypoint script to start both Celery and your Django app
-CMD ["/wiser_load_board_back/entrypoint.sh"]
+CMD ["/app/entrypoint.sh"]

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('read_email', '0009_rename_contact_info_order_company_address_and_more'),
     ]

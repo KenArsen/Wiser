@@ -1,17 +1,14 @@
-from django.conf.urls.static import static
 from django.conf import settings
-
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, re_path, include
-
+from django.urls import path, include
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -33,8 +30,9 @@ urlpatterns = [
 
     path('api/v1/users/', include('api.urls.user')),
     path('api/v1/read_email/', include('api.urls.read_email')),
+    path('api/v1/send_mail/', include('apps.send_mail.urls')),  # new
 
-    path('api/v1/healthcheck', include('api.urls.healthcheck')),
+    path('api/v1/healthcheck/', include('api.urls.healthcheck')),
 
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

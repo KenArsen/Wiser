@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# Set execute permissions for entrypoint.sh (optional)
-chmod +x /wiser_load_board_back/entrypoint.sh
+python manage.py migrate
+
+python manage.py collectstatic --no-input
 
 # Start Celery worker in the background
 python -m celery -A wiser_load_board worker -l info &
@@ -10,4 +11,6 @@ python -m celery -A wiser_load_board worker -l info &
 python -m celery -A wiser_load_board beat --loglevel=info &
 
 # Start your Django application
-exec /bin/sh -c "python manage.py migrate && gunicorn --bind :8080 wiser_load_board.wsgi:application"
+exec /bin/sh -c "gunicorn --bind :8000 wiser_load_board.wsgi:application"
+
+chmod +x entrypoint.sh

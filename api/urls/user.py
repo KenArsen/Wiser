@@ -1,5 +1,5 @@
-from rest_framework.routers import DefaultRouter
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
 from api.views.user import UserViewSet, InvitationView, PasswordSetupView, ResetPasswordRequestView, \
     ResetPasswordConfirmView, RolesViewSet, DriverFilterViewSet
@@ -17,39 +17,4 @@ router.register('drivers', DriverFilterViewSet, basename='drivers')
 router.register('role', RolesViewSet, basename='roles')
 router.register('', UserViewSet, basename='users')
 
-
 urlpatterns += router.urls
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

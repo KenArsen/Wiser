@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('user', '0005_rename_location_user_lat_user_lon'),
     ]

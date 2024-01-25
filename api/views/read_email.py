@@ -1,37 +1,33 @@
-from rest_framework import viewsets
-from drf_yasg.utils import swagger_auto_schema
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
-
-from api.utils.decorators_swagger import filtered_drivers_response, time_until_delivery_response, order_data_spec
-from apps.read_email.models import Order
-from api.serializers.read_email import OrderSerializer
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.utils import timezone
 from django.db.models import Q
-
-from geopy.geocoders import Nominatim
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 from geopy.distance import geodesic
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
-
-
+from geopy.geocoders import Nominatim
+from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from api.serializers.read_email import OrderSerializer
+from api.utils.decorators_swagger import filtered_drivers_response, time_until_delivery_response, order_data_spec
 from api.utils.permissions import IsDispatcher, IsAdmin
+from apps.read_email.models import Order
 from apps.user.models import User
 
 
 class OrderHistoryView(viewsets.ModelViewSet):
     queryset = Order.objects.filter(is_active=False)
     serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
 
 
 class OrderView(viewsets.ModelViewSet):
     queryset = Order.objects.filter(is_active=True)
     serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
 
     @swagger_auto_schema(
         responses=time_until_delivery_response,
@@ -159,8 +155,7 @@ class OrderView(viewsets.ModelViewSet):
 
 
 class OrderFilterView(APIView):
-
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
 
     @swagger_auto_schema(**order_data_spec)
     def get(self, request):

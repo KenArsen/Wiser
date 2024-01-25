@@ -1,27 +1,22 @@
-from django.core import signing
+import uuid
 
+from django.contrib.auth import authenticate
+from django.core import signing
+from django.core.mail import send_mail
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-
+from rest_framework import status, generics
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from apps.user.models import User, Invitation, Roles
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
     ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer, \
     DriverRetrieveSerializers, UserCreateSerializer, UserListSerializer
-
-from api.utils.permissions import IsHR, IsDispatcher, IsAccounting, IsAdmin, IsAdminOrHR
-
-from django.core.mail import send_mail
-from rest_framework import status, generics
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-import uuid
-from rest_framework.decorators import action
-
-from django.contrib.auth import authenticate
+from api.utils.permissions import IsHR, IsDispatcher, IsAdmin, IsAdminOrHR
+from apps.user.models import User, Invitation, Roles
 from wiser_load_board.settings import EMAIL_HOST_USER
 
 
@@ -53,6 +48,7 @@ class UserViewSet(ModelViewSet):
         return [IsAdminOrHR()]
 
     """Активация пользователя СуперАдмином"""
+
     @action(detail=False, methods=['POST'])
     def activate_by_email(self, request):
         email = request.data.get('email')

@@ -29,7 +29,6 @@ filtered_drivers_response = {
     ),
 }
 
-
 time_until_delivery_response = {
     200: openapi.Response(
         description="Time Until Delivery Response",

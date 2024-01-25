@@ -1,8 +1,9 @@
-from django.db import models
+import os
+
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
+from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-import os
 from django.utils.translation import gettext_lazy as _
 
 from api.utils.image import ImageService
@@ -38,7 +39,6 @@ class UserManager(BaseUserManager):
 
 
 class User(ImageService, AbstractBaseUser, PermissionsMixin):
-
     CARGO_VAN = "CARGO VAN"
     SPRINTER_VAN = "SPRINTER VAN"
     VAN = "VAN"
@@ -76,7 +76,8 @@ class User(ImageService, AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN, verbose_name="vehicle")
+    vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN,
+                                    verbose_name="vehicle")
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
 
@@ -136,4 +137,3 @@ class Invitation(models.Model):
 
     def __str__(self):
         return self.email
-

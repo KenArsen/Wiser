@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.utils import dateformat
+from rest_framework import serializers
 
 from apps.read_email.models import Order
 
