@@ -1,8 +1,4 @@
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.html import strip_tags
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -10,6 +6,7 @@ from apps.read_email.models import Order
 from .models import Letter
 from .serializers import LetterSerializer
 from rest_framework.decorators import api_view
+from .tasks import send_mail_to_order
 
 
 @api_view(["GET"])
@@ -30,15 +27,7 @@ def send_mail(request, pk, rate):
         if serializer.is_valid():
             serializer.save()
 
-            email_body = render_to_string('send_email.html', {'letter': letter})
-            email = EmailMultiAlternatives(
-                subject='',
-                body=strip_tags(email_body),
-                from_email=settings.EMAIL_HOST_USER,
-                to=['tan.me4nik@gmail.com']
-            )
-            email.attach_alternative(email_body, 'text/html')
-            email.send()
+            send_mail_to_order.delay(serializer.data)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
