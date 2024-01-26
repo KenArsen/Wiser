@@ -1,15 +1,18 @@
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.utils.permissions import IsDispatcher, IsAdmin
 from apps.read_email.models import Order
 from .models import Letter
 from .serializers import LetterSerializer
-from rest_framework.decorators import api_view
 from .tasks import send_mail_to_order
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 def send_mail(request, pk, rate):
     letter = Letter()
     try:

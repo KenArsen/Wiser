@@ -1,7 +1,7 @@
-FROM public.ecr.aws/docker/library/python:3.10
+FROM public.ecr.aws/docker/library/python:3.11
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV ENV_FILE .env_local
+ENV ENV_FILE .env
 
 WORKDIR /app
 
@@ -20,3 +20,6 @@ EXPOSE 8080
 
 # Use the entrypoint script to start both Celery and your Django app
 CMD ["/app/entrypoint.sh"]
+
+
+
