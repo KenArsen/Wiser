@@ -30,16 +30,16 @@ def process_and_save_emails():
             if msg.is_multipart():
                 for part in msg.walk():
                     if part.get_content_type() == "text/html":
-                        body = part.get_payload(decode=True).decode()
+                        body = part.get_payload(decode=True).decode('utf-8', errors='replace')  # change
             else:
-                body = msg.get_payload(decode=True).decode()
+                body = msg.get_payload(decode=True).decode('utf-8', errors='replace')  # change
 
             if not body:
                 print("Пустое письмо")
                 continue
 
             try:
-                soup = BeautifulSoup(body, "lxml")
+                soup = BeautifulSoup(body, "lxml", from_encoding='utf-8')  # change
                 br_tags = soup.find_all('br')
                 for br_tag in br_tags:
                     br_tag.replace_with('\n')
