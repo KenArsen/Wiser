@@ -4,9 +4,6 @@ python manage.py migrate &
 
 python manage.py collectstatic --no-input &
 
-python manage.py shell -c "from apps.user.models import User; \
-User.objects.create_superuser('superadmin@gmail.com', '123') if not User.objects.filter(email='superadmin@gmail.com').exists() else None"
-
 # Start Celery worker in the background
 python -m celery -A wiser_load_board worker -l info &
 
