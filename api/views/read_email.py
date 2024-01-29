@@ -181,7 +181,7 @@ class OrderFilterView(APIView):
         return Response(serialized_data.data)
 
 
-@api_view
+@api_view(['DELETE'])
 def delete_all_orders(request):
     Order.objects.all().delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
