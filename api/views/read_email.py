@@ -5,8 +5,9 @@ from drf_yasg.utils import swagger_auto_schema
 from geopy.distance import geodesic
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from geopy.geocoders import Nominatim
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -178,3 +179,9 @@ class OrderFilterView(APIView):
 
         serialized_data = OrderSerializer(filtered_orders, many=True)
         return Response(serialized_data.data)
+
+
+@api_view
+def delete_all_orders(request):
+    Order.objects.all().delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
