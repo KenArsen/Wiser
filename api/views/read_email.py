@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 
 from api.serializers.read_email import OrderSerializer
 from api.utils.decorators_swagger import filtered_drivers_response, time_until_delivery_response, order_data_spec
+from api.utils.paginations import LargeResultsSetPagination
 from api.utils.permissions import IsDispatcher, IsAdmin
 from apps.read_email.models import Order
 from apps.user.models import User
@@ -23,12 +24,14 @@ class OrderHistoryView(viewsets.ModelViewSet):
     queryset = Order.objects.filter(is_active=False)
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    pagination_class = LargeResultsSetPagination
 
 
 class OrderView(viewsets.ModelViewSet):
     queryset = Order.objects.filter(is_active=True)
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher,)
+    pagination_class = LargeResultsSetPagination
 
     @swagger_auto_schema(
         responses=time_until_delivery_response,

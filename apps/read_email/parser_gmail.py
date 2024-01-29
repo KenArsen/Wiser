@@ -237,10 +237,7 @@ def process_and_save_emails():
 
                     if order.this_posting_expires_est:
                         eta_time = order.this_posting_expires_est
-                        if eta_time <= timezone.localtime(timezone.now()):
-                            deactivate_expired_order.delay(order.id)
-                        else:
-                            deactivate_expired_order.apply_async((order.id,), eta=eta_time)
+                        deactivate_expired_order.apply_async((order.id,), eta=eta_time)
                         print(f"Запуск задачи для Expires {order.order_number}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
