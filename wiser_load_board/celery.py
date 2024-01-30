@@ -16,6 +16,6 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'my_periodic_task': {
         'task': 'apps.read_email.tasks.process_and_save_emails_task',
-        'schedule': timedelta(minutes=5),
+        'schedule': timedelta(seconds=30),
     },
 }
