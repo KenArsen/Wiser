@@ -13,10 +13,10 @@ from .tasks import send_mail_to_order
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
-def send_mail(request, pk, rate):
+def send_mail(request, order_id, driver_id, rate):
     letter = Letter()
     try:
-        order = Order.objects.get(pk=pk)
+        order = Order.objects.get(pk=order_id)
         letter.rate = rate
         letter.dims = order.dims
         letter.mc = '1220386'
