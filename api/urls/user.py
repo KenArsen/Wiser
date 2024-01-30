@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from api.views.user import UserViewSet, InvitationView, PasswordSetupView, ResetPasswordRequestView, \
-    ResetPasswordConfirmView, RolesViewSet, DriverFilterViewSet
+    ResetPasswordConfirmView, RolesViewSet
 
 router = DefaultRouter()
 
@@ -13,7 +13,7 @@ urlpatterns = [
     path('reset-password/confirm/', ResetPasswordConfirmView.as_view(), name='reset-password-confirm'),
     path('activate_by_email/', UserViewSet.as_view({'post': 'activate_by_email'}), name='user-activate-by-email'),
 ]
-router.register('drivers', DriverFilterViewSet, basename='drivers')
+# router.register('drivers', DriverFilterViewSet, basename='drivers')
 router.register('role', RolesViewSet, basename='roles')
 router.register('', UserViewSet, basename='users')
 

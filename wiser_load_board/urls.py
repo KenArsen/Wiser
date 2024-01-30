@@ -29,6 +29,7 @@ urlpatterns = [
     path('auth-social/', include('social_django.urls', namespace='social')),
 
     path('api/v1/users/', include('api.urls.user')),
+    path('api/v1/drivers/', include('api.urls.driver')),  # new
     path('api/v1/read_email/', include('api.urls.read_email')),
     path('api/v1/send_mail/', include('apps.send_mail.urls')),  # new
 

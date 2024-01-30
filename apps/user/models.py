@@ -39,30 +39,30 @@ class UserManager(BaseUserManager):
 
 
 class User(ImageService, AbstractBaseUser, PermissionsMixin):
-    CARGO_VAN = "CARGO VAN"
-    SPRINTER_VAN = "SPRINTER VAN"
-    VAN = "VAN"
-    SPRINTER = "SPRINTER"
-    BOX_TRUCK = "BOX TRUCK"
-    SMALL_STRAIGHT = "SMALL STRAIGHT"
-    LARGE_STRAIGHT = "LARGE STRAIGHT"
-    LIFTGATE = "LIFTGATE"
-    FLATBED = "FLATBED"
-    TRACTOR = "TRACTOR"
-    REEFER = "REEFER"
-    TYPE_OF_ADS = (
-        (CARGO_VAN, "CARGO VAN"),
-        (SPRINTER_VAN, "SPRINTER VAN"),
-        (VAN, "VAN"),
-        (SPRINTER, "SPRINTER"),
-        (BOX_TRUCK, "BOX TRUCK"),
-        (SMALL_STRAIGHT, "SMALL STRAIGHT"),
-        (LARGE_STRAIGHT, "LARGE STRAIGHT"),
-        (LIFTGATE, "LIFTGATE"),
-        (FLATBED, "FLATBED"),
-        (TRACTOR, "TRACTOR"),
-        (REEFER, "REEFER"),
-    )
+    # CARGO_VAN = "CARGO VAN"
+    # SPRINTER_VAN = "SPRINTER VAN"
+    # VAN = "VAN"
+    # SPRINTER = "SPRINTER"
+    # BOX_TRUCK = "BOX TRUCK"
+    # SMALL_STRAIGHT = "SMALL STRAIGHT"
+    # LARGE_STRAIGHT = "LARGE STRAIGHT"
+    # LIFTGATE = "LIFTGATE"
+    # FLATBED = "FLATBED"
+    # TRACTOR = "TRACTOR"
+    # REEFER = "REEFER"
+    # TYPE_OF_ADS = (
+    #     (CARGO_VAN, "CARGO VAN"),
+    #     (SPRINTER_VAN, "SPRINTER VAN"),
+    #     (VAN, "VAN"),
+    #     (SPRINTER, "SPRINTER"),
+    #     (BOX_TRUCK, "BOX TRUCK"),
+    #     (SMALL_STRAIGHT, "SMALL STRAIGHT"),
+    #     (LARGE_STRAIGHT, "LARGE STRAIGHT"),
+    #     (LIFTGATE, "LIFTGATE"),
+    #     (FLATBED, "FLATBED"),
+    #     (TRACTOR, "TRACTOR"),
+    #     (REEFER, "REEFER"),
+    # )
 
     roles = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(max_length=255, unique=True, db_index=True)
@@ -76,8 +76,8 @@ class User(ImageService, AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN,
-                                    verbose_name="vehicle")
+    # vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN,
+    #                                 verbose_name="vehicle")
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
 

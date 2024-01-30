@@ -14,7 +14,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from api.serializers.user import UserSerializer, InvitationSerializer, ResetPasswordRequestSerializer, \
     ResetPasswordConfirmSerializer, UserRetrieveSerializer, RolesSerializer, UserActivationSerializer, \
-    DriverRetrieveSerializers, UserCreateSerializer, UserListSerializer
+    UserCreateSerializer, UserListSerializer
 from api.utils.permissions import IsHR, IsDispatcher, IsAdmin, IsAdminOrHR
 from apps.user.models import User, Invitation, Roles
 from wiser_load_board.settings import EMAIL_HOST_USER
@@ -65,13 +65,13 @@ class UserViewSet(ModelViewSet):
             return Response({'message': 'У вас нет прав для активации пользователя.'}, status=status.HTTP_403_FORBIDDEN)
 
 
-class DriverFilterViewSet(ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = DriverRetrieveSerializers
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-
-    def get_queryset(self):
-        return User.objects.filter(roles__name='DRIVER')
+# class DriverFilterViewSet(ModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = DriverRetrieveSerializers
+#     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+#
+#     def get_queryset(self):
+#         return User.objects.filter(roles__name='DRIVER')
 
 
 class InvitationView(APIView):

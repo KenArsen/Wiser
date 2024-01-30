@@ -10,10 +10,11 @@ class RolesSerializer(serializers.ModelSerializer):
         fields = ('id', 'name',)
 
 
-class DriverRetrieveSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('first_name', 'vehicle_type', 'lat', 'lon', 'phone_number',)
+# class DriverRetrieveSerializers(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         # fields = ('first_name', 'vehicle_type', 'lat', 'lon', 'phone_number',)
+#         fields = '__all__'
 
 
 class UserListSerializer(serializers.ModelSerializer):
