@@ -117,7 +117,7 @@ def process_and_save_emails():
 
                 lines_after_contact_info = []
                 company_info_phrase = "If you are interested in this load, please contact"
-                company_info_match = re.search(f"{re.escape(company_info_phrase)}[ :]*([\s\S]+?)\n", h)
+                company_info_match = re.search(f"{re.escape(company_info_phrase)}[:]*([\s\S]+?)\n", h)
 
                 company_name = ""
                 company_address = ""
@@ -237,13 +237,8 @@ def process_and_save_emails():
 
                     if order.this_posting_expires_est:
                         eta_time = order.this_posting_expires_est
-                        if eta_time <= timezone.localtime(timezone.now()):
-                            print(f'Expires уже истекло')
-                            deactivate_expired_order.delay(order.id)
-                            print(f'Сразу удалит заказ')
-                        else:
-                            deactivate_expired_order.apply_async((order.id,), eta=eta_time)
-                            print(f"Запуск задачи для Expires {order.order_number}")
+                        deactivate_expired_order.apply_async((order.id,), eta=eta_time)
+                        print(f"Запуск задачи для Expires {order.order_number}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
 
