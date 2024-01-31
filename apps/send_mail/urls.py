@@ -3,5 +3,5 @@ from .views import send_mail
 
 
 urlpatterns = [
-    path('order/<int:pk>/<int:rate>/', send_mail, name='send_mail'),
+    path('order/<int:order_id>/<int:driver_id>/<int:rate>/', send_mail, name='send_mail'),
 ]

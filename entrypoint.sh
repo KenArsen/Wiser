@@ -4,8 +4,6 @@ python manage.py migrate &
 
 python manage.py collectstatic --no-input &
 
-python -m celery -A wiser_load_board purge &
-
 # Start Celery worker in the background
 python -m celery -A wiser_load_board worker -l info &
 
