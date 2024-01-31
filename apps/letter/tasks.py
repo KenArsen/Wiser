@@ -2,23 +2,19 @@ from smtplib import SMTPException, SMTPAuthenticationError
 
 from celery import shared_task
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
+from django.core.mail import send_mail
+
+from .models import Letter
 
 
 @shared_task
-def send_mail_to_order(letter):
+def send_email(comment):
     try:
-        email_body = render_to_string('send_email.html', {'letter': letter})
-        email = EmailMultiAlternatives(
-            subject='',
-            body=strip_tags(email_body),
-            from_email=settings.EMAIL_HOST_USER,
-            to=['tan.me4nik@gmail.com']
-        )
-        email.attach_alternative(email_body, 'text/html')
-        email.send()
+        send_mail(subject='Subject',
+                  message='Message',
+                  from_email=settings.EMAIL_HOST_USER,
+                  recipient_list=['tan.me4nik@gmail.com'],
+                  html_message=comment)
         print('Сообщение успешно отправлено')
     except SMTPAuthenticationError:
         print('Ошибка аутентификации SMTP. Проверьте настройки почты.')
@@ -26,3 +22,5 @@ def send_mail_to_order(letter):
         print(f'Ошибка SMTP: {e}')
     except Exception as e:
         print(f'Общая ошибка при отправке почты: {e}')
+
+    Letter.objects.create(comment=comment)

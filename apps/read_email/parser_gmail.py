@@ -234,6 +234,7 @@ def process_and_save_emails():
                         order_number=order_number,
                     )
                     order.save()
+                    print(f'ETA TIME : {order.this_posting_expires_est}')
 
                     if order.this_posting_expires_est:
                         eta_time = order.this_posting_expires_est

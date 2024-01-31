@@ -1,12 +1,9 @@
-from django.urls import path, include
-from rest_framework import routers
+from django.urls import path
 
-from .views import send_mail, LetterViewSet
-
-router = routers.DefaultRouter()
-router.register(r'', LetterViewSet)
+from .views import LetterRetrieveDestroyView, LetterListView, SendEmailView
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('send/<int:order_id>/<int:driver_id>/<int:rate>/', send_mail, name='send_mail'),
+    path('', LetterListView.as_view(), name='letter-list'),
+    path('<int:pk>/', LetterRetrieveDestroyView.as_view(), name='letter-list'),
+    path('send/', SendEmailView.as_view(), name='send_email'),
 ]
