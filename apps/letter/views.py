@@ -1,6 +1,6 @@
 from django.utils import timezone
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -11,8 +11,14 @@ from .serializers import LetterSerializer
 from .tasks import send_mail_to_order
 
 
+class LetterViewSet(viewsets.ModelViewSet):
+    queryset = Letter.objects.all()
+    serializer_class = LetterSerializer
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
+@action(methods=["GET"], detail=False)
 def send_mail(request, order_id, driver_id, rate):
     letter = Letter()
     try:

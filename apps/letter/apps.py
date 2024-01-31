@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class SendEmailConfig(AppConfig):
+class LetterConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.send_mail'
+    name = 'apps.letter'

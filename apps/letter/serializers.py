@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.send_mail.models import Letter
+from apps.letter.models import Letter
 
 
 class LetterSerializer(serializers.ModelSerializer):
