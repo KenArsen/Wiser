@@ -8,9 +8,6 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 
-#ADD . /wiser_load_board_back/
-#RUN apt-get update && apt-get install -y redis-server
-
 COPY entrypoint.sh /app/
 RUN chmod +x /app/entrypoint.sh
 
