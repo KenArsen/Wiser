@@ -1,3 +1,4 @@
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,7 +6,6 @@ from rest_framework.views import APIView
 from .models import Letter
 from .serializers import LetterSerializer
 from .tasks import send_email
-from drf_yasg.utils import swagger_auto_schema
 
 
 class LetterListView(generics.ListAPIView):
@@ -20,11 +20,13 @@ class LetterRetrieveDestroyView(generics.RetrieveDestroyAPIView):
 
 class SendEmailView(APIView):
     @swagger_auto_schema(
-        operation_summary="To send SMS"
+        operation_summary="To send SMS",
+        request_body=LetterSerializer,
     )
     def post(self, request, *args, **kwargs):
-        comment = request.data.get('comment', '')
-
-        # Отправка письма
-        send_email(comment)
-        return Response({'success': 'Сообщение успешно отправлено'}, status=status.HTTP_200_OK)
+        serializer = LetterSerializer(data=request.data)
+        if serializer.is_valid():
+            comment = serializer.validated_data['comment']
+            send_email(comment)
+            return Response({'success': 'Сообщение успешно отправлено'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
