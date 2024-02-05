@@ -6,8 +6,7 @@ ENV ENV_FILE .env
 WORKDIR /app
 
 COPY requirements.txt /app/
-RUN pip install --upgrade pip
-RUN pip install --upgrade -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY entrypoint.sh /app/
 RUN chmod +x /app/entrypoint.sh
