@@ -195,15 +195,13 @@ def process_and_save_emails():
                                                                                        "%m/%d/%Y %H:%M")) + datetime.timedelta(
                     hours=6) if this_posting_expires_est else None
 
-                try:
-                    print(Order.objects.get(order_number=order_number).order_number)
-                except Order.DoesNotExist:
-                    print(f"Заказ {order_number} сохранен в базу")
-
                 if Order.objects.filter(order_number=order_number).exists():
                     print(f"Order номером {order_number} уже существует!")
-
                 else:
+                    if formatted_posting_est and formatted_posting_est <= timezone.localtime(timezone.now()):
+                        print(
+                            f'Срок действия с order номером {order_number} публикации не указан или время уже истекло!')
+                        continue
                     order = Order(
                         from_whom=from_filed,
                         pick_up_at=pickup_location,
@@ -234,12 +232,12 @@ def process_and_save_emails():
                         order_number=order_number,
                     )
                     order.save()
+                    print(f"Заказ {order_number} сохранен в базу")
                     print(f'ETA TIME : {order.this_posting_expires_est}')
 
-                    if order.this_posting_expires_est:
-                        eta_time = order.this_posting_expires_est
-                        deactivate_expired_order.apply_async((order.id,), eta=eta_time)
-                        print(f"Запуск задачи для Expires {order.order_number}")
+                    eta_time = order.this_posting_expires_est
+                    deactivate_expired_order.apply_async((order.id,), eta=eta_time)
+                    print(f"Запуск задачи для Expires {order.order_number}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
 
