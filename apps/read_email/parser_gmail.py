@@ -198,7 +198,9 @@ def process_and_save_emails():
                 if Order.objects.filter(order_number=order_number).exists():
                     print(f"Order номером {order_number} уже существует!")
                 else:
-                    if formatted_posting_est and formatted_posting_est <= timezone.localtime(timezone.now()):
+                    if formatted_posting_est is None:
+                        continue
+                    if formatted_posting_est <= timezone.localtime(timezone.now()):
                         print(
                             f'Срок действия с order номером {order_number} публикации не указан или время уже истекло!')
                         continue
