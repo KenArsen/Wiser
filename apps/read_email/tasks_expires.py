@@ -5,6 +5,7 @@ from .models import Order
 
 @shared_task
 def deactivate_expired_order(order_id):
+    print(f'####### Время удаления #######')
     try:
         order = Order.objects.get(pk=order_id, is_active=True)
         if order.user is None:
