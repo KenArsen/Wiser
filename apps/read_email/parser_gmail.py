@@ -175,23 +175,29 @@ def process_and_save_emails():
 
                 # Форматирование дат
                 formatted_pickup_cen = timezone.make_aware(
-                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) if pickup_date_cen else None
+                    datetime.datetime.strptime(pickup_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if pickup_date_cen else None
                 formatted_pickup_est = timezone.make_aware(
-                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) if pickup_date_est else None
+                    datetime.datetime.strptime(pickup_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if pickup_date_est else None
 
                 formatted_deliver_cen = timezone.make_aware(
-                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) if delivery_date_cen else None
+                    datetime.datetime.strptime(delivery_date_cen, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if delivery_date_cen else None
                 formatted_deliver_est = timezone.make_aware(
-                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) if delivery_date_est else None
+                    datetime.datetime.strptime(delivery_date_est, "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if delivery_date_est else None
 
                 formatted_posting_cen = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_cen,
-                                                                                       "%m/%d/%Y %H:%M")) if this_posting_expires_cen else None
+                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if this_posting_expires_cen else None
                 formatted_posting_est = timezone.make_aware(datetime.datetime.strptime(this_posting_expires_est,
-                                                                                       "%m/%d/%Y %H:%M")) if this_posting_expires_est else None
+                                                                                       "%m/%d/%Y %H:%M")) + datetime.timedelta(
+                    hours=6) if this_posting_expires_est else None
 
                 print(f'ETA TIME : {formatted_posting_est}')
                 print(f'LOCAL TIME : {timezone.localtime(timezone.now())}')
-                if Order.objects.filter(order_number=order_number).exists():
+                if Order.objects.filter(order_number=order_number).exists() or order_number is None:
                     print(f"Order номером {order_number} уже существует!")
                 else:
                     if formatted_posting_est is None:
@@ -233,7 +239,8 @@ def process_and_save_emails():
 
                     eta_time = order.this_posting_expires_est
                     deactivate_expired_order.apply_async((order.id,), eta=eta_time)
-                    print(f"Запуск задачи для Expires {order.order_number} время удаление через {eta_time - timezone.localtime(timezone.now())}")
+                    print(
+                        f"Запуск задачи для Expires {order.order_number} время удаление через {eta_time - timezone.localtime(timezone.now())}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
 
