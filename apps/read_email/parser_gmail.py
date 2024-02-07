@@ -190,6 +190,7 @@ def process_and_save_emails():
                                                                                        "%m/%d/%Y %H:%M")) if this_posting_expires_est else None
 
                 print(f'ETA TIME : {formatted_posting_est}')
+                print(f'LOCAL TIME : {timezone.localtime(timezone.now())}')
                 if Order.objects.filter(order_number=order_number).exists():
                     print(f"Order номером {order_number} уже существует!")
                 else:
@@ -232,7 +233,7 @@ def process_and_save_emails():
 
                     eta_time = order.this_posting_expires_est
                     deactivate_expired_order.apply_async((order.id,), eta=eta_time)
-                    print(f"Запуск задачи для Expires {order.order_number}")
+                    print(f"Запуск задачи для Expires {order.order_number} время удаление {eta_time}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
 
