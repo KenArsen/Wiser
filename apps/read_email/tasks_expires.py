@@ -7,7 +7,7 @@ from .models import Order
 def deactivate_expired_order(order_id):
     print(f'####### Время удаление #######')
     try:
-        order = Order.objects.get(pk=order_id, is_active=True)
+        order = Order.objects.get(pk=order_id)
         if order.user is None:
             print(f"Время действия заказа: {order.order_number} истекло в: {order.this_posting_expires_est}")
             order.delete()
