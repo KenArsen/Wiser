@@ -238,8 +238,8 @@ def process_and_save_emails():
                     print(f'ORDER id : {order.id} - LOCAL TIME : {timezone.localtime(timezone.now())}')
                     print(f"Заказ {order_number} сохранен в базу")
 
-                    eta_time = order.this_posting_expires_est
-                    transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id, eta_time, timezone.localtime(timezone.now())), eta=eta_time))
+                    eta_time = order.this_posting_expires_est + datetime.timedelta(minutes=1)
+                    deactivate_expired_order.apply_async((order.id, eta_time, timezone.localtime(timezone.now())), eta=eta_time)
                     print(
                         f"Запуск задачи для Expires {order.id} время удаление через {eta_time - timezone.localtime(timezone.now())}")
 
