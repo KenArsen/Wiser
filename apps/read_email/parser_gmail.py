@@ -6,6 +6,7 @@ import re
 from bs4 import BeautifulSoup
 from celery import shared_task
 from django.utils import timezone
+from django.db import transaction
 
 from wiser_load_board.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from .models import Order
@@ -238,7 +239,7 @@ def process_and_save_emails():
                     print(f"Заказ {order_number} сохранен в базу")
 
                     eta_time = order.this_posting_expires_est
-                    deactivate_expired_order.apply_async((order.id, eta_time, timezone.localtime(timezone.now())), eta=eta_time)
+                    transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id, eta_time, timezone.localtime(timezone.now())), eta=eta_time))
                     print(
                         f"Запуск задачи для Expires {order.id} время удаление через {eta_time - timezone.localtime(timezone.now())}")
 
