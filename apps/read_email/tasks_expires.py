@@ -4,7 +4,7 @@ from .models import Order
 
 
 @shared_task
-def deactivate_expired_order(order_id, eta_time, local_time):
+def deactivate_expired_order(order_id):
     print(f'####### Время удаление {order_id} #######')
     try:
         order = Order.objects.get(pk=order_id)
@@ -17,5 +17,5 @@ def deactivate_expired_order(order_id, eta_time, local_time):
             order.is_active = False
             order.save()
     except Order.DoesNotExist as e:
-        print(f'Ошибка на order:{order_id} etatime:{eta_time} - localtime: {local_time} deactivate_expired_order {e}')
+        print(f'Ошибка на order:{order_id} deactivate_expired_order {e}')
         raise ValueError(f"No found order")
