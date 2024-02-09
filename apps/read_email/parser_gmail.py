@@ -37,6 +37,7 @@ def process_and_save_emails():
 
             if not body:
                 print("Пустое письмо")
+                mail.store(num, '+FLAGS', '\\Seen')
                 continue
 
             try:
@@ -49,6 +50,7 @@ def process_and_save_emails():
                     h = div.text.strip()
                 else:
                     print("Ошибка при обработке почты")
+                    mail.store(num, '+FLAGS', '\\Seen')
                     continue
 
                 from_filed = ""
@@ -196,13 +198,16 @@ def process_and_save_emails():
                                                                                        "%m/%d/%Y %H:%M")) + datetime.timedelta(
                     hours=6) if this_posting_expires_est else None
 
-                if Order.objects.filter(order_number=order_number).exists() or order_number is None:
+                if order_number is None or Order.objects.filter(order_number=order_number).exists():
                     print(f"Order номером {order_number} уже существует!")
                 else:
                     if formatted_posting_est is None:
+                        print(f'This posting expires in None')
+                        mail.store(num, '+FLAGS', '\\Seen')
                         continue
                     if formatted_posting_est <= timezone.localtime(timezone.now()):
-                        print(f'Срок действия order номером {order_number} время публикации уже истекло!')
+                        print(f'Срок действия order {order_number} время публикации истекло!')
+                        mail.store(num, '+FLAGS', '\\Seen')
                         continue
                     order = Order(
                         from_whom=from_filed,
@@ -236,7 +241,7 @@ def process_and_save_emails():
                     order.save()
                     print(f'ORDER id : {order.id} - ETA TIME : {formatted_posting_est}')
                     print(f'ORDER id : {order.id} - LOCAL TIME : {timezone.localtime(timezone.now())}')
-                    print(f"Заказ {order_number} сохранен в базу")
+                    print(f"Заказ {order.id} сохранен в базу")
 
                     eta_time = order.this_posting_expires_est
                     transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id,), eta=eta_time))
@@ -247,6 +252,7 @@ def process_and_save_emails():
 
             except Exception as e:
                 print(f"Ошибка {num}", e)
+                mail.store(num, '+FLAGS', '\\Seen')
                 continue
 
         mail.logout()
