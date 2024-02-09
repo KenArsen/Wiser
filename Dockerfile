@@ -5,18 +5,17 @@ ENV ENV_FILE .env
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY entrypoint.sh /app/
-RUN chmod +x /app/entrypoint.sh
+COPY entrypoint.sh .
 
-COPY . /app/
+COPY . .
 
 EXPOSE 8080
 
+# Set permissions for entrypoint script
+RUN chmod +x entrypoint.sh
+
 # Use the entrypoint script to start both Celery and your Django app
 CMD ["/app/entrypoint.sh"]
-
-
-
