@@ -209,44 +209,45 @@ def process_and_save_emails():
                         print(f'Срок действия order {order_number} время публикации истекло!')
                         mail.store(num, '+FLAGS', '\\Seen')
                         continue
-                    order = Order(
-                        from_whom=from_filed,
-                        pick_up_at=pickup_location,
-                        pick_up_date_CEN=formatted_pickup_cen,
-                        pick_up_date_EST=formatted_pickup_est,
-                        deliver_to=delivery_location,
-                        deliver_date_CEN=formatted_deliver_cen,
-                        deliver_date_EST=formatted_deliver_est,
-                        notes=notes,
-                        miles=miles,
-                        pieces=pieces,
-                        weight=weight,
-                        dims=dims,
-                        stackable=stackable,
-                        hazardous=hazardous,
-                        fast_load=fast_load,
-                        dock_level=dock_level,
-                        suggested_truck_size=truck_size,
-                        this_posting_expires_cen=formatted_posting_cen,
-                        this_posting_expires_est=formatted_posting_est,
-                        company_name=company_name,
-                        company_address=company_address,
-                        company_location=company_location,
-                        company_phone=company_phone,
-                        load_posted_by=load_posted_by,
-                        phone=phone,
-                        fax=fax,
-                        order_number=order_number,
-                    )
-                    order.save()
-                    print(f'ORDER id : {order.id} - ETA TIME : {formatted_posting_est}')
-                    print(f'ORDER id : {order.id} - LOCAL TIME : {timezone.localtime(timezone.now())}')
-                    print(f"Заказ {order.id} сохранен в базу")
+                    with transaction.atomic():
+                        order = Order(
+                            from_whom=from_filed,
+                            pick_up_at=pickup_location,
+                            pick_up_date_CEN=formatted_pickup_cen,
+                            pick_up_date_EST=formatted_pickup_est,
+                            deliver_to=delivery_location,
+                            deliver_date_CEN=formatted_deliver_cen,
+                            deliver_date_EST=formatted_deliver_est,
+                            notes=notes,
+                            miles=miles,
+                            pieces=pieces,
+                            weight=weight,
+                            dims=dims,
+                            stackable=stackable,
+                            hazardous=hazardous,
+                            fast_load=fast_load,
+                            dock_level=dock_level,
+                            suggested_truck_size=truck_size,
+                            this_posting_expires_cen=formatted_posting_cen,
+                            this_posting_expires_est=formatted_posting_est,
+                            company_name=company_name,
+                            company_address=company_address,
+                            company_location=company_location,
+                            company_phone=company_phone,
+                            load_posted_by=load_posted_by,
+                            phone=phone,
+                            fax=fax,
+                            order_number=order_number,
+                        )
+                        order.save()
+                        print(f'ORDER id : {order.id} - ETA TIME : {formatted_posting_est}')
+                        print(f'ORDER id : {order.id} - LOCAL TIME : {timezone.localtime(timezone.now())}')
+                        print(f"Заказ {order.id} сохранен в базу")
 
-                    eta_time = order.this_posting_expires_est
-                    transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id,), eta=eta_time))
-                    print(
-                        f"Запуск задачи для Expires {order.id} время удаление через {eta_time - timezone.localtime(timezone.now())}")
+                        eta_time = order.this_posting_expires_est
+                        transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id,), eta=eta_time))
+                        print(
+                            f"Запуск задачи для Expires {order.id} время удаление через {eta_time - timezone.localtime(timezone.now())}")
 
                 mail.store(num, '+FLAGS', '\\Seen')
 
