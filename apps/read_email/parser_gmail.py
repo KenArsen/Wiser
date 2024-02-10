@@ -252,8 +252,7 @@ def process_and_save_emails():
                     logging.info(f"Заказ {order.id} сохранен в базу")
 
                     eta_time = order.this_posting_expires_est
-                    transaction.on_commit(
-                        lambda: deactivate_expired_order.apply_async((order.id,), eta=eta_time))
+                    deactivate_expired_order.apply_async((order.id,), eta=eta_time)
                     logging.info(
                         f"Запуск задачи для Expires {order.id} время удаление через {eta_time - timezone.localtime(timezone.now())}")
 
