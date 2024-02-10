@@ -255,7 +255,7 @@ def process_and_save_emails():
                         eta_time = order.this_posting_expires_est
                         deactivate_expired_order.apply_async((order.id,), eta=eta_time)
                         logging.info(f"Запуск задачи для Expires {order.id}")
-                        logging.info(f"Время удаление через {eta_time - timezone.localtime(timezone.now())}")
+                        logging.info(f"{order.id}: Время удаление через {eta_time - timezone.localtime(timezone.now())}")
 
                     mail.store(num, '+FLAGS', '\\Seen')
 
