@@ -43,6 +43,7 @@ myvenv
 
 *.manifest
 *.spec
+qodana.yaml
 
 # Installer logs
 pip-log.txt
