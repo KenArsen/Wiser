@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 import os
 from datetime import timedelta
 
-
 from celery import Celery
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wiser_load_board.settings")
@@ -12,10 +11,13 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.conf.broker_connection_retry_on_startup = True
 app.autodiscover_tasks()
 
-
 app.conf.beat_schedule = {
     'my_periodic_task': {
         'task': 'apps.read_email.tasks.process_and_save_emails_task',
         'schedule': timedelta(seconds=3),
     },
+    # 'delete_expired_data': {
+    #     'task': 'apps.read_email.tasks.delete_expired_data',
+    #     'schedule': timedelta(days=1),
+    # },
 }
