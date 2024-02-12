@@ -18,6 +18,6 @@ app.conf.beat_schedule = {
     },
     # 'delete_expired_data': {
     #     'task': 'apps.read_email.tasks.delete_expired_data',
-    #     'schedule': timedelta(days=1),
+    #     'schedule': timedelta(minutes=3),
     # },
 }
