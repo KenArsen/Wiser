@@ -14,7 +14,6 @@ from .models import Order
 from .tasks_expires import deactivate_expired_order
 
 
-@shared_task
 def process_and_save_emails():
     try:
         with imaplib.IMAP4_SSL('imap.gmail.com') as mail:
