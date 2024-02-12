@@ -10,10 +10,10 @@ python manage.py collectstatic --no-input
 rm -rf celerybeat-schedule.*
 
 # Start Celery worker
-celery -A wiser_load_board worker --loglevel=info &
+celery -A wiser_load_board worker -l info --without-gossip --without-mingle --without-heartbeat &
 
 # Start Celery beat
-celery -A wiser_load_board beat --loglevel=info &
+celery -A wiser_load_board beat -l info &
 
 # Start Gunicorn server
 exec gunicorn --bind :8080 wiser_load_board.wsgi:application
