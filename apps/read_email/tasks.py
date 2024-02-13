@@ -1,10 +1,11 @@
-from celery import shared_task
-import logging
-from django.db.models import Q
 from .parser_gmail import process_and_save_emails
+from celery import shared_task
 from django.utils import timezone
-from apps.read_email.models import Order
+from django.db import transaction
+import logging
+from .models import Order
 
+logger = logging.getLogger(__name__)
 
 @shared_task
 def process_and_save_emails_task():
@@ -13,16 +14,29 @@ def process_and_save_emails_task():
 
 @shared_task()
 def delete_expired_data():
-    logging.info('########## Удаление начинался ##########')
-    active_orders = Order.objects.filter(Q(this_posting_expires_est__lt=timezone.now()), ~Q(user=None))
-    if active_orders.exists():
-        logging.info(f"Время действия {active_orders.count()} заказов истекло. Перемещаем в историю...")
-        active_orders.update(is_active=False)
-        logging.info("Заказы перемещены в историю")
+    try:
+        with transaction.atomic():
+            logger.info('Начато удаление просроченных данных.')
 
-    expired_orders = Order.objects.filter(this_posting_expires_est__lt=timezone.now(), user=None)
-    if expired_orders.exists():
-        logging.info(f"Время действия {expired_orders.count()} заказов истекло. Удаляем записи...")
-        expired_orders.delete()
-        logging.info("Заказы удалены")
-    logging.info('########## Удаление закончился ##########')
+            active_orders_expired = Order.objects.filter(
+                this_posting_expires_est__lt=timezone.now(),
+                user__isnull=False
+            )
+            if active_orders_expired.exists():
+                logger.info(
+                    f"Достигнуто время истечения для активных ордеров: {active_orders_expired.count()}. Переносимся в историю...")
+                active_orders_expired.update(is_active=False)
+                logger.info("Заказы перемещены в историю")
+
+            expired_orders = Order.objects.filter(
+                this_posting_expires_est__lt=timezone.now(),
+                user__isnull=True
+            )
+            if expired_orders.exists():
+                logger.info(f"Достигнуто время истечения для ордеров с истекшим сроком действия {expired_orders.count()}. Удаление записей...")
+                expired_orders.delete()
+                logger.info("Заказы удалены")
+
+            logger.info('Удаление просроченных данных завершено')
+    except Exception as e:
+        logger.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")

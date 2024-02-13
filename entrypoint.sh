@@ -6,6 +6,9 @@ python manage.py migrate
 # Collect static files
 python manage.py collectstatic --no-input
 
+# Clear Celery Beat cache
+rm -rf celerybeat-schedule.*
+
 # Start Celery worker
 celery -A wiser_load_board worker -l info --without-gossip --without-mingle --without-heartbeat &
 
