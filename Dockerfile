@@ -3,7 +3,7 @@ FROM public.ecr.aws/docker/library/python:3.11
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    ENV_FILE=.env
+    ENV_FILE=.env_local
 
 WORKDIR /app
 

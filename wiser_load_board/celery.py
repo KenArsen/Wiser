@@ -14,7 +14,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'my_periodic_task': {
         'task': 'apps.read_email.tasks.process_and_save_emails_task',
-        'schedule': timedelta(seconds=1),
+        'schedule': timedelta(seconds=3),
     },
     'delete_expired_data': {
         'task': 'apps.read_email.tasks.delete_expired_data',
