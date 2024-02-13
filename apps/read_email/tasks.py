@@ -7,6 +7,7 @@ from .models import Order
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task
 def process_and_save_emails_task():
     return process_and_save_emails()
@@ -16,7 +17,7 @@ def process_and_save_emails_task():
 def delete_expired_data():
     try:
         with transaction.atomic():
-            logger.info('Начато удаление просроченных данных.')
+            logger.info('##### Начато удаление просроченных данных. #####')
 
             active_orders_expired = Order.objects.filter(
                 this_posting_expires_est__lt=timezone.now(),
@@ -33,10 +34,11 @@ def delete_expired_data():
                 user__isnull=True
             )
             if expired_orders.exists():
-                logger.info(f"Достигнуто время истечения для ордеров с истекшим сроком действия {expired_orders.count()}. Удаление записей...")
+                logger.info(
+                    f"Достигнуто время истечения для ордеров с истекшим сроком действия {expired_orders.count()}. Удаление записей...")
                 expired_orders.delete()
                 logger.info("Заказы удалены")
 
-            logger.info('Удаление просроченных данных завершено')
+            logger.info('##### Удаление просроченных данных завершено #####')
     except Exception as e:
         logger.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")
