@@ -20,4 +20,9 @@ RUN mkdir static \
 
 EXPOSE 8080
 
+# Очищаем кэш pip и временные файлы
+RUN pip cache purge && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+
 CMD ["/app/entrypoint.sh"]

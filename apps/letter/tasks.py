@@ -22,5 +22,3 @@ def send_email(comment):
         print(f'Ошибка SMTP: {e}')
     except Exception as e:
         print(f'Общая ошибка при отправке почты: {e}')
-
-    Letter.objects.create(comment=comment)
