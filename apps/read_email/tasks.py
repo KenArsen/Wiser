@@ -2,13 +2,64 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from .models import Order
-from .tasks_expires import deactivate_expired_order
 import logging, re, email, datetime, imaplib
 from bs4 import BeautifulSoup
 from wiser_load_board.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
+
+
+@shared_task
+def deactivate_expired_order(order_id):
+    logging.info(f'####### Время удаление {order_id} #######')
+    try:
+        order = Order.objects.filter(pk=order_id).first()
+        if order:
+            if order.user is None:
+                logging.info(f"Время действия заказа: {order.id} истекло в: {order.this_posting_expires_est}")
+                order.delete()
+                logging.info(f"Заказ с номером {order_id} удален")
+            else:
+                logging.info(f"Время действия заказа {order.order_number} истекло. Заказ перемещен в историю")
+                order.is_active = False
+                order.save()
+        else:
+            logging.info(f'Order уже удален')
+    except Exception as e:
+        logging.error(f'Error in order: deactivate_expired_order {str(e)}')
+        raise ValueError(f"Error in order deactivate_expired_order {str(e)}")
+
+
+@shared_task()
+def delete_expired_data():
+    try:
+        with transaction.atomic():
+            logger.info('##### Начато удаление просроченных данных. #####')
+
+            active_orders_expired = Order.objects.filter(
+                this_posting_expires_est__lt=timezone.now(),
+                user__isnull=False
+            )
+            if active_orders_expired.exists():
+                logger.info(
+                    f"Достигнуто время истечения для активных ордеров: {active_orders_expired.count()}. Переносимся в историю...")
+                active_orders_expired.update(is_active=False)
+                logger.info("Заказы перемещены в историю")
+
+            expired_orders = Order.objects.filter(
+                this_posting_expires_est__lt=timezone.now(),
+                user__isnull=True
+            )
+            if expired_orders.exists():
+                logger.info(
+                    f"Достигнуто время истечения для ордеров с истекшим сроком действия {expired_orders.count()}. Удаление записей...")
+                expired_orders.delete()
+                logger.info("Заказы удалены")
+
+            logger.info('##### Удаление просроченных данных завершено #####')
+    except Exception as e:
+        logger.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")
 
 
 @shared_task
@@ -201,34 +252,3 @@ def save_order(order_data):
         logging.error(e)
     except Exception as e:
         logging.error(f"Ошибка при сохранении заказа: {e}")
-
-
-@shared_task()
-def delete_expired_data():
-    try:
-        with transaction.atomic():
-            logger.info('##### Начато удаление просроченных данных. #####')
-
-            active_orders_expired = Order.objects.filter(
-                this_posting_expires_est__lt=timezone.now(),
-                user__isnull=False
-            )
-            if active_orders_expired.exists():
-                logger.info(
-                    f"Достигнуто время истечения для активных ордеров: {active_orders_expired.count()}. Переносимся в историю...")
-                active_orders_expired.update(is_active=False)
-                logger.info("Заказы перемещены в историю")
-
-            expired_orders = Order.objects.filter(
-                this_posting_expires_est__lt=timezone.now(),
-                user__isnull=True
-            )
-            if expired_orders.exists():
-                logger.info(
-                    f"Достигнуто время истечения для ордеров с истекшим сроком действия {expired_orders.count()}. Удаление записей...")
-                expired_orders.delete()
-                logger.info("Заказы удалены")
-
-            logger.info('##### Удаление просроченных данных завершено #####')
-    except Exception as e:
-        logger.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")

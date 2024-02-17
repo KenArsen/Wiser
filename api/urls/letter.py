@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import LetterRetrieveDestroyView, LetterListView, SendEmailView
+from api.views.letter import LetterRetrieveDestroyView, LetterListView, SendEmailView
 
 urlpatterns = [
     path('', LetterListView.as_view(), name='letter-list'),
