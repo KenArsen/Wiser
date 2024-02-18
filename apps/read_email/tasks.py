@@ -7,8 +7,6 @@ from bs4 import BeautifulSoup
 from wiser_load_board.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from celery import shared_task
 
-logger = logging.getLogger(__name__)
-
 
 @shared_task
 def deactivate_expired_order(order_id):
@@ -35,31 +33,15 @@ def deactivate_expired_order(order_id):
 def delete_expired_data():
     try:
         with transaction.atomic():
-            logger.info('##### Начато удаление просроченных данных. #####')
+            logging.info('##### Начато удаление просроченных данных. #####')
 
-            active_orders_expired = Order.objects.filter(
-                this_posting_expires_est__lt=timezone.now(),
-                user__isnull=False
-            )
-            if active_orders_expired.exists():
-                logger.info(
-                    f"Достигнуто время истечения для активных ордеров: {active_orders_expired.count()}. Переносимся в историю...")
-                active_orders_expired.update(is_active=False)
-                logger.info("Заказы перемещены в историю")
+            expired_orders = Order.objects.filter(this_posting_expires_est__lt=timezone.now(), is_active=True)
+            for order in expired_orders:
+                order.move_to_history()
 
-            expired_orders = Order.objects.filter(
-                this_posting_expires_est__lt=timezone.now(),
-                user__isnull=True
-            )
-            if expired_orders.exists():
-                logger.info(
-                    f"Достигнуто время истечения для ордеров с истекшим сроком действия {expired_orders.count()}. Удаление записей...")
-                expired_orders.delete()
-                logger.info("Заказы удалены")
-
-            logger.info('##### Удаление просроченных данных завершено #####')
+            logging.info('##### Удаление просроченных данных завершено #####')
     except Exception as e:
-        logger.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")
+        logging.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")
 
 
 @shared_task
