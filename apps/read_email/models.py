@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from rest_framework import exceptions
 from django.db import models
 from django.utils import timezone
 import logging
@@ -55,10 +55,10 @@ class Order(models.Model):
 
     def clean(self):
         if self.this_posting_expires_est is None:
-            raise ValidationError(f"Срок действия этого {self.id} нет!")
+            raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} нет!"})
 
         if self.this_posting_expires_est <= timezone.localtime(timezone.now()):
-            raise ValidationError(f"Срок действия этого {self.id} заказа истек!")
+            raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} заказа уже истек!"})
 
     def move_to_history(self):
         if self.user is not None:
@@ -66,5 +66,5 @@ class Order(models.Model):
             self.save()
             logging.info(f"------ Заказ {self.id} перемещен в историю --------")
         else:
-            self.delete()
             logging.info(f"------ Заказ {self.id} удален --------")
+            self.delete()
