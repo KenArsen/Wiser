@@ -1,12 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from apps.user.models import User
 import logging
 
 
 class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True, blank=True)
     created = models.TimeField(auto_now_add=True, null=True, blank=True)
 
     is_active = models.BooleanField(default=True, null=True, blank=True)
@@ -56,10 +55,10 @@ class Order(models.Model):
 
     def clean(self):
         if self.this_posting_expires_est is None:
-            raise ValidationError("Срок действия этой публикации нет!")
+            raise ValidationError(f"Срок действия этого {self.id} нет!")
 
         if self.this_posting_expires_est <= timezone.localtime(timezone.now()):
-            raise ValidationError("Срок действия заказа истек!")
+            raise ValidationError(f"Срок действия этого {self.id} заказа истек!")
 
     def move_to_history(self):
         if self.user is not None:

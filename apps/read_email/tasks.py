@@ -219,7 +219,7 @@ def extract_order_data(html_text):
 def save_order(order_data):
     try:
         order = Order(**order_data)
-        order.clean()
+        order.full_clean()
         order.save()
         logging.info(f"Заказ {order.id} сохранен в базу")
 
