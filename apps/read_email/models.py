@@ -46,7 +46,7 @@ class Order(models.Model):
     load_posted_by = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     fax = models.CharField(max_length=255, blank=True, null=True)
-    order_number = models.CharField(max_length=255, unique=True, default=0)
+    order_number = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.from_whom
