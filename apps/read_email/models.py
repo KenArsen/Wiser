@@ -36,7 +36,7 @@ class Order(models.Model):
     suggested_truck_size = models.CharField(max_length=255, blank=True, null=True)
 
     this_posting_expires_cen = models.DateTimeField(blank=True, null=True)
-    this_posting_expires_est = models.DateTimeField(blank=True, null=True)
+    this_posting_expires_est = models.DateTimeField(default=timezone.now)
 
     company_name = models.CharField(max_length=255, blank=True, null=True)
     company_address = models.TextField(blank=True, null=True)
@@ -46,7 +46,7 @@ class Order(models.Model):
     load_posted_by = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     fax = models.CharField(max_length=255, blank=True, null=True)
-    order_number = models.CharField(max_length=255, blank=True, null=True)
+    order_number = models.CharField(max_length=255, unique=True, default=0)
 
     def __str__(self):
         return self.from_whom
@@ -55,7 +55,7 @@ class Order(models.Model):
         ordering = ['-created']
 
     def clean(self):
-        if not self.this_posting_expires_est:
+        if self.this_posting_expires_est is None:
             raise ValidationError("Срок действия этой публикации нет!")
 
         if self.this_posting_expires_est <= timezone.localtime(timezone.now()):
@@ -65,7 +65,7 @@ class Order(models.Model):
         if self.user is not None:
             self.is_active = False
             self.save()
-            logging.info(f"Заказ {self.id} перемещен в историю")
+            logging.info(f"------ Заказ {self.id} перемещен в историю --------")
         else:
             self.delete()
-            logging.info(f"Заказ {self.id} удален")
+            logging.info(f"------ Заказ {self.id} удален --------")
