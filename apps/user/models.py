@@ -5,8 +5,9 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from apps.common.base_model import BaseModel
 
-from api.utils.image import ImageService
+from apps.common.image import ImageService
 
 
 class Roles(models.Model):
@@ -38,46 +39,19 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(ImageService, AbstractBaseUser, PermissionsMixin):
-    # CARGO_VAN = "CARGO VAN"
-    # SPRINTER_VAN = "SPRINTER VAN"
-    # VAN = "VAN"
-    # SPRINTER = "SPRINTER"
-    # BOX_TRUCK = "BOX TRUCK"
-    # SMALL_STRAIGHT = "SMALL STRAIGHT"
-    # LARGE_STRAIGHT = "LARGE STRAIGHT"
-    # LIFTGATE = "LIFTGATE"
-    # FLATBED = "FLATBED"
-    # TRACTOR = "TRACTOR"
-    # REEFER = "REEFER"
-    # TYPE_OF_ADS = (
-    #     (CARGO_VAN, "CARGO VAN"),
-    #     (SPRINTER_VAN, "SPRINTER VAN"),
-    #     (VAN, "VAN"),
-    #     (SPRINTER, "SPRINTER"),
-    #     (BOX_TRUCK, "BOX TRUCK"),
-    #     (SMALL_STRAIGHT, "SMALL STRAIGHT"),
-    #     (LARGE_STRAIGHT, "LARGE STRAIGHT"),
-    #     (LIFTGATE, "LIFTGATE"),
-    #     (FLATBED, "FLATBED"),
-    #     (TRACTOR, "TRACTOR"),
-    #     (REEFER, "REEFER"),
-    # )
-
+class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
     roles = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, blank=True)
+
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
     last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Last Name")
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="Avatar")
+
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    # vehicle_type = models.CharField(max_length=100, null=True, choices=TYPE_OF_ADS, default=SPRINTER_VAN,
-    #                                 verbose_name="vehicle")
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
 
@@ -111,7 +85,6 @@ class User(ImageService, AbstractBaseUser, PermissionsMixin):
             if not this.avatar == self.avatar:
                 if os.path.isfile(this.avatar.path):
                     os.remove(this.avatar.path)
-
         except:
             pass
 

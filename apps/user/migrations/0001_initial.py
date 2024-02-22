@@ -4,7 +4,7 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import api.utils.image
+import apps.common.image
 
 
 class Migration(migrations.Migration):
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Users',
                 'ordering': ('-id',),
             },
-            bases=(api.utils.image.ImageService, models.Model),
+            bases=(apps.common.image.ImageService, models.Model),
         ),
         migrations.CreateModel(
             name='Roles',
@@ -70,7 +70,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('is_used', models.BooleanField(default=False)),
                 (
-                'user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                    'user',
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Приглашение',
