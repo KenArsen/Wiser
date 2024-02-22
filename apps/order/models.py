@@ -63,6 +63,9 @@ class Order(BaseModel):
         ordering = ["-created_at"]
 
     def clean(self):
+        if not self.order_number:
+            raise exceptions.ValidationError({"error": "This order number cannot be empty"})
+
         if self.this_posting_expires_est is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} нет!"})
 
