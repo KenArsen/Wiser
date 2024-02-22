@@ -1,15 +1,12 @@
-from django.urls import path, include
+from django.urls import include, path
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-app_name = 'api'
+app_name = "api"
 
 
 class HealthCheckView(APIView):
@@ -26,15 +23,15 @@ class HealthCheckView(APIView):
 
 # apps
 urlpatterns = [
-    path('users/', include('apps.user.api.v1.urls', namespace='users')),
-    path('drivers/', include('apps.driver.api.v1.urls', namespace='drivers')),
-    path('orders/', include('apps.order.api.v1.urls', namespace='orders')),
-    path('letters/', include('apps.letter.api.v1.urls', namespace='letters')),
-    path('healthcheck/', HealthCheckView.as_view(), name='healthcheck'),
+    path("users/", include("apps.user.api.v1.urls", namespace="users")),
+    path("drivers/", include("apps.driver.api.v1.urls", namespace="drivers")),
+    path("orders/", include("apps.order.api.v1.urls", namespace="orders")),
+    path("letters/", include("apps.letter.api.v1.urls", namespace="letters")),
+    path("healthcheck/", HealthCheckView.as_view(), name="healthcheck"),
 ]
 
 # token
 urlpatterns += [
-    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path("api/v1/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/v1/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]

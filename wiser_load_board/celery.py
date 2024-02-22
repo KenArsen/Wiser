@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+
 import os
 from datetime import timedelta
 
@@ -12,12 +13,12 @@ app.conf.broker_connection_retry_on_startup = True
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'my_periodic_task': {
-        'task': 'apps.order.tasks.process_and_save_emails_task',
-        'schedule': timedelta(seconds=3),
+    "my_periodic_task": {
+        "task": "apps.order.tasks.process_and_save_emails_task",
+        "schedule": timedelta(seconds=3),
     },
-    'delete_expired_data': {
-        'task': 'apps.order.tasks.delete_expired_data',
-        'schedule': timedelta(minutes=3),
+    "delete_expired_data": {
+        "task": "apps.order.tasks.delete_expired_data",
+        "schedule": timedelta(minutes=3),
     },
 }

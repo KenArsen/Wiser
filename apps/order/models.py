@@ -1,20 +1,22 @@
-from rest_framework import exceptions
+import logging
+
 from django.db import models
 from django.utils import timezone
-import logging
+from rest_framework import exceptions
+
 from apps.common.base_model import BaseModel
 
 
 class Order(BaseModel):
     class OrderStatus(models.TextChoices):
-        DEFAULT = 'DEFAULT', '----'
-        PENDING = 'PENDING', 'Pending'
-        POINT_A = 'A', 'Выехал на точку А'
-        LOADED = 'B', 'Загрузил'
-        ON_THE_WAY = 'C', 'В дороге'
-        UNLOADED = 'D', 'Выгрузил'
+        DEFAULT = "DEFAULT", "----"
+        PENDING = "PENDING", "Pending"
+        POINT_A = "A", "Выехал на точку А"
+        LOADED = "B", "Загрузил"
+        ON_THE_WAY = "C", "В дороге"
+        UNLOADED = "D", "Выгрузил"
 
-    user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
     from_whom = models.EmailField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True, null=True, blank=True)
@@ -58,7 +60,7 @@ class Order(BaseModel):
         return self.from_whom
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def clean(self):
         if self.this_posting_expires_est is None:

@@ -1,8 +1,9 @@
-from rest_framework.viewsets import ModelViewSet
-from apps.driver.models import Driver
-from apps.driver.api.v1.serializers.driver import DriverSerializers
 from rest_framework.permissions import IsAuthenticated
-from apps.common.permissions import IsDispatcher, IsAdmin
+from rest_framework.viewsets import ModelViewSet
+
+from apps.common.permissions import IsAdmin, IsDispatcher
+from apps.driver.api.v1.serializers.driver import DriverSerializers
+from apps.driver.models import Driver
 
 
 class DriverViewSet(ModelViewSet):

@@ -1,12 +1,17 @@
+import logging
 import os
 
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-from apps.common.base_model import BaseModel
 
+from apps.common.base_model import BaseModel
 from apps.common.image import ImageService
 
 
@@ -18,10 +23,9 @@ class Roles(models.Model):
 
 
 class UserManager(BaseUserManager):
-
     def create_user(self, email, password=None, **extra_fields):
         if email is None:
-            raise TypeError('Users must have an email address.')
+            raise TypeError("Users must have an email address.")
 
         user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
@@ -30,7 +34,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None):
         if password is None:
-            raise TypeError('Superusers must have a password.')
+            raise TypeError("Superusers must have a password.")
 
         user = self.create_user(email, password)
         user.is_superuser = True
@@ -46,7 +50,7 @@ class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
     first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
     last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Last Name")
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="Avatar")
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="Avatar")
 
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -55,13 +59,13 @@ class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = UserManager()
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ("-id",)
         verbose_name = _("User")
         verbose_name_plural = _("Users")
 
@@ -74,19 +78,19 @@ class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
             if not self.pk:
                 if self.avatar:
                     # image compress
-                    self.compress_image('avatar', delete_source=True, max_width=300, max_height=300)
+                    self.compress_image("avatar", delete_source=True, max_width=300, max_height=300)
             else:
                 if self.avatar:
                     # image compress
-                    self.compress_image('avatar', delete_source=True, max_width=300, max_height=300)
+                    self.compress_image("avatar", delete_source=True, max_width=300, max_height=300)
 
             this = User.objects.get(id=self.id)
 
             if not this.avatar == self.avatar:
                 if os.path.isfile(this.avatar.path):
                     os.remove(this.avatar.path)
-        except:
-            pass
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
 
         super(User, self).save(*args, **kwargs)
 
