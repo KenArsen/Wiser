@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.letter.api.v1.serializers.letter import LetterSerializer
+from apps.letter.api.v1.serializers.letter_serializer import LetterSerializer
 from apps.letter.models import Letter
 from apps.letter.tasks import send_email
 

@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from apps.common.permissions import IsAdmin, IsAdminOrHR, IsHR
-from apps.user.api.v1.serializers.user import (
+from apps.user.api.v1.serializers.user_serializer import (
     InvitationSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,

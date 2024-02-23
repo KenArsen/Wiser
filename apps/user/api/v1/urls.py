@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from apps.user.api.v1.apis.user import (
+from apps.user.api.v1.apis.user_apis import (
     InvitationView,
     PasswordSetupView,
     ResetPasswordConfirmView,

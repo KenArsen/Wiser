@@ -17,7 +17,7 @@ from apps.common.decorators_swagger import (
     time_until_delivery_response,
 )
 from apps.common.permissions import IsAdmin, IsDispatcher
-from apps.order.api.v1.serializers.order import OrderSerializer
+from apps.order.api.v1.serializers.order_serializer import OrderSerializer
 from apps.order.models import Order
 from apps.user.models import User
 
