@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
@@ -23,12 +24,12 @@ class Order(BaseModel):
     order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.DEFAULT)  # new
 
     pick_up_at = models.CharField(max_length=255, blank=True, null=True)
-    pick_up_date_CEN = models.DateTimeField(blank=True, null=True)
-    pick_up_date_EST = models.DateTimeField(blank=True, null=True)
+    pick_up_date_CEN = models.DateTimeField(default=timezone.now)
+    pick_up_date_EST = models.DateTimeField(default=timezone.now)
 
     deliver_to = models.CharField(max_length=255, blank=True, null=True)
-    deliver_date_CEN = models.DateTimeField(blank=True, null=True)
-    deliver_date_EST = models.DateTimeField(blank=True, null=True)
+    deliver_date_CEN = models.DateTimeField(default=(timezone.now() + timedelta(hours=1)))
+    deliver_date_EST = models.DateTimeField(default=(timezone.now() + timedelta(hours=1)))
 
     notes = models.CharField(max_length=400, blank=True, null=True)
     miles = models.FloatField(blank=True, null=True)
@@ -43,8 +44,8 @@ class Order(BaseModel):
 
     suggested_truck_size = models.CharField(max_length=255, blank=True, null=True)
 
-    this_posting_expires_cen = models.DateTimeField(blank=True, null=True)
-    this_posting_expires_est = models.DateTimeField(default=timezone.now)
+    this_posting_expires_cen = models.DateTimeField(default=(timezone.now() + timedelta(minutes=10)))
+    this_posting_expires_est = models.DateTimeField(default=(timezone.now() + timedelta(minutes=10)))
 
     company_name = models.CharField(max_length=255, blank=True, null=True)
     company_address = models.TextField(blank=True, null=True)
