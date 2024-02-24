@@ -293,10 +293,12 @@ def extract_order_data(html_text):
     return order_data
 
 
+@transaction.atomic
 def save_order(order_data):
     try:
         if not order_data.get("order_number"):
             raise ValidationError({"error": "This order number cannot be empty"})
+
         order = Order(**order_data)
         order.full_clean()
         order.save()
@@ -309,6 +311,7 @@ def save_order(order_data):
         transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id,), eta=eta_time))
         logging.info(f"Запуск задачи для Expires {order.id}")
         logging.info(f"{order.id}: Время удаления через {eta_time - timezone.localtime(timezone.now())}")
+        return order
     except ValidationError as e:
         logging.error(e)
     except Exception as e:

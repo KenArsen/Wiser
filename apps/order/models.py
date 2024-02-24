@@ -54,7 +54,7 @@ class Order(BaseModel):
     load_posted_by = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     fax = models.CharField(max_length=255, blank=True, null=True)
-    order_number = models.CharField(max_length=255, unique=True)
+    order_number = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.from_whom
@@ -65,6 +65,9 @@ class Order(BaseModel):
     def clean(self):
         if not self.order_number:
             raise exceptions.ValidationError({"error": "This order number cannot be empty"})
+
+        if Order.objects.filter(order_number=self.order_number).exists():
+            raise exceptions.ValidationError({"error": "This order number is already in use"})
 
         if self.this_posting_expires_est is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} нет!"})
