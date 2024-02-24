@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.letter.api.v1.apis import letter_apis
+
 app_name = "letter"
 
 urlpatterns = [

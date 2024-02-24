@@ -295,6 +295,8 @@ def extract_order_data(html_text):
 
 def save_order(order_data):
     try:
+        if not order_data.get("order_number"):
+            raise ValidationError({"error": "This order number cannot be empty"})
         order = Order(**order_data)
         order.full_clean()
         order.save()
