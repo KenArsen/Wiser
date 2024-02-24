@@ -15,13 +15,16 @@ class OrderSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        instance = super().create(validated_data)
-        instance.full_clean()
+        instance = Order(**validated_data)
+        instance.full_clean()  # Вызов метода clean()
+        instance.save()
         return instance
 
     def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        instance.full_clean()
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.full_clean()  # Вызов метода clean()
+        instance.save()
         return instance
 
     def get_created_time(self, obj):
