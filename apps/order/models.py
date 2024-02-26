@@ -12,6 +12,7 @@ class Order(BaseModel):
     class OrderStatus(models.TextChoices):
         DEFAULT = "DEFAULT", "----"
         PENDING = "PENDING", "Pending"
+        MY_LOADS = "MY_LOADS", "My Loads"
         POINT_A = "A", "Выехал на точку А"
         LOADED = "B", "Загрузил"
         ON_THE_WAY = "C", "В дороге"
@@ -21,7 +22,7 @@ class Order(BaseModel):
     from_whom = models.EmailField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True, null=True, blank=True)
-    order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.DEFAULT)  # new
+    order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.DEFAULT)
 
     pick_up_at = models.CharField(max_length=255, blank=True, null=True)
     pick_up_date_CEN = models.DateTimeField(blank=True, null=True, default=timezone.now)
