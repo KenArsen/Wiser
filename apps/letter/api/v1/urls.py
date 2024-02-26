@@ -2,7 +2,7 @@ from django.urls import path
 
 from apps.letter.api.v1.apis import letter_apis
 
-app_name = "letter"
+app_name = "letters"
 
 urlpatterns = [
     path("", letter_apis.LetterListView.as_view(), name="letter-list"),

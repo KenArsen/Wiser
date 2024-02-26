@@ -3,10 +3,9 @@ from rest_framework.routers import DefaultRouter
 
 from apps.driver.api.v1.apis.driver_apis import DriverViewSet
 
-app_name = "driver"
+app_name = "drivers"
 
 router = DefaultRouter()
-
 router.register("", DriverViewSet, basename="roles")
 
 urlpatterns = [

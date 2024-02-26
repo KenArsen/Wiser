@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from apps.order.api.v1.apis.my_bids_apis import (
@@ -22,11 +22,11 @@ from apps.order.api.v1.apis.order_apis import (
     delete_all_orders,
 )
 
-app_name = "order"
+app_name = "orders"
 
-order_router = DefaultRouter()
-order_router.register(r"history", OrderHistoryView)
-order_router.register(r"", OrderView)
+router = DefaultRouter()
+router.register(r"history", OrderHistoryView)
+router.register(r"", OrderView)
 
 urlpatterns = [
     path("delete/all/", delete_all_orders),
@@ -62,6 +62,4 @@ urlpatterns += [
 ]
 
 # routers
-urlpatterns += [
-    path("", include(order_router.urls)),
-]
+urlpatterns += router.urls

@@ -10,7 +10,7 @@ from apps.user.api.v1.apis.user_apis import (
     UserViewSet,
 )
 
-app_name = "user"
+app_name = "users"
 
 router = DefaultRouter()
 
