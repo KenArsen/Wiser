@@ -15,17 +15,22 @@ from apps.order.api.v1.apis.my_loads import (
     MyLoadsListAPI,
     MyLoadsUpdateAPI,
 )
-from apps.order.api.v1.apis.order_apis import (
+from apps.order.api.v1.apis.order_apis import (  # OrderHistoryView,
     OrderFilterView,
-    OrderHistoryView,
     OrderView,
     delete_all_orders,
+)
+from apps.order.api.v1.apis.order_history_api import (
+    OrderHistoryCreateAPI,
+    OrderHistoryDeleteAPI,
+    OrderHistoryDetailView,
+    OrderHistoryListAPI,
+    OrderHistoryUpdateView,
 )
 
 app_name = "orders"
 
 router = DefaultRouter()
-router.register(r"history", OrderHistoryView)
 router.register(r"", OrderView)
 
 urlpatterns = [
@@ -41,6 +46,15 @@ urlpatterns = [
         OrderView.as_view({"get": "get_location_order", "post": "get_location_order"}),
         name="order-location",
     ),
+]
+
+# order-history
+urlpatterns += [
+    path("history/", OrderHistoryListAPI.as_view(), name="order-history-list"),
+    path("history/create/", OrderHistoryCreateAPI.as_view(), name="order-history-create"),
+    path("history/<int:pk>/", OrderHistoryDetailView.as_view(), name="order-history-detail"),
+    path("history/<int:pk>/update/", OrderHistoryUpdateView.as_view(), name="order-history-update"),
+    path("history/<int:pk>/delete/", OrderHistoryDeleteAPI.as_view(), name="order-history-delete"),
 ]
 
 # my bids

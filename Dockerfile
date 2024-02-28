@@ -15,8 +15,7 @@ RUN pip install -r /app/requirements.txt
 
 COPY . .
 
-RUN mkdir static \
-    && chmod +x entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 EXPOSE 8080
 
