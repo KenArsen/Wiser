@@ -10,8 +10,8 @@ WORKDIR /app
 RUN pip install --upgrade pip \
     && apt-get update
 
-COPY requirements/production.txt /app/
-RUN pip install -r /app/production.txt
+COPY requirements.txt /app/
+RUN pip install -r /app/requirements.txt
 
 COPY . .
 

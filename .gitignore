@@ -13,6 +13,7 @@ docker-compose.yml
 
 *.py[cod]
 *$py.class
+static/
 
 # C extensions
 *.so
@@ -36,7 +37,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 venv
-wiser/
+.wiser/
 myvenv
 .env_local
 .env.local
