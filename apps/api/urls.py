@@ -1,4 +1,6 @@
-from django.urls import include, path
+from django.conf import settings
+from django.urls import include, path, re_path
+from django.views.static import serve
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -28,6 +30,20 @@ urlpatterns = [
     path("orders/", include("apps.order.api.v1.urls", namespace="orders")),
     path("letters/", include("apps.letter.api.v1.urls", namespace="letters")),
     path("healthcheck/", HealthCheckView.as_view(), name="healthcheck"),
+]
+
+# libraries
+urlpatterns += [
+    re_path(
+        r"^static/(?P<path>.*)$",
+        serve,
+        {"document_root": settings.STATIC_ROOT, "show_indexes": settings.DEBUG},
+    ),
+    re_path(
+        r"^api/v1/media/(?P<path>.*)$",
+        serve,
+        {"document_root": settings.MEDIA_ROOT, "show_indexes": settings.DEBUG},
+    ),
 ]
 
 # token
