@@ -7,6 +7,8 @@ from rest_framework.views import APIView
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import OrderSerializer
 from apps.order.models import Order
+from apps.order.repositories.order_history_repository import OrderHistoryRepository
+from apps.order.services.order_history_service import OrderHistoryService
 
 
 class OrderHistoryListAPI(APIView):
@@ -19,27 +21,10 @@ class OrderHistoryListAPI(APIView):
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request):
-        orders = Order.objects.filter(is_active=False)
+        service = OrderHistoryService(OrderHistoryRepository())
+        orders = service.list_orders()
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class OrderHistoryCreateAPI(APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-
-    @swagger_auto_schema(
-        operation_summary="Create an order",
-        tags=["Order History"],
-        operation_description="Create a new order",
-        request_body=OrderSerializer,
-        responses={201: OrderSerializer()},
-    )
-    def post(self, request):
-        serializer = OrderSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderHistoryDetailView(APIView):

@@ -21,7 +21,6 @@ from apps.order.api.v1.apis.order_apis import (  # OrderHistoryView,
     delete_all_orders,
 )
 from apps.order.api.v1.apis.order_history_api import (
-    OrderHistoryCreateAPI,
     OrderHistoryDeleteAPI,
     OrderHistoryDetailView,
     OrderHistoryListAPI,
@@ -51,7 +50,6 @@ urlpatterns = [
 # order-history
 urlpatterns += [
     path("history/", OrderHistoryListAPI.as_view(), name="order-history-list"),
-    path("history/create/", OrderHistoryCreateAPI.as_view(), name="order-history-create"),
     path("history/<int:pk>/", OrderHistoryDetailView.as_view(), name="order-history-detail"),
     path("history/<int:pk>/update/", OrderHistoryUpdateView.as_view(), name="order-history-update"),
     path("history/<int:pk>/delete/", OrderHistoryDeleteAPI.as_view(), name="order-history-delete"),
