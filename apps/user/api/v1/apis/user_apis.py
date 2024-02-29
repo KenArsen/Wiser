@@ -3,6 +3,8 @@ import uuid
 from django.contrib.auth import authenticate
 from django.core import signing
 from django.core.mail import send_mail
+from django.db import transaction
+from django.urls import reverse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
@@ -72,15 +74,6 @@ class UserViewSet(ModelViewSet):
             return Response({"message": "У вас нет прав для активации пользователя."}, status=status.HTTP_403_FORBIDDEN)
 
 
-# class DriverFilterViewSet(ModelViewSet):
-#     queryset = User.objects.all()
-#     serializer_class = DriverRetrieveSerializers
-#     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-#
-#     def get_queryset(self):
-#         return User.objects.filter(roles__name='DRIVER')
-
-
 class InvitationView(APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
@@ -99,6 +92,7 @@ class InvitationView(APIView):
         operation_summary="Send Invitation",
         operation_description="Send an invitation to the specified email address.",
     )
+    @transaction.atomic()
     def post(self, request):
         serializer = InvitationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -112,7 +106,9 @@ class InvitationView(APIView):
             invitation = Invitation.objects.create(user=user, email=email, invitation_token=invitation_token)
             # Отправьте приглашение на электронную почту пользователя здесь.
             subject = "Приглашение для регистрации"
-            invitation_url = f"http://127.0.0.1:8000/api/users/setup-password/?token={invitation_token}"
+            invitation_url = request.build_absolute_uri(
+                reverse("api:users:setup-password", kwargs={"invitation_token": invitation_token})
+            )
             message = f"Для продолжении регистрации по ссылке: {invitation_url}"
             from_email = EMAIL_HOST_USER
             recipient_list = [email]
@@ -155,9 +151,10 @@ class ResetPasswordRequestView(generics.CreateAPIView):
         token = signing.dumps({"user_id": user.id})
         return token
 
-    def send_password_reset_email(self, email, reset_token):
+    def send_password_reset_email(self, email, reset_token, request):
         subject = "Сброс пароля"
-        reset_url = f"http://127.0.0.1:8000/api/users/reset-password/confirm/?token={reset_token}"
+        reset_url = request.build_absolute_uri(reverse("api:users:reset-password-confirm")) + f"?token={reset_token}"
+
         message = f"Для сброса пароля перейдите по ссылке: {reset_url}"
         from_email = EMAIL_HOST_USER
         recipient_list = [email]
@@ -170,7 +167,7 @@ class ResetPasswordRequestView(generics.CreateAPIView):
             try:
                 user1 = User.objects.get(email=email)
                 reset_token = self.generate_reset_token(user1)
-                self.send_password_reset_email(email, reset_token)
+                self.send_password_reset_email(email, reset_token, request)
                 return Response({"message": "Email sent with reset instructions"}, status=status.HTTP_200_OK)
             except User.DoesNotExist:
                 return Response({"error": "User with this email does not exist"}, status=status.HTTP_404_NOT_FOUND)
