@@ -7,8 +7,6 @@ from rest_framework.views import APIView
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import OrderSerializer
 from apps.order.models import Order
-from apps.order.repositories.order_history_repository import OrderHistoryRepository
-from apps.order.services.order_history_service import OrderHistoryService
 
 
 class OrderHistoryListAPI(APIView):
@@ -21,9 +19,8 @@ class OrderHistoryListAPI(APIView):
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request):
-        service = OrderHistoryService(OrderHistoryRepository())
-        orders = service.list_orders()
-        serializer = OrderSerializer(orders, many=True)
+        queryset = Order.objects.all()
+        serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
