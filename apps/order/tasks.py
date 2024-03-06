@@ -19,7 +19,7 @@ from .models import Order
 def deactivate_expired_order(order_id):
     logging.info(f"####### Время удаление {order_id} #######")
     try:
-        order = Order.objects.filter(pk=order_id).first()
+        order = Order.objects.filter(pk=order_id, order_status='DEFAULT').first()
         if order:
             if order.user is None:
                 logging.info(f"Время действия заказа: {order.id} истекло в: {order.this_posting_expires_est}")
@@ -42,7 +42,11 @@ def delete_expired_data():
         with transaction.atomic():
             logging.info("##### Начато удаление просроченных данных. #####")
 
-            expired_orders = Order.objects.filter(this_posting_expires_est__lt=timezone.now(), is_active=True)
+            expired_orders = Order.objects.filter(
+                this_posting_expires_est__lt=timezone.now(),
+                is_active=True,
+                order_status='DEFAULT'
+            )
             for order in expired_orders:
                 order.move_to_history()
 
