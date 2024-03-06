@@ -17,11 +17,22 @@ class Order(BaseModel):
         ON_THE_WAY = "C", "В дороге"
         UNLOADED = "D", "Выгрузил"
 
+    class MyLoadsStatus(models.IntegerChoices):
+        DEFAULT = 0, "Active"
+        POINT_A = 1, "I am going to the load"
+        UPLOADED = 2, "Uploaded"
+        ON_THE_WAY = 3, "On the way"
+        UNLOADED = 4, "Unloaded"
+        DELIVERED = 5, "Delivered"
+        CHECKOUT = 6, "Checkout"
+
     user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
     from_whom = models.EmailField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True, null=True, blank=True)
+
     order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.DEFAULT)
+    my_loads_status = models.IntegerField(choices=MyLoadsStatus.choices, default=MyLoadsStatus.DEFAULT)
 
     pick_up_at = models.CharField(max_length=255, blank=True, null=True)
     pick_up_date_CEN = models.DateTimeField(blank=True, null=True, default=timezone.now)
@@ -44,12 +55,8 @@ class Order(BaseModel):
 
     suggested_truck_size = models.CharField(max_length=255, blank=True, null=True)
 
-    this_posting_expires_cen = models.DateTimeField(
-        blank=True, null=True, default=timezone.now
-    )
-    this_posting_expires_est = models.DateTimeField(
-        blank=True, null=True, default=timezone.now
-    )
+    this_posting_expires_cen = models.DateTimeField(blank=True, null=True, default=timezone.now)
+    this_posting_expires_est = models.DateTimeField(blank=True, null=True, default=timezone.now)
 
     company_name = models.CharField(max_length=255, blank=True, null=True)
     company_address = models.TextField(blank=True, null=True)

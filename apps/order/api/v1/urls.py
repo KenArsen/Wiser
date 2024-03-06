@@ -1,38 +1,32 @@
 from django.urls import path
 
 from apps.order.api.v1.apis import (
-    MyBidsListAPI,
-    my_bids_no,
-    my_bids_yes,
-
-    MyLoadsListAPI,
-
-    OrderListAPI,
-    OrderCreateAPI,
-    OrderDetailAPI,
-    OrderUpdateAPI,
-    OrderDeleteAPI,
-
     GetDeliveryTime,
     GetLocationOrder,
-
+    MyBidsListAPI,
+    MyLoadsListAPI,
+    MyLoadsStatus,
+    OrderCreateAPI,
+    OrderDeleteAPI,
+    OrderDetailAPI,
     OrderFilterView,
-
     OrderHistoryListAPI,
+    OrderListAPI,
+    OrderUpdateAPI,
+    my_bids_no,
+    my_bids_yes,
 )
 
 app_name = "orders"
 
 urlpatterns = [
-    path('', OrderListAPI.as_view(), name='order-list'),
-    path('create/', OrderCreateAPI.as_view(), name="order-create"),
-    path('<int:pk>/', OrderDetailAPI.as_view(), name="order-detail"),
-    path('<int:pk>/update/', OrderUpdateAPI.as_view(), name="order-update"),
-    path('<int:pk>/delete/', OrderDeleteAPI.as_view(), name="order-delete"),
-
+    path("", OrderListAPI.as_view(), name="order-list"),
+    path("create/", OrderCreateAPI.as_view(), name="order-create"),
+    path("<int:pk>/", OrderDetailAPI.as_view(), name="order-detail"),
+    path("<int:pk>/update/", OrderUpdateAPI.as_view(), name="order-update"),
+    path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
     path("<int:pk>/delivery-time/", GetDeliveryTime.as_view(), name="order-delivery-time"),
     path("<int:pk>/location-order/", GetLocationOrder.as_view(), name="order-location"),
-
     path("filter/", OrderFilterView.as_view(), name="order-filter"),
 ]
 
@@ -51,4 +45,5 @@ urlpatterns += [
 # my loads
 urlpatterns += [
     path("my_loads/", MyLoadsListAPI.as_view(), name="my-loads"),
+    path("my_loads_status/<int:pk>/", MyLoadsStatus.as_view(), name="my-loads-status"),
 ]

@@ -11,7 +11,6 @@ from rest_framework.response import Response
 
 from apps.common.decorators_swagger import (
     filtered_drivers_response,
-    order_data_spec,
     time_until_delivery_response,
 )
 from apps.common.permissions import IsAdmin, IsDispatcher
@@ -24,7 +23,7 @@ class OrderListAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_summary="List orders",
         operation_description="Get a list of active orders with default status",
     )
@@ -38,7 +37,7 @@ class OrderCreateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_summary="Create order",
         operation_description="Create a new order",
         request_body=OrderSerializer,
@@ -55,7 +54,7 @@ class OrderDetailAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_summary="Retrieve order details",
         operation_description="Retrieve details of a specific order",
     )
@@ -69,7 +68,7 @@ class OrderUpdateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_summary="Update order",
         operation_description="Update details of a specific order",
         request_body=OrderSerializer,
@@ -83,7 +82,7 @@ class OrderUpdateAPI(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_description="Update an existing order partially",
         request_body=OrderSerializer,
         responses={200: OrderSerializer()},
@@ -103,7 +102,7 @@ class OrderDeleteAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_summary="Delete order",
         operation_description="Delete a specific order",
     )
@@ -115,9 +114,7 @@ class OrderDeleteAPI(views.APIView):
 
 class GetDeliveryTime(views.APIView):
     @swagger_auto_schema(
-        tags=['Order'],
-        responses=time_until_delivery_response,
-        operation_summary="Get time_until_delivery"
+        tags=["Order"], responses=time_until_delivery_response, operation_summary="Get time_until_delivery"
     )
     def get(self, request, pk):
         order = Order.objects.get(pk=pk)
@@ -137,9 +134,7 @@ class GetDeliveryTime(views.APIView):
 
 class GetLocationOrder(views.APIView):
     @swagger_auto_schema(
-        tags=['Order'],
-        responses=filtered_drivers_response,
-        operation_summary="Get location order details"
+        tags=["Order"], responses=filtered_drivers_response, operation_summary="Get location order details"
     )
     def get(self, request, pk):
         order = Order.objects.get(pk=pk)
@@ -219,9 +214,9 @@ class OrderFilterView(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=['Order'],
+        tags=["Order"],
         operation_summary="Filter orders",
-        operation_description="Filter orders based on pick up location, delivery location, and miles."
+        operation_description="Filter orders based on pick up location, delivery location, and miles.",
     )
     def get(self, request):
         pick_up_at = request.query_params.get("pick_up_at")
