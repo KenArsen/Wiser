@@ -23,7 +23,7 @@ def send_email(letter_id):
                 message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[letter.driver_id.email],
-                fail_silently=False,  # Raise exception on failure
+                fail_silently=False,
                 html_message=letter.comment,
             )
     except (SMTPAuthenticationError, SMTPException) as e:
