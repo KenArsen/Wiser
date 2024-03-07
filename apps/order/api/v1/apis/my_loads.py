@@ -15,7 +15,6 @@ class MyLoadsListAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="List my loads",
         tags=["My Loads"],
-        operation_description="Get a list of orders with status 'MY_LOADS' made by the current user",
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request):
@@ -30,11 +29,9 @@ class MyLoadsDetailAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Retrieve my load details",
         tags=["My Loads"],
-        operation_description="Retrieve detailed information about an order with status"
-        " 'MY_LOADS' made by the current user",
         responses={200: OrderSerializer()},
     )
-    def get(self, request, pk, format=None):
+    def get(self, request, pk):
         queryset = OrderRepository.get_order_list(is_active=True, order_status="MY_LOADS")
         order = queryset.get(pk=pk)
         serializer = OrderSerializer(order)
@@ -47,11 +44,10 @@ class MyLoadsUpdateAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Update my load",
         tags=["My Loads"],
-        operation_description="Update an existing order made by the current user",
         request_body=OrderSerializer,
         responses={200: OrderSerializer()},
     )
-    def put(self, request, pk, format=None):
+    def put(self, request, pk):
         queryset = OrderRepository.get_order_list(is_active=True)
         order = queryset.get(pk=pk)
         serializer = OrderSerializer(order, data=request.data)
@@ -63,11 +59,10 @@ class MyLoadsUpdateAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Update my load partially",
         tags=["My Loads"],
-        operation_description="Partially update an existing order made by the current user",
         request_body=OrderSerializer,
         responses={200: OrderSerializer()},
     )
-    def patch(self, request, pk, format=None):
+    def patch(self, request, pk):
         queryset = OrderRepository.get_order_list(is_active=True)
         order = queryset.get(pk=pk)
         serializer = OrderSerializer(order, data=request.data, partial=True)
@@ -83,10 +78,9 @@ class MyLoadsDeleteAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Delete my load",
         tags=["My Loads"],
-        operation_description="Delete an existing order made by the current user",
         responses={204: "No Content"},
     )
-    def delete(self, request, pk, format=None):
+    def delete(self, request, pk):
         queryset = OrderRepository.get_order_list()
         order = queryset.get(pk=pk)
         order.delete()
@@ -96,13 +90,7 @@ class MyLoadsDeleteAPI(views.APIView):
 class MyLoadsStatus(views.APIView):
     @swagger_auto_schema(
         tags=["My Loads"],
-        responses={
-            200: "Order status updated successfully",
-            400: "Invalid new status or Order is already in CHECKOUT status",
-            404: "Order does not exist",
-        },
         operation_summary="Update order status",
-        operation_description="Update the status of the order identified by the provided pk to the next status",
     )
     def post(self, request, pk):
 
