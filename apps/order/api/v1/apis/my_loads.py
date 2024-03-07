@@ -53,8 +53,4 @@ class MyLoadsStatus(views.APIView):
         order.my_loads_status = next_status
         order.save()
 
-        return Response(
-            {
-                "message": "Order status updated successfully",
-                'status': order.my_loads_status
-            }, status=status.HTTP_200_OK)
+        return Response({'status': order.my_loads_status}, status=status.HTTP_200_OK)
