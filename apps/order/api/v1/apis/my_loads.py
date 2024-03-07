@@ -24,6 +24,16 @@ class MyLoadsListAPI(views.APIView):
 
 
 class MyLoadsStatus(views.APIView):
+    @swagger_auto_schema(
+        tags=["My Loads"],
+        responses={
+            200: "Order status updated successfully",
+            400: "Invalid new status or Order is already in CHECKOUT status",
+            404: "Order does not exist"
+        },
+        operation_summary="Update order status",
+        operation_description="Update the status of the order identified by the provided pk to the next status",
+    )
     def post(self, request, pk):
 
         try:
@@ -43,4 +53,8 @@ class MyLoadsStatus(views.APIView):
         order.my_loads_status = next_status
         order.save()
 
-        return Response({"message": "Order status updated successfully"}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "message": "Order status updated successfully",
+                'status': order.my_loads_status
+            }, status=status.HTTP_200_OK)
