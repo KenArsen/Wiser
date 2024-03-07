@@ -51,7 +51,7 @@ def my_bids_yes(request, pk):
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_yes()
 
-            return Response({"status": "success"}, status=status.HTTP_200_OK)
+            return Response({"status": "The order has been moved to My Loads"}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             logging.error(f"{pk} does not exist")
             return Response({"status": "fail", "message": "Order does not exist"}, status=status.HTTP_404_NOT_FOUND)
@@ -85,7 +85,7 @@ def my_bids_no(request, pk):
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_no()
 
-            return Response({"status": "success"}, status=status.HTTP_200_OK)
+            return Response({"status": "The order has been moved to HISTORY"}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             logging.error(f"{pk} does not exist")
             return Response({"status": "fail", "message": "Order does not exist"}, status=status.HTTP_404_NOT_FOUND)

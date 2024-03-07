@@ -29,7 +29,7 @@ class MyLoadsStatus(views.APIView):
         responses={
             200: "Order status updated successfully",
             400: "Invalid new status or Order is already in CHECKOUT status",
-            404: "Order does not exist"
+            404: "Order does not exist",
         },
         operation_summary="Update order status",
         operation_description="Update the status of the order identified by the provided pk to the next status",
@@ -53,4 +53,4 @@ class MyLoadsStatus(views.APIView):
         order.my_loads_status = next_status
         order.save()
 
-        return Response({'status': order.my_loads_status}, status=status.HTTP_200_OK)
+        return Response({"status": order.get_order_status_display()}, status=status.HTTP_200_OK)

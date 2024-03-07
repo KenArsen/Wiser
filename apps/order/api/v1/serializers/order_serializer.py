@@ -10,6 +10,9 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         exclude = (
+            "is_active",
+            "order_status",
+            "my_loads_status",
             "created_at",
             "updated_at",
         )

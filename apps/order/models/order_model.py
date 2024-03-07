@@ -12,10 +12,6 @@ class Order(BaseModel):
         DEFAULT = "DEFAULT", "----"
         PENDING = "PENDING", "Pending"
         MY_LOADS = "MY_LOADS", "My Loads"
-        POINT_A = "A", "Выехал на точку А"
-        LOADED = "B", "Загрузил"
-        ON_THE_WAY = "C", "В дороге"
-        UNLOADED = "D", "Выгрузил"
 
     class MyLoadsStatus(models.IntegerChoices):
         DEFAULT = 0, "Active"
