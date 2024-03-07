@@ -29,6 +29,74 @@ class MyBidsListAPI(views.APIView):
         return Response(serializer.data)
 
 
+class MyBidsDetailAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve my bid details",
+        tags=["My Bids"],
+        operation_description="Retrieve detailed information about a pending bid made by the current user",
+        responses={200: OrderSerializer()},
+    )
+    def get(self, request, pk, *args, **kwargs):
+        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
+        order = queryset.get(pk=pk)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
+
+class MyBidsUpdateAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    @swagger_auto_schema(
+        operation_summary="Update my bid",
+        tags=["My Bids"],
+        operation_description="Update an existing pending bid made by the current user",
+        request_body=OrderSerializer,
+        responses={200: OrderSerializer()},
+    )
+    def put(self, request, pk, *args, **kwargs):
+        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
+        order = queryset.get(pk=pk)
+        serializer = OrderSerializer(order, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_summary="Update my bid",
+        tags=["My Bids"],
+        operation_description="Update an existing pending bid made by the current user",
+        request_body=OrderSerializer,
+        responses={200: OrderSerializer()},
+    )
+    def patch(self, request, pk, format=None):
+        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
+        order = queryset.get(pk=pk)
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyBidsDeleteAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    @swagger_auto_schema(
+        operation_summary="Delete my bid",
+        tags=["My Bids"],
+        operation_description="Delete an existing pending bid made by the current user",
+        responses={204: "No Content"},
+    )
+    def delete(self, request, pk, *args, **kwargs):
+        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
+        order = queryset.get(pk=pk)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 @swagger_auto_schema(
     method="post",
     tags=["My Bids"],

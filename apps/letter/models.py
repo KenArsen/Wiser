@@ -5,8 +5,8 @@ from apps.common.base_model import BaseModel
 
 
 class Letter(BaseModel):
-    order_id = models.ForeignKey("order.Order", on_delete=models.CASCADE, default=1, related_name="letters")
-    driver_id = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, default=1, related_name="letters")
+    order_id = models.OneToOneField("order.Order", on_delete=models.CASCADE, related_name="letter")
+    driver_id = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, related_name="letters")
     comment = models.TextField(blank=True, null=True)
 
     def __str__(self):

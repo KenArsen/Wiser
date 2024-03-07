@@ -1,25 +1,24 @@
 from django.utils import dateformat
 from rest_framework import serializers
 
+from apps.letter.api.v1.serializers import LetterSerializer
 from apps.order.models import Order
 
 
 class OrderSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField()
+    letter = LetterSerializer(read_only=True)
 
     class Meta:
         model = Order
         exclude = (
-            "is_active",
-            "order_status",
-            "my_loads_status",
             "created_at",
             "updated_at",
         )
 
     def create(self, validated_data):
         instance = Order(**validated_data)
-        instance.full_clean()  # Вызов метода clean()
+        instance.full_clean()
         instance.save()
         return instance
 
