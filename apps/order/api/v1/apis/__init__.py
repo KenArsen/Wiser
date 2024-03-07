@@ -6,7 +6,9 @@ from .my_bids_apis import (
     my_bids_no,
     my_bids_yes,
 )
-from .my_loads import (
+from .my_loads_apis import (
+    MyLoadsCheckoutAPI,
+    MyLoadsCompletedAPI,
     MyLoadsDeleteAPI,
     MyLoadsDetailAPI,
     MyLoadsListAPI,

@@ -1,5 +1,6 @@
 import logging
 
+from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, views
@@ -10,7 +11,6 @@ from rest_framework.response import Response
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import OrderSerializer
 from apps.order.models import Order
-from apps.order.repositories import OrderRepository
 from apps.order.services import order_service
 
 
@@ -20,11 +20,10 @@ class MyBidsListAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="List my bids",
         tags=["My Bids"],
-        operation_description="Get a list of pending bids made by the current user",
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request, *args, **kwargs):
-        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
+        queryset = Order.objects.filter(is_active=True, order_status="PENDING")
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -35,12 +34,10 @@ class MyBidsDetailAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Retrieve my bid details",
         tags=["My Bids"],
-        operation_description="Retrieve detailed information about a pending bid made by the current user",
         responses={200: OrderSerializer()},
     )
     def get(self, request, pk, *args, **kwargs):
-        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
-        order = queryset.get(pk=pk)
+        order = Order.objects.get(pk=pk, is_active=True, order_status="PENDING")
         serializer = OrderSerializer(order)
         return Response(serializer.data)
 
@@ -51,13 +48,11 @@ class MyBidsUpdateAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Update my bid",
         tags=["My Bids"],
-        operation_description="Update an existing pending bid made by the current user",
         request_body=OrderSerializer,
         responses={200: OrderSerializer()},
     )
     def put(self, request, pk, *args, **kwargs):
-        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
-        order = queryset.get(pk=pk)
+        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
         serializer = OrderSerializer(order, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -67,13 +62,11 @@ class MyBidsUpdateAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Update my bid",
         tags=["My Bids"],
-        operation_description="Update an existing pending bid made by the current user",
         request_body=OrderSerializer,
         responses={200: OrderSerializer()},
     )
-    def patch(self, request, pk, format=None):
-        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
-        order = queryset.get(pk=pk)
+    def patch(self, request, pk):
+        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
         serializer = OrderSerializer(order, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -87,12 +80,10 @@ class MyBidsDeleteAPI(views.APIView):
     @swagger_auto_schema(
         operation_summary="Delete my bid",
         tags=["My Bids"],
-        operation_description="Delete an existing pending bid made by the current user",
         responses={204: "No Content"},
     )
     def delete(self, request, pk, *args, **kwargs):
-        queryset = OrderRepository.get_order_list(is_active=True, order_status="PENDING")
-        order = queryset.get(pk=pk)
+        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -101,7 +92,6 @@ class MyBidsDeleteAPI(views.APIView):
     method="post",
     tags=["My Bids"],
     operation_summary="Accept bid",
-    operation_description="This endpoint accepts the bid for the order.",
     responses={200: "Success", 400: "Bad Request"},
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -135,7 +125,6 @@ def my_bids_yes(request, pk):
     method="post",
     tags=["My Bids"],
     operation_summary="Reject bid",
-    operation_description="This endpoint rejects the bid for the order.",
     responses={200: "Success", 400: "Bad Request"},
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,

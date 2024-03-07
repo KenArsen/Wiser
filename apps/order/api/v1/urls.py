@@ -7,6 +7,8 @@ from apps.order.api.v1.apis import (
     MyBidsDetailAPI,
     MyBidsListAPI,
     MyBidsUpdateAPI,
+    MyLoadsCheckoutAPI,
+    MyLoadsCompletedAPI,
     MyLoadsDeleteAPI,
     MyLoadsDetailAPI,
     MyLoadsListAPI,
@@ -64,4 +66,6 @@ urlpatterns += [
     path("my_loads/<int:pk>/update/", MyLoadsUpdateAPI.as_view(), name="my-loads-update"),
     path("my_loads/<int:pk>/delete/", MyLoadsDeleteAPI.as_view(), name="my-loads-delete"),
     path("my_loads_status/<int:pk>/", MyLoadsStatus.as_view(), name="my-loads-status"),
+    path("my_loads_checkouts/", MyLoadsCheckoutAPI.as_view(), name="my-loads-checkouts"),
+    path("my_loads_completes/", MyLoadsCompletedAPI.as_view(), name="my-loads-completes"),
 ]

@@ -6,11 +6,13 @@ from apps.order.models import Order
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    created_time = serializers.SerializerMethodField()
+    created_time = serializers.SerializerMethodField(read_only=True)
     letter = LetterSerializer(read_only=True)
+    my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
 
     class Meta:
         model = Order
+        read_only_fields = ["is_active", "order_status"]
         exclude = (
             "created_at",
             "updated_at",

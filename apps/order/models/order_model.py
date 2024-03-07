@@ -21,6 +21,7 @@ class Order(BaseModel):
         UNLOADED = 4, "Unloaded"
         DELIVERED = 5, "Delivered"
         CHECKOUT = 6, "Checkout"
+        COMPLETED = 7, "Completed"
 
     user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
     from_whom = models.EmailField(null=True, blank=True)

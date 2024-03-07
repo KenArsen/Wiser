@@ -25,7 +25,6 @@ class OrderListAPI(views.APIView):
     @swagger_auto_schema(
         tags=["Order"],
         operation_summary="List orders",
-        operation_description="Get a list of active orders with default status",
     )
     def get(self, request):
         orders = Order.objects.filter(is_active=True, order_status="DEFAULT")
@@ -39,7 +38,6 @@ class OrderCreateAPI(views.APIView):
     @swagger_auto_schema(
         tags=["Order"],
         operation_summary="Create order",
-        operation_description="Create a new order",
         request_body=OrderSerializer,
     )
     def post(self, request):
@@ -56,7 +54,6 @@ class OrderDetailAPI(views.APIView):
     @swagger_auto_schema(
         tags=["Order"],
         operation_summary="Retrieve order details",
-        operation_description="Retrieve details of a specific order",
     )
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
@@ -69,8 +66,7 @@ class OrderUpdateAPI(views.APIView):
 
     @swagger_auto_schema(
         tags=["Order"],
-        operation_summary="Update order",
-        operation_description="Update details of a specific order",
+        operation_summary="Update an order",
         request_body=OrderSerializer,
     )
     def put(self, request, pk):
@@ -83,7 +79,7 @@ class OrderUpdateAPI(views.APIView):
 
     @swagger_auto_schema(
         tags=["Order"],
-        operation_description="Update an existing order partially",
+        operation_summary="Update an order partially",
         request_body=OrderSerializer,
         responses={200: OrderSerializer()},
     )
@@ -104,7 +100,6 @@ class OrderDeleteAPI(views.APIView):
     @swagger_auto_schema(
         tags=["Order"],
         operation_summary="Delete order",
-        operation_description="Delete a specific order",
     )
     def delete(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
@@ -137,7 +132,7 @@ class GetLocationOrder(views.APIView):
         tags=["Order"], responses=filtered_drivers_response, operation_summary="Get location order details"
     )
     def get(self, request, pk):
-        order = Order.objects.get(pk=pk)
+        order = get_object_or_404(Order, pk=pk)
         pick_up_at = order.pick_up_at if order.is_active else None
         if not pick_up_at:
             return Response({"error": "pick_up_at not specified for the order."}, status=400)
