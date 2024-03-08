@@ -18,7 +18,7 @@ class MyLoadsListAPI(views.APIView):
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request):
-        queryset = get_object_or_404(Order, is_active=True, order_status="MY_LOADS", my_loads_status__lte=5)
+        queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status__lte=5)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -32,7 +32,7 @@ class MyLoadsCheckoutAPI(views.APIView):
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request):
-        queryset = get_object_or_404(Order, is_active=True, order_status="MY_LOADS", my_loads_status=6)
+        queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status=6)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -46,7 +46,7 @@ class MyLoadsCompletedAPI(views.APIView):
         responses={200: OrderSerializer(many=True)},
     )
     def get(self, request):
-        queryset = get_object_or_404(Order, is_active=True, order_status="MY_LOADS", my_loads_status=7)
+        queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status=7)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
