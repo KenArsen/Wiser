@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-from apps.order.api.v1.serializers.order_serializer import OrderSerializer
+from apps.order.api.v1.serializers import OrderSerializer
 
 filtered_drivers_response = {
     200: openapi.Response(

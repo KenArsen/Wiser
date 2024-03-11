@@ -7,8 +7,8 @@ from apps.order.models import Order
 
 class OrderSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
-    letter = LetterSerializer(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
+    letter = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Order
@@ -17,6 +17,11 @@ class OrderSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def get_letter(self, obj):
+        if obj.letter:
+            return LetterSerializer(obj.letter).data
+        return None
 
     def create(self, validated_data):
         instance = Order(**validated_data)

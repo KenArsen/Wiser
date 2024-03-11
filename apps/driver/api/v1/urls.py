@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.driver.api.v1.apis.driver_apis import (
+from apps.driver.api.v1.apis import (
     DriverCreateAPI,
     DriverDeleteAPI,
     DriverDetailAPI,
@@ -9,7 +9,6 @@ from apps.driver.api.v1.apis.driver_apis import (
 )
 
 app_name = "drivers"
-
 
 urlpatterns = [
     path("", DriverListAPI.as_view(), name="driver-list"),
