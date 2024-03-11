@@ -1,6 +1,8 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
+from apps.common import IsAdmin, IsDispatcher
 from apps.vehicle.api.v1.serializers import VehicleSerializer
 from apps.vehicle.models import Vehicles
 
@@ -8,6 +10,7 @@ from apps.vehicle.models import Vehicles
 class VehicleListAPI(generics.ListAPIView):
     queryset = Vehicles.objects.all()
     serializer_class = VehicleSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
         operation_summary="List drivers",
@@ -21,6 +24,7 @@ class VehicleListAPI(generics.ListAPIView):
 class VehicleCreateAPI(generics.CreateAPIView):
     queryset = Vehicles.objects.all()
     serializer_class = VehicleSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
         operation_summary="Create new a vehicle",
@@ -34,6 +38,7 @@ class VehicleCreateAPI(generics.CreateAPIView):
 class VehicleDetailAPI(generics.RetrieveAPIView):
     queryset = Vehicles.objects.all()
     serializer_class = VehicleSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
         operation_summary="Retrieve vehicle details",
@@ -47,6 +52,7 @@ class VehicleDetailAPI(generics.RetrieveAPIView):
 class VehicleUpdateAPI(generics.UpdateAPIView):
     queryset = Vehicles.objects.all()
     serializer_class = VehicleSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
         operation_summary="Update the vehicle",
@@ -70,6 +76,7 @@ class VehicleUpdateAPI(generics.UpdateAPIView):
 class VehicleDeleteAPI(generics.DestroyAPIView):
     queryset = Vehicles.objects.all()
     serializer_class = VehicleSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
         operation_summary="Delete the vehicle",
