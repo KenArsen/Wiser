@@ -24,10 +24,10 @@ class Vehicles(BaseModel):
     vehicle_year = models.CharField(max_length=255, blank=True, null=True)
 
     # vehicle sizes
-    width = models.IntegerField(blank=True, null=True)
-    height = models.IntegerField(blank=True, null=True)
-    length = models.IntegerField(blank=True, null=True)
-    payload = models.IntegerField(blank=True, null=True)
+    width = models.IntegerField(default=0, blank=True, null=True)
+    height = models.IntegerField(default=0, blank=True, null=True)
+    length = models.IntegerField(default=0, blank=True, null=True)
+    payload = models.IntegerField(default=0, blank=True, null=True)
 
     # vehicle details
     vin = models.CharField(max_length=255, blank=True, null=True)

@@ -84,4 +84,4 @@ class VehicleDeleteAPI(generics.DestroyAPIView):
         responses={201: "No content"},
     )
     def delete(self, request, *args, **kwargs):
-        return self.delete(request, *args, **kwargs)
+        return self.destroy(request, *args, **kwargs)

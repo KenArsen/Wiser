@@ -1,5 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, views
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -110,3 +111,34 @@ class DriverDeleteAPI(views.APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Driver.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class DriverFilterAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    @swagger_auto_schema(
+        operation_summary="List active drivers",
+        tags=["Drivers"],
+        responses={200: DriverSerializers(many=True)},
+    )
+    def get(self, request, *args, **kwargs):
+        queryset = Driver.objects.filter(is_active=True)
+        serializer = DriverSerializers(queryset, many=True)
+        return Response(serializer.data)
+
+
+class DriverSetStatusAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    @swagger_auto_schema(tags=["Drivers"], operation_summary="Set driver status", responses={200: "Driver Status"})
+    def get(self, request, pk):
+        try:
+            driver = Driver.objects.get(pk=pk)
+            if driver.is_active:
+                driver.is_active = False
+            else:
+                driver.is_active = True
+            driver.save()
+            return Response({"message": f"Driver status {driver.is_active}"})
+        except Driver.DoesNotExist:
+            raise ValidationError({"detail": "No such driver"})
