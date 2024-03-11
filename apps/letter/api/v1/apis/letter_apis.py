@@ -1,5 +1,6 @@
+from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, status, views
+from rest_framework import status, views
 from rest_framework.response import Response
 
 from apps.letter.api.v1.serializers.letter_serializer import LetterSerializer
@@ -7,14 +8,25 @@ from apps.letter.models import Letter
 from apps.letter.tasks import send_email
 
 
-class LetterListView(generics.ListAPIView):
-    queryset = Letter.objects.all()
-    serializer_class = LetterSerializer
+class LetterListAPI(views.APIView):
+    def get(self, request):
+        queryset = Letter.objects.all()
+        serializer = LetterSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class LetterRetrieveDestroyView(generics.RetrieveDestroyAPIView):
-    queryset = Letter.objects.all()
-    serializer_class = LetterSerializer
+class LetterDetailAPI(views.APIView):
+    def get(self, request, pk):
+        letter = get_object_or_404(Letter, pk=pk)
+        serializer = LetterSerializer(letter)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LetterDeleteAPI(views.APIView):
+    def delete(self, request, pk):
+        letter = get_object_or_404(Letter, pk=pk)
+        letter.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SendEmailView(views.APIView):
