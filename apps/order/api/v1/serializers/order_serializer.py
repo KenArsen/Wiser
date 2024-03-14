@@ -5,10 +5,17 @@ from apps.letter.api.v1.serializers import LetterSerializer
 from apps.order.models import Assign, Order
 
 
+class AssignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assign
+        fields = ("broker_company", "rate_confirmation")
+
+
 class OrderSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
     letter = LetterSerializer(required=False, read_only=True)
+    assign = AssignSerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -22,6 +29,8 @@ class OrderSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if data["letter"] is None:
             del data["letter"]
+        if data["assign"] is None:
+            del data["assign"]
         return data
 
     def create(self, validated_data):

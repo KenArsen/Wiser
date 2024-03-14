@@ -97,7 +97,7 @@ class Order(BaseModel):
 class Assign(BaseModel):
     broker_company = models.CharField(max_length=255)
     rate_confirmation = models.CharField(max_length=255)
-    order_id = models.ForeignKey("order.Order", on_delete=models.CASCADE, related_name="assigns")
+    order_id = models.OneToOneField("order.Order", on_delete=models.CASCADE, related_name="assign")
 
     def __str__(self):
         return f"{self.broker_company} - {self.rate_confirmation}"
