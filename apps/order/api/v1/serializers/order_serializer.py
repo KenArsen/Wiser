@@ -2,13 +2,13 @@ from django.utils import dateformat
 from rest_framework import serializers
 
 from apps.letter.api.v1.serializers import LetterSerializer
-from apps.order.models import Order
+from apps.order.models import Assign, Order
 
 
 class OrderSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
-    letter = LetterSerializer(read_only=True)
+    letter = LetterSerializer(required=False, read_only=True)
 
     class Meta:
         model = Order
@@ -17,6 +17,12 @@ class OrderSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data["letter"] is None:
+            del data["letter"]
+        return data
 
     def create(self, validated_data):
         instance = Order(**validated_data)
@@ -34,3 +40,10 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_created_time(self, obj):
         formatted_time = dateformat.format(obj.created_at, "h:i A")
         return formatted_time
+
+
+class AssignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assign
+        fields = ("id", "broker_company", "rate_confirmation", "order_id")
+        read_only_fields = ("id",)

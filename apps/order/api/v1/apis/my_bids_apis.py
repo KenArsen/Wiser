@@ -3,13 +3,16 @@ import logging
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, views
+from rest_framework import exceptions, status, views
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.common.permissions import IsAdmin, IsDispatcher
-from apps.order.api.v1.serializers.order_serializer import OrderSerializer
+from apps.order.api.v1.serializers.order_serializer import (
+    AssignSerializer,
+    OrderSerializer,
+)
 from apps.order.models import Order
 from apps.order.services import order_service
 
@@ -97,17 +100,25 @@ class MyBidsDeleteAPI(views.APIView):
         type=openapi.TYPE_OBJECT,
         required=["id"],
         properties={
-            "id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
+            "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
+            "broker_company": openapi.Schema(type=openapi.TYPE_STRING, description="The broker company "),
+            "rate_confirmation": openapi.Schema(type=openapi.TYPE_STRING, description="The rate confirmation"),
         },
     ),
 )
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 @api_view(["POST"])
-def my_bids_yes(request, pk):
+def my_bids_yes(request):
     if request.method == "POST":
         try:
+            pk = request.data["order_id"]
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_yes()
+            serializer = AssignSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                raise exceptions.ValidationError({"error": "Broker company/Rate confirmation not is valid"})
 
             return Response({"status": "The order has been moved to My Loads"}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:

@@ -1,1 +1,1 @@
-from .letter_serializer import LetterSerializer
+from .letter_serializer import LetterDetailSerializer, LetterSerializer

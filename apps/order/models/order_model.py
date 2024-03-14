@@ -92,3 +92,12 @@ class Order(BaseModel):
         else:
             logging.info(f"------ Заказ {self.id} удален --------")
             self.delete()
+
+
+class Assign(BaseModel):
+    broker_company = models.CharField(max_length=255)
+    rate_confirmation = models.CharField(max_length=255)
+    order_id = models.ForeignKey("order.Order", on_delete=models.CASCADE, related_name="assigns")
+
+    def __str__(self):
+        return f"{self.broker_company} - {self.rate_confirmation}"

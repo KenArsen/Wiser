@@ -3,7 +3,10 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, views
 from rest_framework.response import Response
 
-from apps.letter.api.v1.serializers.letter_serializer import LetterSerializer
+from apps.letter.api.v1.serializers.letter_serializer import (
+    LetterDetailSerializer,
+    LetterSerializer,
+)
 from apps.letter.models import Letter
 from apps.letter.tasks import send_email
 
@@ -32,10 +35,10 @@ class LetterDeleteAPI(views.APIView):
 class SendEmailView(views.APIView):
     @swagger_auto_schema(
         operation_summary="To send SMS",
-        request_body=LetterSerializer,
+        request_body=LetterDetailSerializer,
     )
     def post(self, request, *args, **kwargs):
-        serializer = LetterSerializer(data=request.data)
+        serializer = LetterDetailSerializer(data=request.data)
         if serializer.is_valid():
             letter_instance = serializer.save()
             send_email.delay(letter_instance.id)

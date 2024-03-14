@@ -55,7 +55,7 @@ urlpatterns += [
     path("my_bids/<int:pk>/", MyBidsDetailAPI.as_view(), name="my-bids-detail"),
     path("my_bids/<int:pk>/update/", MyBidsUpdateAPI.as_view(), name="my-bids-update"),
     path("my_bids/<int:pk>/delete/", MyBidsDeleteAPI.as_view(), name="my-bids-delete"),
-    path("my_bids/<int:pk>/yes/", my_bids_yes, name="my-bids-yes"),
+    path("my_bids/yes/", my_bids_yes, name="my-bids-yes"),
     path("my_bids/<int:pk>/no/", my_bids_no, name="my-bids-no"),
 ]
 
