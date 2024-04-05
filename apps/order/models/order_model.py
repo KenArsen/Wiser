@@ -24,7 +24,6 @@ class Order(BaseModel):
         COMPLETED = 7, "Completed"
 
     user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
-    from_whom = models.EmailField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True, null=True, blank=True)
 
@@ -32,12 +31,14 @@ class Order(BaseModel):
     my_loads_status = models.IntegerField(choices=MyLoadsStatus.choices, default=MyLoadsStatus.DEFAULT)
 
     pick_up_at = models.CharField(max_length=255, blank=True, null=True)
-    pick_up_date_CEN = models.DateTimeField(blank=True, null=True, default=timezone.now)
     pick_up_date_EST = models.DateTimeField(blank=True, null=True, default=timezone.now)
 
     deliver_to = models.CharField(max_length=255, blank=True, null=True)
-    deliver_date_CEN = models.DateTimeField(blank=True, null=True, default=timezone.now)
     deliver_date_EST = models.DateTimeField(blank=True, null=True, default=timezone.now)
+
+    broker = models.CharField(max_length=255, blank=True, null=True)
+    broker_phone = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(null=True, blank=True)
 
     notes = models.CharField(max_length=400, blank=True, null=True)
     miles = models.FloatField(blank=True, null=True)

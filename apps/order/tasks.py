@@ -1,8 +1,7 @@
-import datetime
 import email
 import imaplib
 import logging
-import re
+from datetime import datetime, timedelta
 
 from bs4 import BeautifulSoup
 from celery import shared_task
@@ -81,225 +80,166 @@ def process_and_save_emails_task():
                         mail.store(num, "+FLAGS", "\\Seen")
                         continue
 
-                    soup = BeautifulSoup(body, "lxml")
-                    br_tags = soup.find_all("br")
-                    for br_tag in br_tags:
-                        br_tag.replace_with("\n")
-                    div = soup.find("div")
-                    if div:
-                        h = div.text.strip()
-                    else:
-                        logging.warning("Ошибка при обработке почты")
-                        mail.store(num, "+FLAGS", "\\Seen")
-                        continue
+                    soup = BeautifulSoup(body, "html.parser")
 
-                    order_data = extract_order_data(h)
-                    if order_data:
-                        save_order(order_data)
-                        mail.store(num, "+FLAGS", "\\Seen")
-                    else:
-                        logging.warning("Недостаточно данных для создания заказа")
-                        mail.store(num, "+FLAGS", "\\Seen")
+                    order_data = extract_order_data(soup=soup)
+                    print(order_data)
+                    # if order_data:
+                    #     save_order(order_data)
+                    #     mail.store(num, "+FLAGS", "\\Seen")
+                    # else:
+                    #     logging.warning("Недостаточно данных для создания заказа")
+                    #     mail.store(num, "+FLAGS", "\\Seen")
 
                 except Exception as e:
                     logging.error(f"Ошибка {num}", e)
                     mail.store(num, "+FLAGS", "\\Seen")
                     continue
-
             mail.logout()
-
         num_unread_messages = len(message_ids[0].split())
         return {"status": "success", "unread_messages": num_unread_messages}
     except Exception as e:
         return {"status": "error", "error_message": str(e)}
 
 
-def extract_order_data(html_text):
+def extract_order_data(soup):
     order_data = {}
 
-    # Извлечение данных из HTML текста с помощью регулярных выражений
-    email_matches = re.findall(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", html_text)
-    order_data["from_whom"] = email_matches[1] if len(email_matches) > 1 else ""
+    try:
+        if soup.find("div", class_="column1").find("a"):
+            pick_up_at = soup.find("div", class_="column1").a.strong.text.strip()
+        else:
+            pick_up_at = soup.find("div", class_="column1").strong.text.strip()
+        pick_up_date_EST = (
+            soup.find("div", class_="column1").contents[-1].strip().replace(" EST", "").replace(" CEN", "")
+        )
 
-    order_data["pick_up_at"] = (
-        re.search(r"Pick-up at: (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Pick-up at: (.*?)\n", html_text)
-        else None
-    )
+        if soup.find("div", class_="column3").find("a"):
+            deliver_to = soup.find("div", class_="column3").a.strong.text.strip()
+        else:
+            deliver_to = soup.find("div", class_="column3").strong.text.strip()
+        deliver_date_EST = (
+            soup.find("div", class_="column3").contents[-1].strip().replace(" EST", "").replace(" CEN", "")
+        )
 
-    order_data["pick_up_date_CEN"] = (
-        re.search(r"Pick-up date \(CEN\): (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Pick-up date \(CEN\): (.*?)\n", html_text)
-        else None
-    )
+        broker_data = soup.find_all("div", class_="column4")[0].find_all("p", class_="dataColumn")
+        i = 0
+        if broker_data[i].strong.text.strip() == "Broker:":
+            order_data["broker"] = broker_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["broker"] = None
+        if broker_data[i].strong.text.strip() == "Broker phone:":
+            order_data["broker_phone"] = broker_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["broker_phone"] = None
+        if broker_data[i].strong.text.strip() == "Email:":
+            order_data["email"] = broker_data[i].text.strip().split(":")[-1]
+            i += 1
+        else:
+            order_data["email"] = None
+        if broker_data[i].strong.text.strip() == "Posted:":
+            order_data["posted"] = (
+                broker_data[i].contents[-1].strip().rstrip(":").replace(" EST", "").replace(" CEN", "")
+            )
+            i += 1
+        else:
+            order_data["posted"] = None
+        if broker_data[i].strong.text.strip() == "Expires:":
+            order_data["expires"] = (
+                broker_data[i].contents[-1].strip().rstrip(":").replace(" EST", "").replace(" CEN", "")
+            )
+            i += 1
+        else:
+            order_data["expires"] = None
+        if broker_data[i].strong.text.strip() == "Dock Level:":
+            order_data["dock_level"] = broker_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["dock_level"] = None
+        if broker_data[i].strong.text.strip() == "CSA/Fast Load:":
+            order_data["fast_load"] = broker_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["fast_load"] = None
+        if broker_data[i].strong.text.strip() == "Notes:":
+            order_data["notes"] = broker_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["notes"] = None
 
-    order_data["pick_up_date_EST"] = (
-        re.search(r"Pick-up date \(EST\): (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Pick-up date \(EST\): (.*?)\n", html_text)
-        else None
-    )
+        transport_data = soup.find_all("div", class_="column5")[0].find_all("p", class_="dataColumn")
+        i = 0
+        if transport_data[i].strong.text.strip() == "Load Type:":
+            order_data["load_type"] = transport_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["load_type"] = None
+        if transport_data[i].strong.text.strip() == "Vehicle required:":
+            order_data["vehicle_required"] = transport_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["vehicle_required"] = None
+        if transport_data[i].strong.text.strip() == "Pieces:":
+            order_data["pieces"] = transport_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["pieces"] = None
+        if transport_data[i].strong.text.strip() == "Weight:":
+            order_data["weight"] = transport_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["weight"] = None
+        if transport_data[i].strong.text.strip() == "Dimensions:":
+            order_data["dimensions"] = transport_data[i].contents[-1].strip().rstrip(":")
+            i += 1
+        else:
+            order_data["dimensions"] = None
+        if transport_data[i].strong.text.strip() == "Stackable:":
+            order_data["stackable"] = transport_data[i].contents[-1].strip().rstrip(":")
+        else:
+            order_data["stackable"] = None
 
-    order_data["deliver_to"] = (
-        re.search(r"Deliver to: (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Deliver to: (.*?)\n", html_text)
-        else None
-    )
+        # Определение формата даты и времени
+        date_format = "%m/%d/%Y %H:%M" if len(pick_up_date_EST.split()[0].split("/")[2]) == 4 else "%m/%d/%y %H:%M"
 
-    order_data["deliver_date_CEN"] = (
-        re.search(r"Delivery date \(CEN\): (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Delivery date \(CEN\): (.*?)\n", html_text)
-        else None
-    )
+        order_data["pick_up_at"] = pick_up_at
+        order_data["pick_up_date_EST"] = (
+            timezone.make_aware(datetime.strptime(pick_up_date_EST, date_format)) + timedelta(hours=6)
+            if pick_up_date_EST
+            else None
+        )
+        order_data["deliver_to"] = deliver_to
+        order_data["deliver_date_EST"] = (
+            timezone.make_aware(datetime.strptime(deliver_date_EST, date_format)) + timedelta(hours=6)
+            if deliver_date_EST
+            else None
+        )
 
-    order_data["deliver_date_EST"] = (
-        re.search(r"Delivery date \(EST\): (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Delivery date \(EST\): (.*?)\n", html_text)
-        else None
-    )
+        order_data["posted"] = (
+            timezone.make_aware(datetime.strptime(order_data["posted"], date_format)) + timedelta(hours=6)
+            if order_data["posted"]
+            else None
+        )
+        order_data["expires"] = (
+            timezone.make_aware(datetime.strptime(order_data["expires"], date_format)) + timedelta(hours=6)
+            if order_data["expires"]
+            else None
+        )
 
-    order_data["notes"] = (
-        re.search(r"Notes: (.*?)\n", html_text).group(1).strip() if re.search(r"Notes: (.*?)\n", html_text) else None
-    )
-
-    order_data["miles"] = (
-        re.search(r"Miles: (.*?)\n", html_text).group(1).strip() if re.search(r"Miles: (.*?)\n", html_text) else None
-    )
-
-    order_data["pieces"] = (
-        re.search(r"Pieces: (.*?)\n", html_text).group(1).strip() if re.search(r"Pieces: (.*?)\n", html_text) else None
-    )
-
-    order_data["weight"] = (
-        re.search(r"Weight: (.*?)\n", html_text).group(1).strip() if re.search(r"Weight: (.*?)\n", html_text) else None
-    )
-
-    order_data["dims"] = (
-        re.search(r"Dims: (.*?) in.\n", html_text).group(1).strip()
-        if re.search(r"Dims: (.*?) in.\n", html_text)
-        else None
-    )
-
-    order_data["stackable"] = (
-        re.search(r"Stackable \? : (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Stackable \? : (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["hazardous"] = (
-        re.search(r"Hazardous \? : (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Hazardous \? : (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["fast_load"] = (
-        re.search(r"FAST Load \? : (.*?)\n", html_text).group(1).strip()
-        if re.search(r"FAST Load \? : (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["dock_level"] = (
-        re.search(r"Dock Level \? : (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Dock Level \? : (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["suggested_truck_size"] = (
-        re.search(r"Suggested Truck Size : (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Suggested Truck Size : (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["this_posting_expires_cen"] = (
-        re.search(r"This posting expires \(CEN\): (.*?)\n", html_text).group(1).strip()
-        if re.search(r"This posting expires \(CEN\): (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["this_posting_expires_est"] = (
-        re.search(r"This posting expires \(EST\): (.*?)\n", html_text).group(1).strip()
-        if re.search(r"This posting expires \(EST\): (.*?)\n", html_text)
-        else None
-    )
-
-    company_info_match = re.search(r"If you are interested in this load, please contact[:]*([\s\S]+?)\n", html_text)
-    if company_info_match:
-        company_info = company_info_match.group(1).strip()
-        company_info_lines = company_info.split("\n")
-        if len(company_info_lines) >= 4:
-            order_data["company_name"] = company_info_lines[0].strip()
-            order_data["company_address"] = company_info_lines[1].strip()
-            order_data["company_location"] = company_info_lines[2].strip()
-            order_data["company_phone"] = company_info_lines[3].strip()
-    else:
-        logging.warning("Информация о компании не найдена")
-
-    order_data["load_posted_by"] = (
-        re.search(r"Load posted by: (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Load posted by: (.*?)\n", html_text)
-        else None
-    )
-    order_data["phone"] = (
-        re.search(r"Phone: (.*?)\n", html_text).group(1).strip() if re.search(r"Phone: (.*?)\n", html_text) else None
-    )
-    order_data["fax"] = (
-        re.search(r"Fax: (.*?)\n", html_text).group(1).strip() if re.search(r"Fax: (.*?)\n", html_text) else None
-    )
-    order_data["order_number"] = (
-        re.search(r"Please reference our ORDER NUMBER : (.*?)\n", html_text).group(1).strip()
-        if re.search(r"Please reference our ORDER NUMBER : (.*?)\n", html_text)
-        else None
-    )
-
-    order_data["pick_up_date_CEN"] = (
-        timezone.make_aware(datetime.datetime.strptime(order_data["pick_up_date_CEN"], "%m/%d/%Y %H:%M"))
-        + datetime.timedelta(hours=6)
-        if order_data["pick_up_date_CEN"]
-        else None
-    )
-
-    order_data["pick_up_date_EST"] = (
-        timezone.make_aware(datetime.datetime.strptime(order_data["pick_up_date_EST"], "%m/%d/%Y %H:%M"))
-        + datetime.timedelta(hours=6)
-        if order_data["pick_up_date_EST"]
-        else None
-    )
-
-    order_data["deliver_date_CEN"] = (
-        timezone.make_aware(datetime.datetime.strptime(order_data["deliver_date_CEN"], "%m/%d/%Y %H:%M"))
-        + datetime.timedelta(hours=6)
-        if order_data["deliver_date_CEN"]
-        else None
-    )
-
-    order_data["deliver_date_EST"] = (
-        timezone.make_aware(datetime.datetime.strptime(order_data["deliver_date_EST"], "%m/%d/%Y %H:%M"))
-        + datetime.timedelta(hours=6)
-        if order_data["deliver_date_EST"]
-        else None
-    )
-
-    order_data["this_posting_expires_cen"] = (
-        timezone.make_aware(datetime.datetime.strptime(order_data["this_posting_expires_cen"], "%m/%d/%Y %H:%M"))
-        + datetime.timedelta(hours=6)
-        if order_data["this_posting_expires_cen"]
-        else None
-    )
-
-    order_data["this_posting_expires_est"] = (
-        timezone.make_aware(datetime.datetime.strptime(order_data["this_posting_expires_est"], "%m/%d/%Y %H:%M"))
-        + datetime.timedelta(hours=6)
-        if order_data["this_posting_expires_est"]
-        else None
-    )
-
-    return order_data
+        return order_data
+    except ValueError as ve:
+        print(f"Произошла ошибка значения: {ve}")
+    except TypeError as te:
+        print(f"Произошла ошибка типа: {te}")
 
 
 @transaction.atomic
 def save_order(order_data):
     try:
         if not order_data.get("order_number"):
-            raise ValidationError({"error": "This order number cannot be empty"})
+            raise ValidationError({"error": "Этот номер заказа не может быть пустым."})
 
         order = Order(**order_data)
         order.full_clean()

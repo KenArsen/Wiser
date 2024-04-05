@@ -21,6 +21,7 @@ docker-compose.yml
 build/
 develop-eggs/
 downloads/
+t.py
 eggs/
 .eggs/
 lib/
