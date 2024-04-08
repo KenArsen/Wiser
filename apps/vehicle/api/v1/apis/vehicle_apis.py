@@ -12,11 +12,6 @@ class VehicleListAPI(generics.ListAPIView):
     serializer_class = VehicleSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="List drivers",
-        tags=["Vehicles"],
-        responses={200: VehicleSerializer(many=True)},
-    )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -26,11 +21,6 @@ class VehicleCreateAPI(generics.CreateAPIView):
     serializer_class = VehicleSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Create new a vehicle",
-        tags=["Vehicles"],
-        responses={201: VehicleSerializer()},
-    )
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
@@ -40,11 +30,6 @@ class VehicleDetailAPI(generics.RetrieveAPIView):
     serializer_class = VehicleSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Retrieve vehicle details",
-        tags=["Vehicles"],
-        responses={200: VehicleSerializer()},
-    )
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
@@ -54,21 +39,9 @@ class VehicleUpdateAPI(generics.UpdateAPIView):
     serializer_class = VehicleSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Update the vehicle",
-        tags=["Vehicles"],
-        request_body=VehicleSerializer,
-        responses={200: VehicleSerializer()},
-    )
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_summary="Update the vehicle",
-        tags=["Vehicles"],
-        request_body=VehicleSerializer,
-        responses={200: VehicleSerializer()},
-    )
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
@@ -78,10 +51,5 @@ class VehicleDeleteAPI(generics.DestroyAPIView):
     serializer_class = VehicleSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Delete the vehicle",
-        tags=["Vehicles"],
-        responses={201: "No content"},
-    )
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)

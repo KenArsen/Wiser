@@ -12,11 +12,6 @@ from apps.driver.models import Driver
 class DriverListAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="List drivers",
-        tags=["Drivers"],
-        responses={200: DriverSerializers(many=True)},
-    )
     def get(self, request, *args, **kwargs):
         queryset = Driver.objects.all()
         serializer = DriverSerializers(queryset, many=True)
@@ -26,11 +21,6 @@ class DriverListAPI(views.APIView):
 class DriverDetailAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Retrieve driver details",
-        tags=["Drivers"],
-        responses={200: DriverSerializers()},
-    )
     def get(self, request, pk, *args, **kwargs):
         try:
             driver = Driver.objects.get(pk=pk)
@@ -43,12 +33,6 @@ class DriverDetailAPI(views.APIView):
 class DriverCreateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Create a new driver",
-        tags=["Drivers"],
-        request_body=DriverSerializers,
-        responses={201: DriverSerializers()},
-    )
     def post(self, request, *args, **kwargs):
         serializer = DriverSerializers(data=request.data)
         if serializer.is_valid():
@@ -60,12 +44,6 @@ class DriverCreateAPI(views.APIView):
 class DriverUpdateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Update driver",
-        tags=["Drivers"],
-        request_body=DriverSerializers,
-        responses={200: DriverSerializers()},
-    )
     def put(self, request, pk, *args, **kwargs):
         try:
             driver = Driver.objects.get(pk=pk)
@@ -78,12 +56,6 @@ class DriverUpdateAPI(views.APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(
-        operation_summary="Update a driver",
-        tags=["Drivers"],
-        request_body=DriverSerializers,
-        responses={200: DriverSerializers()},
-    )
     def patch(self, request, pk):
         try:
             driver = Driver.objects.get(pk=pk)
@@ -99,11 +71,6 @@ class DriverUpdateAPI(views.APIView):
 class DriverDeleteAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Delete a driver",
-        tags=["Drivers"],
-        responses={204: "No Content"},
-    )
     def delete(self, request, pk, *args, **kwargs):
         try:
             driver = Driver.objects.get(pk=pk)
@@ -118,8 +85,6 @@ class DriverFilterAPI(views.APIView):
 
     @swagger_auto_schema(
         operation_summary="List active drivers",
-        tags=["Drivers"],
-        responses={200: DriverSerializers(many=True)},
     )
     def get(self, request, *args, **kwargs):
         queryset = Driver.objects.filter(is_active=True)
@@ -130,7 +95,7 @@ class DriverFilterAPI(views.APIView):
 class DriverSetStatusAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(tags=["Drivers"], operation_summary="Set driver status", responses={200: "Driver Status"})
+    @swagger_auto_schema(operation_summary="Set driver status", responses={200: "Driver Status"})
     def get(self, request, pk):
         try:
             driver = Driver.objects.get(pk=pk)

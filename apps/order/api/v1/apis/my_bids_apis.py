@@ -20,11 +20,6 @@ from apps.order.services import order_service
 class MyBidsListAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="List my bids",
-        tags=["My Bids"],
-        responses={200: OrderSerializer(many=True)},
-    )
     def get(self, request, *args, **kwargs):
         queryset = Order.objects.filter(is_active=True, order_status="PENDING")
         serializer = OrderSerializer(queryset, many=True)
@@ -34,11 +29,6 @@ class MyBidsListAPI(views.APIView):
 class MyBidsDetailAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Retrieve my bid details",
-        tags=["My Bids"],
-        responses={200: OrderSerializer()},
-    )
     def get(self, request, pk, *args, **kwargs):
         order = Order.objects.get(pk=pk, is_active=True, order_status="PENDING")
         serializer = OrderSerializer(order)
@@ -48,12 +38,6 @@ class MyBidsDetailAPI(views.APIView):
 class MyBidsUpdateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Update my bid",
-        tags=["My Bids"],
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer()},
-    )
     def put(self, request, pk, *args, **kwargs):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
         serializer = OrderSerializer(order, data=request.data)
@@ -62,12 +46,6 @@ class MyBidsUpdateAPI(views.APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(
-        operation_summary="Update my bid",
-        tags=["My Bids"],
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer()},
-    )
     def patch(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
         serializer = OrderSerializer(order, data=request.data, partial=True)
@@ -80,11 +58,6 @@ class MyBidsUpdateAPI(views.APIView):
 class MyBidsDeleteAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Delete my bid",
-        tags=["My Bids"],
-        responses={204: "No Content"},
-    )
     def delete(self, request, pk, *args, **kwargs):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
         order.delete()
@@ -93,7 +66,6 @@ class MyBidsDeleteAPI(views.APIView):
 
 @swagger_auto_schema(
     method="post",
-    tags=["My Bids"],
     operation_summary="Accept bid",
     responses={200: "Success", 400: "Bad Request"},
     request_body=openapi.Schema(
@@ -134,7 +106,6 @@ def my_bids_yes(request):
 
 @swagger_auto_schema(
     method="post",
-    tags=["My Bids"],
     operation_summary="Reject bid",
     responses={200: "Success", 400: "Bad Request"},
     request_body=openapi.Schema(

@@ -12,11 +12,6 @@ from apps.order.models import Order
 class MyLoadsListAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="List my loads",
-        tags=["My Loads"],
-        responses={200: OrderSerializer(many=True)},
-    )
     def get(self, request):
         queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status__lte=5)
         serializer = OrderSerializer(queryset, many=True)
@@ -26,11 +21,6 @@ class MyLoadsListAPI(views.APIView):
 class MyLoadsCheckoutAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="List my loads checkout",
-        tags=["My Loads"],
-        responses={200: OrderSerializer(many=True)},
-    )
     def get(self, request):
         queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status=6)
         serializer = OrderSerializer(queryset, many=True)
@@ -40,11 +30,6 @@ class MyLoadsCheckoutAPI(views.APIView):
 class MyLoadsCompletedAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="List my loads completed",
-        tags=["My Loads"],
-        responses={200: OrderSerializer(many=True)},
-    )
     def get(self, request):
         queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status=7)
         serializer = OrderSerializer(queryset, many=True)
@@ -54,11 +39,6 @@ class MyLoadsCompletedAPI(views.APIView):
 class MyLoadsDetailAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Retrieve my load details",
-        tags=["My Loads"],
-        responses={200: OrderSerializer()},
-    )
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="MY_LOADS")
         serializer = OrderSerializer(order)
@@ -68,12 +48,6 @@ class MyLoadsDetailAPI(views.APIView):
 class MyLoadsUpdateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Update my load",
-        tags=["My Loads"],
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer()},
-    )
     def put(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="MY_LOADS")
         serializer = OrderSerializer(order, data=request.data)
@@ -82,12 +56,6 @@ class MyLoadsUpdateAPI(views.APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(
-        operation_summary="Update my load partially",
-        tags=["My Loads"],
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer()},
-    )
     def patch(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="MY_LOADS")
         serializer = OrderSerializer(order, data=request.data, partial=True)
@@ -100,11 +68,6 @@ class MyLoadsUpdateAPI(views.APIView):
 class MyLoadsDeleteAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        operation_summary="Delete my load",
-        tags=["My Loads"],
-        responses={204: "No Content"},
-    )
     def delete(self, request, pk):
         get_object_or_404(Order, pk=pk, is_active=True, order_status="MY_LOADS").delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -112,7 +75,6 @@ class MyLoadsDeleteAPI(views.APIView):
 
 class MyLoadsStatus(views.APIView):
     @swagger_auto_schema(
-        tags=["My Loads"],
         operation_summary="Update order status",
     )
     def post(self, request, pk):
