@@ -30,44 +30,35 @@ class Order(BaseModel):
     order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.DEFAULT)
     my_loads_status = models.IntegerField(choices=MyLoadsStatus.choices, default=MyLoadsStatus.DEFAULT)
 
+    order_number = models.CharField(max_length=255, blank=True, null=True)
+
     pick_up_at = models.CharField(max_length=255, blank=True, null=True)
-    pick_up_date_EST = models.DateTimeField(blank=True, null=True, default=timezone.now)
+    pick_up_date = models.DateTimeField(blank=True, null=True, default=timezone.now)
 
     deliver_to = models.CharField(max_length=255, blank=True, null=True)
-    deliver_date_EST = models.DateTimeField(blank=True, null=True, default=timezone.now)
+    deliver_date = models.DateTimeField(blank=True, null=True, default=timezone.now)
+
+    line = models.CharField(max_length=255, blank=True, null=True)
 
     broker = models.CharField(max_length=255, blank=True, null=True)
     broker_phone = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
-
-    notes = models.CharField(max_length=400, blank=True, null=True)
-    miles = models.FloatField(blank=True, null=True)
-    pieces = models.FloatField(blank=True, null=True)
-    weight = models.FloatField(blank=True, null=True)
-    dims = models.CharField(max_length=255, blank=True, null=True)
-
-    stackable = models.CharField(max_length=255, blank=True, null=True)
-    hazardous = models.CharField(max_length=255, blank=True, null=True)
-    fast_load = models.CharField(max_length=255, blank=True, null=True)
+    posted = models.DateTimeField(blank=True, null=True, default=timezone.now)
+    expires = models.DateTimeField(blank=True, null=True, default=timezone.now)
     dock_level = models.CharField(max_length=255, blank=True, null=True)
+    hazmat = models.CharField(max_length=255, blank=True, null=True)
+    fast_load = models.CharField(max_length=255, blank=True, null=True)
+    notes = models.CharField(max_length=400, blank=True, null=True)
 
-    suggested_truck_size = models.CharField(max_length=255, blank=True, null=True)
-
-    this_posting_expires_cen = models.DateTimeField(blank=True, null=True, default=timezone.now)
-    this_posting_expires_est = models.DateTimeField(blank=True, null=True, default=timezone.now)
-
-    company_name = models.CharField(max_length=255, blank=True, null=True)
-    company_address = models.TextField(blank=True, null=True)
-    company_location = models.CharField(max_length=255, blank=True, null=True)
-    company_phone = models.CharField(max_length=40, blank=True, null=True)
-
-    load_posted_by = models.CharField(max_length=255, blank=True, null=True)
-    phone = models.CharField(max_length=255, blank=True, null=True)
-    fax = models.CharField(max_length=255, blank=True, null=True)
-    order_number = models.CharField(max_length=255, blank=True, null=True)
+    load_type = models.CharField(max_length=255, blank=True, null=True)
+    vehicle_required = models.CharField(max_length=255, blank=True, null=True)
+    pieces = models.CharField(max_length=255, blank=True, null=True)
+    weight = models.CharField(max_length=255, blank=True, null=True)
+    dimensions = models.CharField(max_length=255, blank=True, null=True)
+    stackable = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return self.from_whom
+        return self.email
 
     class Meta:
         ordering = ["-created_at"]
@@ -79,10 +70,10 @@ class Order(BaseModel):
         if Order.objects.filter(order_number=self.order_number).exists():
             raise exceptions.ValidationError({"error": "This order number is already in use"})
 
-        if self.this_posting_expires_est is None:
+        if self.expires is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} нет!"})
 
-        if self.this_posting_expires_est <= timezone.localtime(timezone.now()):
+        if self.expires <= timezone.localtime(timezone.now()):
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} заказа уже истек!"})
 
     def move_to_history(self):
