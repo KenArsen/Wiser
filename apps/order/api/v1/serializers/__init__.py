@@ -1,1 +1,6 @@
-from .order_serializer import AssignSerializer, OrderSerializer, OrderReadSerializer, OrderWriteSerializer
+from .order_serializer import (
+    AssignSerializer,
+    OrderReadSerializer,
+    OrderSerializer,
+    OrderWriteSerializer,
+)

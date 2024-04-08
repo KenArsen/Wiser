@@ -71,10 +71,10 @@ class Order(BaseModel):
             raise exceptions.ValidationError({"error": "This order number is already in use"})
 
         if self.expires is None:
-            raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} нет!"})
+            raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} нет!"})
 
         if self.expires <= timezone.localtime(timezone.now()):
-            raise exceptions.ValidationError({"error": f"Срок действия этого {self.id} заказа уже истек!"})
+            raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} заказа уже истек!"})
 
     def move_to_history(self):
         if self.user is not None:

@@ -12,16 +12,14 @@ class AssignSerializer(serializers.ModelSerializer):
 
 
 class OrderWriteSerializer(serializers.ModelSerializer):
-    created_time = serializers.SerializerMethodField(read_only=True)
-
     class Meta:
         model = Order
         exclude = (
             "created_at",
             "updated_at",
+            "is_active",
             "order_status",
             "my_loads_status",
-            "created_time",
         )
 
     def create(self, validated_data):
@@ -37,10 +35,6 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def get_created_time(self, obj):
-        formatted_time = dateformat.format(obj.created_at, "h:i A")
-        return formatted_time
-
 
 class OrderReadSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
@@ -54,6 +48,10 @@ class OrderReadSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def get_created_time(self, obj):
+        formatted_time = dateformat.format(obj.created_at, "h:i A")
+        return formatted_time
 
 
 class OrderSerializer(serializers.ModelSerializer):

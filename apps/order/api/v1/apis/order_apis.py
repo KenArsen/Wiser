@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from geopy.distance import geodesic
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from geopy.geocoders import Nominatim
-from rest_framework import status, views, generics
+from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -14,7 +14,10 @@ from apps.common.decorators_swagger import (
     time_until_delivery_response,
 )
 from apps.common.permissions import IsAdmin, IsDispatcher
-from apps.order.api.v1.serializers.order_serializer import OrderSerializer, OrderReadSerializer, OrderWriteSerializer
+from apps.order.api.v1.serializers.order_serializer import (
+    OrderReadSerializer,
+    OrderWriteSerializer,
+)
 from apps.order.models import Order
 from apps.user.models import User
 
@@ -28,55 +31,62 @@ class OrderListAPI(generics.ListAPIView):
         return self.list(request, *args, **kwargs)
 
 
-class OrderCreateAPI(views.APIView):
+class OrderCreateAPI(generics.CreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderWriteSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    def post(self, request):
-        serializer = OrderWriteSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
-class OrderDetailAPI(views.APIView):
+class OrderDetailAPI(generics.RetrieveAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    def get(self, request, pk):
-        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
-        serializer = OrderReadSerializer(order)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def retrieve(self, request, *args, **kwargs):
+        instance = get_object_or_404(self.queryset, pk=kwargs["pk"], is_active=True, order_status="DEFAULT")
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
-class OrderUpdateAPI(views.APIView):
+class OrderUpdateAPI(generics.UpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderWriteSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    def put(self, request, pk):
-        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
-        serializer = OrderWriteSerializer(order, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = get_object_or_404(Order, pk=kwargs["pk"], is_active=True, order_status="DEFAULT")
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
-    def patch(self, request, pk=None):
-        order = Order.objects.filter(is_active=True, order_status="DEFAULT", pk=pk).first()
-        if not order:
-            return Response({"detail": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = OrderWriteSerializer(order, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if getattr(instance, "_prefetched_objects_cache", None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs["partial"] = True
+        return self.update(request, *args, **kwargs)
 
 
-class OrderDeleteAPI(views.APIView):
+class OrderDeleteAPI(generics.DestroyAPIView):
+    queryset = Order.objects.all()
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    def delete(self, request, pk):
-        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
-        order.delete()
+    def destroy(self, request, *args, **kwargs):
+        instance = get_object_or_404(Order, pk=kwargs["pk"], is_active=True, order_status="DEFAULT")
+        self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 
 class GetDeliveryTime(views.APIView):
@@ -100,9 +110,7 @@ class GetDeliveryTime(views.APIView):
 
 
 class GetLocationOrder(views.APIView):
-    @swagger_auto_schema(
-        tags=["Order"], responses=filtered_drivers_response, operation_summary="Get location order details"
-    )
+    @swagger_auto_schema(responses=filtered_drivers_response, operation_summary="Get location order details")
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
         pick_up_at = order.pick_up_at if order.is_active else None
@@ -114,7 +122,6 @@ class GetLocationOrder(views.APIView):
             if not location:
                 return Response({"error": "Failed to geocode pick_up_at location."}, status=400)
             lat_order, lon_order = location.latitude, location.longitude
-            distance_km = 0
             if request.method == "GET":
                 active_drivers = User.objects.filter(
                     is_active=True, roles__name="DRIVER", lat__isnull=False, lon__isnull=False
@@ -177,19 +184,19 @@ class GetLocationOrder(views.APIView):
             return Response({"error": f"An error occurred during geocoding: {str(e)}"}, status=500)
 
 
-class OrderFilterView(views.APIView):
+class OrderFilterView(generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     @swagger_auto_schema(
-        tags=["Order"],
         operation_summary="Filter orders",
-        operation_description="Filter orders based on pick up location, delivery location, and miles.",
     )
     def get(self, request):
         pick_up_at = request.query_params.get("pick_up_at")
         deliver_to = request.query_params.get("deliver_to")
         miles = request.query_params.get("miles")
-        filtered_orders = Order.objects.filter(is_active=True)
+        filtered_orders = self.queryset.filter(is_active=True)
         filter_conditions = Q()
         if pick_up_at:
             filter_conditions |= Q(pick_up_at__icontains=pick_up_at)
@@ -199,5 +206,5 @@ class OrderFilterView(views.APIView):
             filter_conditions |= Q(miles__exact=miles)
         if filter_conditions:
             filtered_orders = filtered_orders.filter(filter_conditions)
-        serialized_data = OrderSerializer(filtered_orders, many=True)
+        serialized_data = OrderReadSerializer(filtered_orders, many=True)
         return Response(serialized_data.data)
