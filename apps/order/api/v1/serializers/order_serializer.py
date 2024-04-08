@@ -11,6 +11,51 @@ class AssignSerializer(serializers.ModelSerializer):
         fields = ("broker_company", "rate_confirmation")
 
 
+class OrderWriteSerializer(serializers.ModelSerializer):
+    created_time = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Order
+        exclude = (
+            "created_at",
+            "updated_at",
+            "order_status",
+            "my_loads_status",
+            "created_time",
+        )
+
+    def create(self, validated_data):
+        instance = Order(**validated_data)
+        instance.full_clean()
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.full_clean()
+        instance.save()
+        return instance
+
+    def get_created_time(self, obj):
+        formatted_time = dateformat.format(obj.created_at, "h:i A")
+        return formatted_time
+
+
+class OrderReadSerializer(serializers.ModelSerializer):
+    created_time = serializers.SerializerMethodField(read_only=True)
+    my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
+    letter = LetterSerializer(required=False, read_only=True)
+    assign = AssignSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        exclude = (
+            "created_at",
+            "updated_at",
+        )
+
+
 class OrderSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
@@ -49,10 +94,3 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_created_time(self, obj):
         formatted_time = dateformat.format(obj.created_at, "h:i A")
         return formatted_time
-
-
-class AssignSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Assign
-        fields = ("id", "broker_company", "rate_confirmation", "order_id")
-        read_only_fields = ("id",)

@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from geopy.distance import geodesic
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from geopy.geocoders import Nominatim
-from rest_framework import status, views
+from rest_framework import status, views, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -14,34 +14,25 @@ from apps.common.decorators_swagger import (
     time_until_delivery_response,
 )
 from apps.common.permissions import IsAdmin, IsDispatcher
-from apps.order.api.v1.serializers.order_serializer import OrderSerializer
+from apps.order.api.v1.serializers.order_serializer import OrderSerializer, OrderReadSerializer, OrderWriteSerializer
 from apps.order.models import Order
 from apps.user.models import User
 
 
-class OrderListAPI(views.APIView):
+class OrderListAPI(generics.ListAPIView):
+    queryset = Order.objects.filter(is_active=True, order_status="DEFAULT")
+    serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        tags=["Order"],
-        operation_summary="List orders",
-    )
-    def get(self, request):
-        orders = Order.objects.filter(is_active=True, order_status="DEFAULT")
-        serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 
 class OrderCreateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        tags=["Order"],
-        operation_summary="Create order",
-        request_body=OrderSerializer,
-    )
     def post(self, request):
-        serializer = OrderSerializer(data=request.data)
+        serializer = OrderWriteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -51,43 +42,28 @@ class OrderCreateAPI(views.APIView):
 class OrderDetailAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        tags=["Order"],
-        operation_summary="Retrieve order details",
-    )
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
-        serializer = OrderSerializer(order)
+        serializer = OrderReadSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class OrderUpdateAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        tags=["Order"],
-        operation_summary="Update an order",
-        request_body=OrderSerializer,
-    )
     def put(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
-        serializer = OrderSerializer(order, data=request.data)
+        serializer = OrderWriteSerializer(order, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(
-        tags=["Order"],
-        operation_summary="Update an order partially",
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer()},
-    )
     def patch(self, request, pk=None):
         order = Order.objects.filter(is_active=True, order_status="DEFAULT", pk=pk).first()
         if not order:
             return Response({"detail": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = OrderSerializer(order, data=request.data, partial=True)
+        serializer = OrderWriteSerializer(order, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -97,10 +73,6 @@ class OrderUpdateAPI(views.APIView):
 class OrderDeleteAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
-    @swagger_auto_schema(
-        tags=["Order"],
-        operation_summary="Delete order",
-    )
     def delete(self, request, pk):
         order = get_object_or_404(Order, pk=pk, is_active=True, order_status="DEFAULT")
         order.delete()
