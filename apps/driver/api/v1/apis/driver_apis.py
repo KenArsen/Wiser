@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.driver.api.v1.serializers import DriverSerializers
 from apps.driver.models import Driver
+from apps.order.models import Template
+from apps.order.api.v1.serializers import TemplateSerializer
 
 
 class DriverListAPI(views.APIView):
@@ -25,7 +27,9 @@ class DriverDetailAPI(views.APIView):
         try:
             driver = Driver.objects.get(pk=pk)
             serializer = DriverSerializers(driver)
-            return Response(serializer.data)
+            template = Template.objects.filter(is_active=True).first()
+            template_serializer = TemplateSerializer(template)
+            return Response(data={"driver": serializer.data, "template": template_serializer.data})
         except Driver.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
