@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.driver.api.v1.serializers import DriverSerializers
+from apps.vehicle.api.v1.serializers import VehicleSerializer
 from apps.driver.models import Driver
 from apps.order.models import Template
 from apps.order.api.v1.serializers import TemplateSerializer
@@ -25,11 +26,14 @@ class DriverDetailAPI(views.APIView):
 
     def get(self, request, pk, *args, **kwargs):
         try:
-            driver = Driver.objects.get(pk=pk)
+            driver = Driver.objects.prefetch_related('vehicles').get(pk=pk)
+            vehicles = driver.vehicles.all()
+            vehicles_serializer = VehicleSerializer(vehicles, many=True)
             serializer = DriverSerializers(driver)
             template = Template.objects.filter(is_active=True).first()
             template_serializer = TemplateSerializer(template)
-            return Response(data={"driver": serializer.data, "template": template_serializer.data})
+            return Response(data={"driver": serializer.data, "vehicles": vehicles_serializer.data,
+                                  "template": template_serializer.data})
         except Driver.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
