@@ -47,4 +47,4 @@ class Vehicles(BaseModel):
     driver = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, related_name="vehicles")
 
     def __str__(self):
-        return f"ID: {self.unit_id} - DRIVER: {self.driver}"
+        return f"ID: {self.id}, UNIT ID: {self.unit_id} - DRIVER: {self.driver}"

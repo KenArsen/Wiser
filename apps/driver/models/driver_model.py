@@ -35,4 +35,4 @@ class Driver(BaseModel, ImageService):
         verbose_name_plural = _("Drivers")
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f'{self.email}'
