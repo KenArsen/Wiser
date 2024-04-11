@@ -10,7 +10,7 @@ class Letter(BaseModel):
     comment = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f'Order ID: {self.order_id.id} - Driver ID: {self.driver_id.id}'
+        return f"Order ID: {self.order_id.id} - Driver ID: {self.driver_id.id}"
 
     def clean(self):
         if not self.order_id:
