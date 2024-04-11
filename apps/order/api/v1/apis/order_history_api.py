@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -20,7 +20,7 @@ class OrderHistoryDetailView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.queryset(pk=kwargs['pk'])
+        instance = self.queryset(pk=kwargs["pk"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -31,8 +31,8 @@ class OrderHistoryUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        order = get_object_or_404(Order, pk=kwargs['pk'], is_active=False)
+        partial = kwargs.pop("partial", False)
+        order = get_object_or_404(Order, pk=kwargs["pk"], is_active=False)
         serializer = self.get_serializer(order, data=request.data, partial=partial)
         if serializer.is_valid():
             serializer.save()
@@ -40,7 +40,7 @@ class OrderHistoryUpdateView(generics.UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
+        kwargs["partial"] = True
         return self.update(request, *args, **kwargs)
 
 

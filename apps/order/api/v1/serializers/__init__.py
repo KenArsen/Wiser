@@ -4,5 +4,4 @@ from .order_serializer import (
     OrderSerializer,
     OrderWriteSerializer,
 )
-
 from .template_serializer import TemplateSerializer

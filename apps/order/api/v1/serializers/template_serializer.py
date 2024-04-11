@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from apps.order.models import Template
 
 
@@ -7,7 +8,7 @@ class TemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Template
-        fields = ['id', 'is_active', 'content', 'logo_url']
+        fields = ["id", "is_active", "content", "logo_url"]
 
     def get_logo_url(self, obj):
         if obj.logo:

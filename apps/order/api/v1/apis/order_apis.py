@@ -90,9 +90,7 @@ class OrderDeleteAPI(generics.DestroyAPIView):
 
 
 class GetDeliveryTime(views.APIView):
-    @swagger_auto_schema(
-        responses=time_until_delivery_response, operation_summary="Get time_until_delivery"
-    )
+    @swagger_auto_schema(responses=time_until_delivery_response, operation_summary="Get time_until_delivery")
     def get(self, request, pk):
         order = Order.objects.get(pk=pk)
         delivery_time = order.deliver_date_EST if order.is_active else None
