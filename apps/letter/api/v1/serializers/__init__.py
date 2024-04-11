@@ -1,1 +1,1 @@
-from .letter_serializer import LetterDetailSerializer, LetterSerializer
+from .letter_serializer import LetterReadSerializer, LetterWriteSerializer

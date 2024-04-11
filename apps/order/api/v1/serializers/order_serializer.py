@@ -1,7 +1,7 @@
 from django.utils import dateformat
 from rest_framework import serializers
 
-from apps.letter.api.v1.serializers import LetterSerializer
+from apps.letter.api.v1.serializers import LetterReadSerializer
 from apps.order.models import Assign, Order
 
 
@@ -39,7 +39,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
 class OrderReadSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
-    letter = LetterSerializer(required=False, read_only=True)
+    letter = LetterReadSerializer(required=False, read_only=True)
     assign = AssignSerializer(read_only=True)
 
     class Meta:
@@ -57,7 +57,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
-    letter = LetterSerializer(required=False, read_only=True)
+    letter = LetterReadSerializer(required=False, read_only=True)
     assign = AssignSerializer(read_only=True)
 
     class Meta:

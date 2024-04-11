@@ -1,44 +1,45 @@
-from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, views
+from rest_framework import generics, status, views
 from rest_framework.response import Response
 
 from apps.letter.api.v1.serializers.letter_serializer import (
-    LetterDetailSerializer,
-    LetterSerializer,
+    LetterReadSerializer,
+    LetterWriteSerializer,
 )
 from apps.letter.models import Letter
 from apps.letter.tasks import send_email
 
 
-class LetterListAPI(views.APIView):
-    def get(self, request):
-        queryset = Letter.objects.all()
-        serializer = LetterSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class LetterListAPI(generics.ListAPIView):
+    queryset = Letter.objects.all()
+    serializer_class = LetterReadSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 
-class LetterDetailAPI(views.APIView):
-    def get(self, request, pk):
-        letter = get_object_or_404(Letter, pk=pk)
-        serializer = LetterSerializer(letter)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class LetterDetailAPI(generics.RetrieveAPIView):
+    queryset = Letter.objects.all()
+    serializer_class = LetterReadSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 
-class LetterDeleteAPI(views.APIView):
-    def delete(self, request, pk):
-        letter = get_object_or_404(Letter, pk=pk)
-        letter.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class LetterDeleteAPI(generics.DestroyAPIView):
+    queryset = Letter.objects.all()
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
 class SendEmailView(views.APIView):
     @swagger_auto_schema(
         operation_summary="To send SMS",
-        request_body=LetterDetailSerializer,
+        request_body=LetterWriteSerializer,
     )
     def post(self, request, *args, **kwargs):
-        serializer = LetterDetailSerializer(data=request.data)
+        serializer = LetterWriteSerializer(data=request.data)
         if serializer.is_valid():
             letter_instance = serializer.save()
             send_email.delay(letter_instance.id)
