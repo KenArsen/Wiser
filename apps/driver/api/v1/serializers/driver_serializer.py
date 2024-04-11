@@ -8,3 +8,4 @@ class DriverSerializers(serializers.ModelSerializer):
         model = Driver
         read_only_fields = ("created_at", "updated_at", "is_active")
         fields = "__all__"
+        ref_name = "Driver"

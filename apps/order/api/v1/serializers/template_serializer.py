@@ -9,6 +9,7 @@ class TemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Template
         fields = ["id", "is_active", "content", "logo_url"]
+        ref_name = "Template"
 
     def get_logo_url(self, obj):
         if obj.logo:

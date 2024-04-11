@@ -21,6 +21,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             "order_status",
             "my_loads_status",
         )
+        ref_name = "OrderWrite"
 
     def create(self, validated_data):
         instance = Order(**validated_data)
@@ -48,6 +49,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+        ref_name = "OrderRead"
 
     def get_created_time(self, obj):
         formatted_time = dateformat.format(obj.created_at, "h:i A")
