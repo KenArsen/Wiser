@@ -26,7 +26,7 @@ class DriverDetailAPI(generics.RetrieveAPIView):
     serializer_class = DriverSerializers
     permission_classes = [IsAuthenticated, IsAdmin | IsDispatcher]
 
-    def retrieve(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         vehicles_serializer = VehicleSerializer(instance.vehicles.all(), many=True)
