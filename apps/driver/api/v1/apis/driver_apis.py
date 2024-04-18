@@ -29,7 +29,7 @@ class DriverDetailAPI(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        vehicles_serializer = VehicleSerializer(instance.dispatcher_vehicles.all(), many=True)
+        vehicles_serializer = VehicleSerializer(instance.driver_vehicles.all(), many=True)
         template = Template.objects.filter(is_active=True).first()
         template_serializer = TemplateSerializer(template)
         return Response(
