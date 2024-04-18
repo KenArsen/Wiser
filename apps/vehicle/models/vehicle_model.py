@@ -32,6 +32,9 @@ class Vehicles(BaseModel):
 
     # vehicle details
     vin = models.CharField(max_length=255, blank=True, null=True)
+    location_to = models.CharField(max_length=255, blank=True, null=True)
+    location_from = models.CharField(max_length=255, blank=True, null=True)
+    location_from_date = models.DateTimeField(blank=True, null=True)
 
     # lisense info
     lisense_plate = models.CharField(max_length=255, blank=True, null=True)
@@ -47,7 +50,8 @@ class Vehicles(BaseModel):
     vehicle_owner = models.ForeignKey(
         "user.User", on_delete=models.SET_NULL, blank=True, null=True, related_name="owner_vehicles"
     )
-    driver = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, related_name="driver_vehicles")
+    driver = models.OneToOneField(
+        "driver.Driver", on_delete=models.CASCADE, blank=True, null=True, related_name="vehicle")
 
     def __str__(self):
         return f"ID: {self.id}, UNIT ID: {self.unit_id} - DRIVER: {self.driver}"
