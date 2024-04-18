@@ -1,7 +1,5 @@
 #!/bin/sh
 
-python manage.py flush --no-input
-
 # Apply migrations
 python manage.py migrate
 
