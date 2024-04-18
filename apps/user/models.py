@@ -44,7 +44,7 @@ class UserManager(BaseUserManager):
 
 
 class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
-    role = models.ForeignKey(Roles, on_delete=models.SET_NULL, related_name='users', null=True, blank=True)
+    role = models.ForeignKey(Roles, on_delete=models.SET_NULL, related_name="users", null=True, blank=True)
 
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
