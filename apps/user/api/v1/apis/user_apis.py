@@ -58,8 +58,6 @@ class UserViewSet(ModelViewSet):
             return [AllowAny()]
         return [IsAdminOrHR()]
 
-    """Активация пользователя СуперАдмином"""
-
     @action(["get"], detail=False)
     def me(self, request, *args, **kwargs):
         queryset = User.objects.filter(id=request.user.id)
@@ -69,6 +67,7 @@ class UserViewSet(ModelViewSet):
 
     @action(detail=False, methods=["POST"])
     def activate_by_email(self, request):
+        """Активация пользователя СуперАдмином"""
         email = request.data.get("email")
         try:
             user = User.objects.get(email=email)

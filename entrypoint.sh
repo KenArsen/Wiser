@@ -1,10 +1,15 @@
 #!/bin/sh
 
+python manage.py flush --no-input
+
 # Apply migrations
 python manage.py migrate
 
 # Collect static files
 python manage.py collectstatic --no-input
+
+python manage.py shell -c "from apps.user.models import User; \
+ User.objects.create_superuser('superadmin@gmail.com', '123') if not User.objects.filter(email='superadmin@gmail.com').exists() else None"
 
 # Clear Celery Beat cache
 rm -rf celerybeat-schedule.*

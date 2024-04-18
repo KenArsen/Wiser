@@ -41,11 +41,13 @@ class Vehicles(BaseModel):
     lisense_expiry_state = models.CharField(max_length=255, blank=True, null=True)
 
     # owner info
-    dispatcher = models.CharField(max_length=255, blank=True, null=True)
-    vehicle_owner = models.ForeignKey(
-        "user.User", on_delete=models.CASCADE, blank=True, null=True, related_name="vehicles"
+    dispatcher = models.ForeignKey(
+        "user.User", on_delete=models.SET_NULL, blank=True, null=True, related_name="dispatcher_vehicles"
     )
-    driver = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, related_name="vehicles")
+    vehicle_owner = models.ForeignKey(
+        "user.User", on_delete=models.SET_NULL, blank=True, null=True, related_name="owner_vehicles"
+    )
+    driver = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, related_name="driver_vehicles")
 
     def __str__(self):
         return f"ID: {self.id}, UNIT ID: {self.unit_id} - DRIVER: {self.driver}"
