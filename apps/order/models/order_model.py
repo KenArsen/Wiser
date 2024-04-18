@@ -64,12 +64,6 @@ class Order(BaseModel):
         ordering = ["-created_at"]
 
     def clean(self):
-        if not self.order_number:
-            raise exceptions.ValidationError({"error": "This order number cannot be empty"})
-
-        if Order.objects.filter(order_number=self.order_number).exists():
-            raise exceptions.ValidationError({"error": "This order number is already in use"})
-
         if self.expires is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} нет!"})
 
