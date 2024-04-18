@@ -7,31 +7,31 @@ from apps.user.models import Invitation, Roles, User
 class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Roles
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("id", "name")
+        ref_name = "Roles"
 
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            "id",
-            "email",
-        )
+        fields = ("id", "email")
+        ref_name = "UserList"
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
+    role = RolesSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name", "phone_number", "roles")
+        fields = ("email", "first_name", "last_name", "phone_number", "role")
+        ref_name = "UserRetrieve"
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ("password", "user_permissions", "groups")
+        ref_name = "User"
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -39,6 +39,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = ("email", "password")
         extra_kwargs = {"password": {"write_only": True}}
+        ref_name = "UserCreate"
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
@@ -51,12 +52,14 @@ class UserActivationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("email",)
+        ref_name = "UserActivation"
 
 
 class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitation
         fields = ("email",)
+        ref_name = "Invitation"
 
 
 class ResetPasswordRequestSerializer(serializers.Serializer):

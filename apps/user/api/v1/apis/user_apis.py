@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.urls import reverse
 from drf_yasg import openapi
+from rest_framework.generics import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.decorators import action
@@ -42,7 +43,7 @@ class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsAdmin | IsHR)
 
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action == "retrieve" or self.action == "me":
             return UserRetrieveSerializer
         elif self.action == "list":
             return UserListSerializer
@@ -58,6 +59,13 @@ class UserViewSet(ModelViewSet):
         return [IsAdminOrHR()]
 
     """Активация пользователя СуперАдмином"""
+
+    @action(["get"], detail=False)
+    def me(self, request, *args, **kwargs):
+        queryset = User.objects.filter(id=request.user.id)
+        user = get_object_or_404(queryset)
+        serializer = self.get_serializer(user, context={"request": request})
+        return Response(serializer.data)
 
     @action(detail=False, methods=["POST"])
     def activate_by_email(self, request):
