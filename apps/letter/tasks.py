@@ -26,6 +26,7 @@ def send_email(letter_id):
                 fail_silently=False,
                 html_message=letter.comment,
             )
+            logging.info("Email sent successfully")
     except (SMTPAuthenticationError, SMTPException) as e:
         print(f"Ошибка при отправке почты: {e}")
     except Letter.DoesNotExist:

@@ -31,5 +31,10 @@ class UserAdmin(BaseUserAdmin):
     ordering = ("-id",)
 
 
+@admin.register(Roles)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    list_display_links = ("id", "name")
+
+
 admin.site.register(Invitation)
-admin.site.register(Roles)
