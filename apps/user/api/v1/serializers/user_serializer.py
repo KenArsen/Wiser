@@ -23,7 +23,7 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name", "phone_number", "role")
+        fields = ("id", "email", "first_name", "last_name", "phone_number", "role")
         ref_name = "UserRetrieve"
 
 
