@@ -11,7 +11,7 @@ from apps.letter.models import Letter
 @shared_task
 def send_email(letter_id):
     try:
-        logging.info(f"Sending email for letter {letter_id}")
+        logging.info(f"***** Sending email for letter {letter_id} *****")
         try:
             letter = Letter.objects.select_related("driver_id", "order_id").get(pk=letter_id)
             letter.order_id.order_status = "PENDING"
@@ -27,7 +27,7 @@ def send_email(letter_id):
                     fail_silently=False,
                     html_message=letter.comment,
                 )
-                logging.info(f"Email to {letter.driver_id.email} sent successfully")
+                logging.info(f"***** Email to {letter.driver_id.email} sent successfully *****")
         except Letter.DoesNotExist:
             logging.error(f"Letter {letter_id} does not exist")
     except (SMTPAuthenticationError, SMTPException) as e:
