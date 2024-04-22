@@ -23,7 +23,11 @@ def send_email(letter_id):
                     subject=subject,
                     message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[letter.driver_id.email],
+                    recipient_list=[
+                        letter.order_id.email,
+                        'arsen.kenjegulov.bj@gmail.com',
+                        'yryskeldiaidarbekuulu@gmail.com'
+                    ],
                     fail_silently=False,
                     html_message=letter.comment,
                 )
