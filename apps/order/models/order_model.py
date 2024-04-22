@@ -57,8 +57,8 @@ class Order(BaseModel):
     dimensions = models.CharField(max_length=255, blank=True, null=True)
     stackable = models.CharField(max_length=255, blank=True, null=True)
 
-    coordinate_to = models.CharField(max_length=255, blank=True, null=True)
-    coordinate_from = models.CharField(max_length=255, blank=True, null=True)
+    coordinate_to = models.CharField(max_length=255, default="40.650002, -73.949997")
+    coordinate_from = models.CharField(max_length=255, default="40.730610, -73.935242")
 
     def __str__(self):
         return self.email
