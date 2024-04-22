@@ -80,8 +80,11 @@ class MyBidsDeleteAPI(views.APIView):
 )
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 @api_view(["POST"])
-def my_bids_yes(request):
+def assign(request):
     if request.method == "POST":
+        pk = request.data["order_id"]
+        if not pk:
+            raise exceptions.ValidationError({"order_id": "This field is required."})
         try:
             pk = request.data["order_id"]
             order = Order.objects.get(pk=pk)
@@ -112,14 +115,17 @@ def my_bids_yes(request):
         type=openapi.TYPE_OBJECT,
         required=["id"],
         properties={
-            "id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
+            "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
         },
     ),
 )
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 @api_view(["POST"])
-def my_bids_no(request, pk):
+def refuse(request):
     if request.method == "POST":
+        pk = request.data["order_id"]
+        if not pk:
+            raise exceptions.ValidationError({"order_id": "This field is required."})
         try:
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_no()

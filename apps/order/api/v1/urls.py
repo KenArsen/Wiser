@@ -24,8 +24,8 @@ from apps.order.api.v1.apis import (
     OrderHistoryUpdateView,
     OrderListAPI,
     OrderUpdateAPI,
-    my_bids_no,
-    my_bids_yes,
+    refuse,
+    assign,
 )
 
 app_name = "orders"
@@ -55,8 +55,8 @@ urlpatterns += [
     path("my_bids/<int:pk>/", MyBidsDetailAPI.as_view(), name="my-bids-detail"),
     path("my_bids/<int:pk>/update/", MyBidsUpdateAPI.as_view(), name="my-bids-update"),
     path("my_bids/<int:pk>/delete/", MyBidsDeleteAPI.as_view(), name="my-bids-delete"),
-    path("my_bids/yes/", my_bids_yes, name="my-bids-yes"),
-    path("my_bids/<int:pk>/no/", my_bids_no, name="my-bids-no"),
+    path("my_bids/assign/", assign, name="my-bids-assign"),
+    path("my_bids/refuse/", refuse, name="my-bids-refuse"),
 ]
 
 # my loads

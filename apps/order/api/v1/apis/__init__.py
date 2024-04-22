@@ -3,8 +3,8 @@ from .my_bids_apis import (
     MyBidsDetailAPI,
     MyBidsListAPI,
     MyBidsUpdateAPI,
-    my_bids_no,
-    my_bids_yes,
+    refuse,
+    assign,
 )
 from .my_loads_apis import (
     MyLoadsCheckoutAPI,

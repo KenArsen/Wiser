@@ -8,7 +8,7 @@ from apps.order.models import Assign, Order
 class AssignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assign
-        fields = ("broker_company", "rate_confirmation")
+        fields = ("order_id", "broker_company", "rate_confirmation")
 
 
 class OrderWriteSerializer(serializers.ModelSerializer):
