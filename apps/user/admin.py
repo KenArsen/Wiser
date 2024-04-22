@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from .models import Invitation, Roles, User
 
 
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password", "first_name", "last_name", "avatar", "role")}),
@@ -30,6 +31,5 @@ class UserAdmin(BaseUserAdmin):
     ordering = ("-id",)
 
 
-admin.site.register(User, UserAdmin)
 admin.site.register(Invitation)
 admin.site.register(Roles)

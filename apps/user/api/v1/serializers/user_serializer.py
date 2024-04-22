@@ -8,6 +8,7 @@ class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Roles
         fields = ("id", "name")
+        read_only_fields = ("id",)
         ref_name = "Roles"
 
 
@@ -23,7 +24,8 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "email", "first_name", "last_name", "phone_number", "role")
+        exclude = ("password", "user_permissions", "groups", "lat", "lon", "last_login", "created_at", "updated_at",
+                   "is_superuser")
         ref_name = "UserRetrieve"
 
 
@@ -37,7 +39,8 @@ class UserSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email", "password")
+        fields = ("id", "email", "password", "phone_number", "first_name", "last_name", "role")
+        read_only_fields = ("id",)
         extra_kwargs = {"password": {"write_only": True}}
         ref_name = "UserCreate"
 
