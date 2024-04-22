@@ -13,5 +13,6 @@ class LetterReadSerializer(serializers.ModelSerializer):
 class LetterWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Letter
-        exclude = ("created_at", "updated_at", "id")
+        fields = "__all__"
+        read_only_fields = ('id', 'created_at', 'updated_at')
         ref_name = "LetterWrite"

@@ -12,21 +12,24 @@ from apps.letter.models import Letter
 def send_email(letter_id):
     try:
         logging.info(f"Sending email for letter {letter_id}")
-        letter = Letter.objects.select_related("driver_id", "order_id").get(pk=letter_id)
-        letter.order_id.order_status = "PENDING"
-        letter.order_id.save()
-        if letter.driver_id.email:
-            subject = "New comment added"
-            message = "A new comment has been added:\n\n"
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[letter.driver_id.email],
-                fail_silently=False,
-                html_message=letter.comment,
-            )
-            logging.info(f"Email to {letter.driver_id.email} sent successfully")
+        try:
+            letter = Letter.objects.select_related("driver_id", "order_id").get(pk=letter_id)
+            letter.order_id.order_status = "PENDING"
+            letter.order_id.save()
+            if letter.driver_id.email:
+                subject = "New comment added"
+                message = "A new comment has been added:\n\n"
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[letter.driver_id.email],
+                    fail_silently=False,
+                    html_message=letter.comment,
+                )
+                logging.info(f"Email to {letter.driver_id.email} sent successfully")
+        except Letter.DoesNotExist:
+            logging.error(f"Letter {letter_id} does not exist")
     except (SMTPAuthenticationError, SMTPException) as e:
         print(f"Ошибка при отправке почты: {e}")
     except Letter.DoesNotExist:
