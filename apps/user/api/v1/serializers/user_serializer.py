@@ -24,8 +24,17 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        exclude = ("password", "user_permissions", "groups", "lat", "lon", "last_login", "created_at", "updated_at",
-                   "is_superuser")
+        exclude = (
+            "password",
+            "user_permissions",
+            "groups",
+            "lat",
+            "lon",
+            "last_login",
+            "created_at",
+            "updated_at",
+            "is_superuser",
+        )
         ref_name = "UserRetrieve"
 
 

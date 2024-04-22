@@ -1,6 +1,5 @@
 import logging
 
-from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import exceptions, status, views
@@ -26,47 +25,9 @@ class MyBidsListAPI(views.APIView):
         return Response(serializer.data)
 
 
-class MyBidsDetailAPI(views.APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-
-    def get(self, request, pk, *args, **kwargs):
-        order = Order.objects.get(pk=pk, is_active=True, order_status="PENDING")
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
-
-
-class MyBidsUpdateAPI(views.APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-
-    def put(self, request, pk, *args, **kwargs):
-        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
-        serializer = OrderSerializer(order, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request, pk):
-        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
-        serializer = OrderSerializer(order, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class MyBidsDeleteAPI(views.APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-
-    def delete(self, request, pk, *args, **kwargs):
-        order = get_object_or_404(Order, pk=pk, is_active=True, order_status="PENDING")
-        order.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 @swagger_auto_schema(
     method="post",
-    operation_summary="Accept bid",
+    operation_summary="Assign order",
     responses={200: "Success", 400: "Bad Request"},
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -109,7 +70,7 @@ def assign(request):
 
 @swagger_auto_schema(
     method="post",
-    operation_summary="Reject bid",
+    operation_summary="Refuse order",
     responses={200: "Success", 400: "Bad Request"},
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
