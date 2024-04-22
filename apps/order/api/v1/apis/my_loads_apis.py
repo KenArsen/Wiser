@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, views
+from rest_framework import status, views, exceptions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -76,8 +77,26 @@ class MyLoadsDeleteAPI(views.APIView):
 class MyLoadsStatus(views.APIView):
     @swagger_auto_schema(
         operation_summary="Update order status",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
+            },
+            required=["order_id"]
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "status": openapi.Schema(type=openapi.TYPE_STRING, description="Status of the order")})),
+        }
     )
-    def post(self, request, pk):
+    def post(self, request):
+        pk = request.data.get("order_id")
+        if not pk:
+            raise exceptions.ValidationError({"order_id": "This field is required."})
 
         try:
             order = Order.objects.get(pk=pk)
