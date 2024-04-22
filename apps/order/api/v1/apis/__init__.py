@@ -1,23 +1,11 @@
-from .my_bids_apis import (
-    MyBidsDeleteAPI,
-    MyBidsDetailAPI,
-    MyBidsListAPI,
-    MyBidsUpdateAPI,
-    refuse,
-    assign,
-)
+from .my_bids_apis import MyBidsListAPI, assign, refuse
 from .my_loads_apis import (
     MyLoadsCheckoutAPI,
     MyLoadsCompletedAPI,
-    MyLoadsDeleteAPI,
-    MyLoadsDetailAPI,
     MyLoadsListAPI,
     MyLoadsStatus,
-    MyLoadsUpdateAPI,
 )
 from .order_apis import (
-    GetDeliveryTime,
-    GetLocationOrder,
     OrderCreateAPI,
     OrderDeleteAPI,
     OrderDetailAPI,
@@ -25,9 +13,4 @@ from .order_apis import (
     OrderListAPI,
     OrderUpdateAPI,
 )
-from .order_history_api import (
-    OrderHistoryDeleteAPI,
-    OrderHistoryDetailView,
-    OrderHistoryListAPI,
-    OrderHistoryUpdateView,
-)
+from .order_history_api import OrderHistoryListAPI

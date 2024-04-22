@@ -52,7 +52,8 @@ class Vehicles(BaseModel):
         "user.User", on_delete=models.SET_NULL, blank=True, null=True, related_name="owner_vehicles"
     )
     driver = models.OneToOneField(
-        "driver.Driver", on_delete=models.CASCADE, blank=True, null=True, related_name="vehicle")
+        "driver.Driver", on_delete=models.CASCADE, blank=True, null=True, related_name="vehicle"
+    )
 
     def __str__(self):
         return f"ID: {self.id}, UNIT ID: {self.unit_id} - DRIVER: {self.driver}"
