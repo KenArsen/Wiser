@@ -29,6 +29,8 @@ class Driver(BaseModel, ImageService):
     # driver status
     is_active = models.BooleanField(default=True)
 
+
+
     class Meta:
         ordering = ("-id",)
         verbose_name = _("Driver")
