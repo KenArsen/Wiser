@@ -6,37 +6,32 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 from apps.letter.models import Letter
+from apps.order.models import Order
 
 
 @shared_task
-def send_email(letter_id):
+def send_email(data):
     try:
-        logging.info(f"***** Sending email for letter {letter_id} *****")
-        try:
-            letter = Letter.objects.select_related("driver_id", "order_id").get(pk=letter_id)
-            letter.order_id.order_status = "PENDING"
-            letter.order_id.save()
-            if letter.driver_id.email:
-                subject = "New comment added"
-                message = "A new comment has been added:\n\n"
-                send_mail(
-                    subject=subject,
-                    message=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[
-                        letter.order_id.email,
-                        'arsen.kenjegulov.bj@gmail.com',
-                        'yryskeldiaidarbekuulu@gmail.com'
-                    ],
-                    fail_silently=False,
-                    html_message=letter.comment,
-                )
-                logging.info(f"***** Email to {letter.driver_id.email} sent successfully *****")
-        except Letter.DoesNotExist:
-            logging.error(f"Letter {letter_id} does not exist")
+        logging.info(f"***** Sending email for letter {data['id']} *****")
+        letter = Letter.objects.get(id=data["id"])
+        order = Order.objects.get(id=data["order_id"])
+        order.order_status = "PENDING"
+        order.save()
+        if order.email:
+            subject = "New comment added"
+            message = "A new comment has been added:\n\n"
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[order.email, "arsen.kenjegulov.bj@gmail.com", "yryskeldiaidarbekuulu@gmail.com"],
+                fail_silently=False,
+                html_message=letter.comment,
+            )
+            logging.info(f"***** Email to {order.email} sent successfully *****")
+    except Letter.DoesNotExist or Order.DoesNotExist:
+        logging.error(f"***** Unable to send email for letter {data['id']} *****")
     except (SMTPAuthenticationError, SMTPException) as e:
         print(f"Ошибка при отправке почты: {e}")
-    except Letter.DoesNotExist:
-        print(f"Объект Letter с id={letter_id} не найден")
     except Exception as e:
         print(f"Общая ошибка: {e}")
