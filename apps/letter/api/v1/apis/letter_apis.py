@@ -45,8 +45,9 @@ class SendEmailView(views.APIView):
         order_id = request.data.get("order_id")
         try:
             order = Order.objects.get(id=order_id)
-            if order.letter:
+            if hasattr(order, 'letter'):
                 order.letter.delete()
+                order.save()
             serializer = LetterWriteSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
