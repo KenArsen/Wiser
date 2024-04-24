@@ -22,7 +22,7 @@ class Vehicles(BaseModel):
     transport_type = models.CharField(max_length=255, choices=Transport.choices, default=Transport.SPRINTER_VAN)
     vehicle_model = models.CharField(max_length=255, blank=True, null=True)
     vehicle_year = models.CharField(max_length=255, blank=True, null=True)
-    dock_high = models.BooleanField(default=False)
+    dock_high = models.CharField(max_length=255, default='No')
 
     # vehicle sizes
     width = models.IntegerField(default=0, blank=True, null=True)
