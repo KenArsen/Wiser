@@ -70,7 +70,7 @@ class Order(BaseModel):
         if self.expires is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} нет!"})
 
-        if self.expires <= timezone.localtime(timezone.now()):
+        if self.expires <= timezone.localtime(timezone.now()) and self.order_status == 'DEFAULT':
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} заказа уже истек!"})
 
     def move_to_history(self):
