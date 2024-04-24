@@ -35,7 +35,7 @@ class Vehicles(BaseModel):
     location_to = models.CharField(max_length=255, blank=True, null=True)
     location_from = models.CharField(max_length=255, blank=True, null=True)
     location_from_date = models.DateTimeField(blank=True, null=True)
-    coordinate_from = models.CharField(max_length=255, default="40.730610, -73.935242")
+    coordinate_from = models.CharField(max_length=255, default="40.730610,-73.935242")
 
     # lisense info
     lisense_plate = models.CharField(max_length=255, blank=True, null=True)
