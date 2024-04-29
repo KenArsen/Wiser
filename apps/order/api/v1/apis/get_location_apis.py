@@ -41,7 +41,9 @@ class GetLocationAPI(views.APIView):
                 driver_info = self.get_driver_info(driver, distance_miles, time)
                 drivers.append(driver_info)
 
-        return Response({"available_drivers": drivers}, status=status.HTTP_200_OK)
+        return Response(
+            {"order_coordinates": order.coordinate_from, "available_drivers": drivers}, status=status.HTTP_200_OK
+        )
 
     def get_distance_and_time(self, lon_order, lat_order, lon_driver, lat_driver):
         url = (
@@ -58,8 +60,9 @@ class GetLocationAPI(views.APIView):
         return {
             "id": driver.id,
             "first_name": driver.first_name,
+            "last_name": driver.last_name,
             "phone_number": driver.phone_number,
             "miles_out": round(distance_miles, 1),
-            "time": round(time, 1),
+            "time": round(time, 2),
             "coordinate_from": driver.vehicle.coordinate_from,
         }

@@ -22,7 +22,7 @@ app.conf.beat_schedule = {
         "schedule": timedelta(minutes=3),
     },
     "get_location": {
-        "task": "apps.order.location_tasks.get_location",
+        "task": "apps.order.tasks.get_location",
         "schedule": timedelta(minutes=5),
     },
 }
