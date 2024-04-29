@@ -57,6 +57,8 @@ class Order(BaseModel):
     dimensions = models.CharField(max_length=255, blank=True, null=True)
     stackable = models.CharField(max_length=255, blank=True, null=True)
 
+    match = models.IntegerField(default=0)
+
     coordinate_to = models.CharField(max_length=255, default="40.650002,-73.949997")
     coordinate_from = models.CharField(max_length=255, default="40.730610,-73.935242")
 
@@ -70,7 +72,7 @@ class Order(BaseModel):
         if self.expires is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} нет!"})
 
-        if self.expires <= timezone.localtime(timezone.now()) and self.order_status == 'DEFAULT':
+        if self.expires <= timezone.localtime(timezone.now()) and self.order_status == "DEFAULT":
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} заказа уже истек!"})
 
     def move_to_history(self):

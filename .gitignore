@@ -37,7 +37,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 venv
-.wiser/
+.wsr/
 myvenv
 .env_local
 .env.local
