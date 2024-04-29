@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.common import LargeResultsSetPagination
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     AssignSerializer,
@@ -18,6 +19,7 @@ from apps.order.services import order_service
 
 class MyBidsListAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
 
     def get(self, request, *args, **kwargs):
         queryset = Order.objects.filter(is_active=True, order_status="PENDING")

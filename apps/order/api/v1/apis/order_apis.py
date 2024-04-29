@@ -5,6 +5,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     OrderReadSerializer,
@@ -17,6 +18,7 @@ class OrderListAPI(generics.ListAPIView):
     queryset = Order.objects.filter(is_active=True, order_status="DEFAULT")
     serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -84,6 +86,7 @@ class OrderFilterView(generics.ListAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
 
     @swagger_auto_schema(
         operation_summary="Filter orders",

@@ -4,6 +4,7 @@ from rest_framework import exceptions, status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.common import LargeResultsSetPagination
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers import OrderSerializer
 from apps.order.models import Order
@@ -11,6 +12,7 @@ from apps.order.models import Order
 
 class MyLoadsListAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
 
     def get(self, request):
         queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status__lte=5)
