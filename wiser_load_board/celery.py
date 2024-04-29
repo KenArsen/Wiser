@@ -20,9 +20,9 @@ app.conf.beat_schedule = {
     "delete_expired_data": {
         "task": "apps.order.tasks.delete_expired_data",
         "schedule": timedelta(minutes=3),
-    },
-    "get_location": {
-        "task": "apps.order.tasks.get_location",
-        "schedule": timedelta(minutes=5),
-    },
+    }
+    # "get_location": {
+    #     "task": "apps.order.tasks.get_location",
+    #     "schedule": timedelta(minutes=5),
+    # },
 }
