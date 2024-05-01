@@ -6,7 +6,7 @@ from apps.letter.models import Letter
 class LetterReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Letter
-        exclude = ("created_at", "updated_at")
+        exclude = ("updated_at",)
         ref_name = "LetterRead"
 
 

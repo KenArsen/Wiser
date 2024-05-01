@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, status
+from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -10,8 +10,10 @@ from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     OrderReadSerializer,
     OrderWriteSerializer,
+    OrderSerializer,
 )
 from apps.order.models import Order
+from geopy.distance import geodesic
 
 
 class OrderListAPI(generics.ListAPIView):
@@ -107,3 +109,53 @@ class OrderFilterView(generics.ListAPIView):
             filtered_orders = filtered_orders.filter(filter_conditions)
         serialized_data = OrderReadSerializer(filtered_orders, many=True)
         return Response(serialized_data.data)
+
+
+class LastTwoOrdersAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    def get(self, request, *args, **kwargs):
+        order_id = kwargs['pk']
+        order = get_object_or_404(Order, pk=order_id)
+
+        # Получаем координаты текущего заказа
+        lat_from, lon_from = order.coordinate_from.split(',')
+        lat_to, lon_to = order.coordinate_to.split(',')
+
+        # Формируем квадрат, внутри которого будем искать другие заказы
+        max_latitude = float(lat_from) + 0.1  # Примерный радиус в градусах
+        min_latitude = float(lat_from) - 0.1
+        max_longitude = float(lon_from) + 0.1
+        min_longitude = float(lon_from) - 0.1
+
+        # Получаем другие заказы в радиусе 20 миль от текущего заказа
+        other_orders = Order.objects.filter(
+            ~Q(pk=order_id),  # Исключаем текущий заказ
+            Q(coordinate_from__lte=max_latitude, coordinate_from__gte=min_latitude) &
+            Q(coordinate_to__lte=max_latitude, coordinate_to__gte=min_latitude)
+        ).order_by('-id')
+
+        # # Инициализируем список для хранения найденных заказов
+        # orders_within_20_miles = []
+        #
+        # # Отфильтруем заказы, расстояние между координатами которых менее 20 миль
+        # for other_order in other_orders:
+        #     lat_other_from, lon_other_from = other_order.coordinate_from.split(',')
+        #     lat_other_to, lon_other_to = other_order.coordinate_to.split(',')
+        #     lat_other_from = float(lat_other_from)
+        #     lon_other_from = float(lon_other_from)
+        #     lat_other_to = float(lat_other_to)
+        #     lon_other_to = float(lon_other_to)
+        #     distance_from = geodesic((lat_from, lon_from), (lat_other_from, lon_other_from)).miles
+        #     distance_to = geodesic((lat_to, lon_to), (lat_other_to, lon_other_to)).miles
+        #     if distance_from <= 20 and distance_to <= 20:
+        #         orders_within_20_miles.append(other_order)
+        #
+        #     # Если найдено два заказа, выходим из цикла
+        #     if len(orders_within_20_miles) >= 2:
+        #         break
+
+        serialized_data = OrderSerializer(other_orders, many=True)
+
+        # return Response({"orders_within_20_miles": orders_within_20_miles})
+        return Response({"orders_within_20_miles": serialized_data.data})

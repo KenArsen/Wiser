@@ -12,6 +12,7 @@ from apps.order.api.v1.apis import (
     OrderFilterView,
     OrderHistoryListAPI,
     OrderListAPI,
+    LastTwoOrdersAPI,
     OrderUpdateAPI,
     assign,
     refuse,
@@ -29,6 +30,7 @@ urlpatterns = [
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
     path("filter/", OrderFilterView.as_view(), name="order-filter"),
     path("get-location/", GetLocationAPI.as_view(), name="get-location-drivers"),
+    path("last-two/<int:pk>/", LastTwoOrdersAPI.as_view(), name="last-two-orders"),
 ]
 
 # order-history

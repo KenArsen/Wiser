@@ -12,5 +12,6 @@ from .order_apis import (
     OrderFilterView,
     OrderListAPI,
     OrderUpdateAPI,
+    LastTwoOrdersAPI,
 )
 from .order_history_api import OrderHistoryListAPI
