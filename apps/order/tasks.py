@@ -19,15 +19,15 @@ from .models import Order
 def delete_expired_data():
     try:
         with transaction.atomic():
-            logging.info("##### Начато удаление просроченных данных. #####")
+            logging.info("##### Started deleting expired data. #####")
 
             expired_orders = Order.objects.filter(expires__lt=timezone.now(), order_status="PENDING")
             for order in expired_orders:
                 order.move_to_history()
 
-            logging.info("##### Удаление просроченных данных завершено #####")
+            logging.info("##### Deletion of expired data completed #####")
     except Exception as e:
-        logging.error(f"Произошла ошибка при удалении данных с истекшим сроком действия: {e}")
+        raise ValidationError({"error": f"An error occurred while deleting expired data: {e}"})
 
 
 @shared_task()
@@ -54,7 +54,7 @@ def process_and_save_emails_task():
                         body = msg.get_payload(decode=True).decode()
 
                     if not body:
-                        logging.warning("Пустое письмо")
+                        logging.warning("Empty letter")
                         mail.store(num, "+FLAGS", "\\Seen")
                         continue
 
@@ -70,14 +70,14 @@ def process_and_save_emails_task():
                         continue
 
                 except Exception as e:
-                    logging.error(f"Ошибка {e}")
+                    logging.error(f"Error {e}")
                     mail.store(num, "+FLAGS", "\\Seen")
                     continue
             mail.logout()
         num_unread_messages = len(message_ids[0].split())
         return {"status": "success", "unread_messages": num_unread_messages}
     except Exception as e:
-        return {"status": "error", "error_message": str(e)}
+        logging.error(f"Error {e}")
 
 
 def extract_order_data(soup):
@@ -215,18 +215,18 @@ def extract_order_data(soup):
 
         return order_data
     except ValueError as ve:
-        logging.error(f"Произошла ошибка значения: {ve}")
+        raise ValidationError({"error": f"A value error has occurred: {ve}"})
     except TypeError as te:
-        logging.error(f"Произошла ошибка типа: {te}")
+        raise ValidationError({"error": f"A type error has occurred: {te}"})
 
 
 @transaction.atomic
 def save_order(order_data):
     if not order_data.get("order_number"):
-        raise ValidationError({"error": "Этот номер заказа не может быть пустым."})
+        raise ValidationError({"error": "This order number cannot be empty."})
 
     order = Order(**order_data)
     order.full_clean()
     order.save()
-    logging.info(f"Заказ {order.id} сохранен в базу")
+    logging.info(f"{'#' * 10} Order {order.id} saved to the database")
     return order

@@ -50,7 +50,7 @@ class SendEmailView(views.APIView):
             if serializer.is_valid():
                 serializer.save()
                 send_email(serializer.data)
-                return Response({"success": "Сообщение успешно отправлено"}, status=status.HTTP_200_OK)
+                return Response({"success": "Message sent successfully"}, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Order.DoesNotExist:
             raise exceptions.ValidationError({"detail": "No such order found"})

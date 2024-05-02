@@ -72,13 +72,15 @@ class UserViewSet(ModelViewSet):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"message": "Пользователь с таким email не найден."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "User with this email was not found."}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_superuser:
             user.is_active = True
             user.save()
-            return Response({"message": "Пользователь активирован."}, status=status.HTTP_200_OK)
+            return Response({"message": "User activated."}, status=status.HTTP_200_OK)
         else:
-            return Response({"message": "У вас нет прав для активации пользователя."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"message": "You do not have rights to activate the user."}, status=status.HTTP_403_FORBIDDEN
+            )
 
 
 class InvitationView(APIView):
@@ -112,11 +114,11 @@ class InvitationView(APIView):
             invitation_token = str(uuid.uuid4())
             invitation = Invitation.objects.create(user=user, email=email, invitation_token=invitation_token)
             # Отправьте приглашение на электронную почту пользователя здесь.
-            subject = "Приглашение для регистрации"
+            subject = "Invitation to register"
             invitation_url = request.build_absolute_uri(
                 reverse("api:users:setup-password", kwargs={"invitation_token": invitation_token})
             )
-            message = f"Для продолжении регистрации по ссылке: {invitation_url}"
+            message = f"To continue registration follow the link: {invitation_url}"
             from_email = EMAIL_HOST_USER
             recipient_list = [email]
             send_mail(subject, message, from_email, recipient_list, fail_silently=False)
@@ -159,10 +161,10 @@ class ResetPasswordRequestView(generics.CreateAPIView):
         return token
 
     def send_password_reset_email(self, email, reset_token, request):
-        subject = "Сброс пароля"
+        subject = "Password reset"
         reset_url = request.build_absolute_uri(reverse("api:users:reset-password-confirm")) + f"?token={reset_token}"
 
-        message = f"Для сброса пароля перейдите по ссылке: {reset_url}"
+        message = f"To reset your password, follow the link: {reset_url}"
         from_email = EMAIL_HOST_USER
         recipient_list = [email]
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
