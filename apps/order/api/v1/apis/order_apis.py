@@ -143,13 +143,12 @@ class LastSimilarOrdersAPI(views.APIView):
         for bid in order_my_bids:
             distance_from = get_distance(order.coordinate_from, bid.coordinate_from)
             distance_to = get_distance(order.coordinate_to, bid.coordinate_to)
-            if distance_from <= radius and distance_to <= radius:
-                nearby_orders.append(bid)
 
             if len(nearby_orders) > count:
                 break
-        print(nearby_orders)
 
+            if distance_from <= radius and distance_to <= radius:
+                nearby_orders.append(bid)
         serializer = OrderReadSerializer(nearby_orders, many=True)
 
         return Response({'nearby_orders': serializer.data}, status=status.HTTP_200_OK)
