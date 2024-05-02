@@ -3,6 +3,7 @@ from django.urls import path
 from apps.order.api.v1.apis import (
     LastTwoOrdersAPI,
     MyBidsListAPI,
+    MyBidsHistoryAPI,
     MyLoadsCheckoutAPI,
     MyLoadsCompletedAPI,
     MyLoadsListAPI,
@@ -41,6 +42,7 @@ urlpatterns += [
 # my bids
 urlpatterns += [
     path("my_bids/", MyBidsListAPI.as_view(), name="my-bids-list"),
+    path("my_bids/history/", MyBidsHistoryAPI.as_view(), name="my-bids-history"),
     path("my_bids/assign/", assign, name="my-bids-assign"),
     path("my_bids/refuse/", refuse, name="my-bids-refuse"),
 ]

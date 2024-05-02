@@ -1,4 +1,4 @@
-from .my_bids_apis import MyBidsListAPI, assign, refuse
+from .my_bids_apis import MyBidsListAPI, MyBidsHistoryAPI, assign, refuse
 from .my_loads_apis import (
     MyLoadsCheckoutAPI,
     MyLoadsCompletedAPI,

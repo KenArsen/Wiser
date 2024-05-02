@@ -27,6 +27,16 @@ class MyBidsListAPI(views.APIView):
         return Response(serializer.data)
 
 
+class MyBidsHistoryAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
+
+    def get(self, request, *args, **kwargs):
+        queryset = Order.objects.filter(is_active=False, order_status="PENDING")
+        serializer = OrderSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 @swagger_auto_schema(
     method="post",
     operation_summary="Assign order",
