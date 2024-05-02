@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from geopy.distance import geodesic
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
@@ -96,16 +96,22 @@ class LastSimilarOrdersAPI(views.APIView):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('radius', openapi.IN_QUERY, description="Radius in miles", type=openapi.TYPE_INTEGER,
-                              default=20),
-            openapi.Parameter('count', openapi.IN_QUERY, description="Number of nearby orders to return",
-                              type=openapi.TYPE_INTEGER, default=2),
+            openapi.Parameter(
+                "radius", openapi.IN_QUERY, description="Radius in miles", type=openapi.TYPE_INTEGER, default=20
+            ),
+            openapi.Parameter(
+                "count",
+                openapi.IN_QUERY,
+                description="Number of nearby orders to return",
+                type=openapi.TYPE_INTEGER,
+                default=2,
+            ),
         ]
     )
     def get(self, request, *args, **kwargs):
         order = get_object_or_404(Order, pk=kwargs["pk"])
-        radius = int(request.query_params.get('radius', 20))
-        count = int(request.query_params.get('count', 2))
+        radius = int(request.query_params.get("radius", 20))
+        count = int(request.query_params.get("count", 2))
 
         order_my_bids = Order.objects.filter(order_status="AWAITING_BID").order_by("-id")
 
@@ -121,7 +127,7 @@ class LastSimilarOrdersAPI(views.APIView):
                 nearby_orders.append(bid)
 
         serializer = OrderReadSerializer(nearby_orders, many=True)
-        return Response({'nearby_orders': serializer.data}, status=status.HTTP_200_OK)
+        return Response({"nearby_orders": serializer.data}, status=status.HTTP_200_OK)
 
 
 def get_distance(coord1, coord2):

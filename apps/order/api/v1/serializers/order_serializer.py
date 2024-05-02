@@ -1,4 +1,3 @@
-from django.utils import dateformat
 from rest_framework import serializers
 
 from apps.letter.api.v1.serializers import LetterReadSerializer
@@ -43,7 +42,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = "__all__"
         read_only_fields = ("created_at", "updated_at", "my_loads_status", "order_status")
         ref_name = "OrderRead"
 
@@ -55,7 +54,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = "__all__"
         read_only_fields = ("order_status", "created_at", "updated_at")
 
     def to_representation(self, instance):

@@ -3,6 +3,7 @@ from smtplib import SMTPAuthenticationError, SMTPException
 
 from django.conf import settings
 from django.core.mail import send_mail
+from rest_framework import exceptions
 
 from apps.letter.models import Letter
 from apps.order.models import Order
@@ -28,8 +29,8 @@ def send_email(data):
             )
             logging.info(f"***** Email to {order.email} sent successfully *****")
     except Letter.DoesNotExist or Order.DoesNotExist:
-        logging.error(f"***** Unable to send email for letter {data['id']} *****")
+        raise exceptions.ValidationError({"detail": "No such letter or order found"})
     except (SMTPAuthenticationError, SMTPException) as e:
-        logging.error(f"Ошибка при отправке почты: {e}")
+        raise exceptions.ValidationError({"error", f"{e}"})
     except Exception as e:
-        logging.error(f"Общая ошибка: {e}")
+        raise exceptions.ValidationError({"error": f"{e}"})

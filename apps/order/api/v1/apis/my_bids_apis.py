@@ -1,8 +1,6 @@
-import logging
-
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import exceptions, status, generics
+from rest_framework import exceptions, generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -57,7 +55,7 @@ def assign(request):
     if request.method == "POST":
         pk = request.data["order_id"]
         if not pk:
-            raise exceptions.ValidationError({"order_id": "This field is required."})
+            raise exceptions.ValidationError({"detail": "order_id field is required."})
         try:
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_yes()
@@ -66,16 +64,9 @@ def assign(request):
                 serializer.save()
             else:
                 raise exceptions.ValidationError({"error": "Broker company/Rate confirmation not is valid"})
-
             return Response({"status": "The order has been moved to My Loads"}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
-            logging.error(f"{pk} does not exist")
-            return Response({"status": "fail", "message": "Order does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logging.error(f"An error occurred: {e}")
-            return Response(
-                {"status": "fail", "message": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            raise exceptions.ValidationError({"detail": "No such order found"})
     return Response({"status": "fail", "message": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -97,18 +88,11 @@ def refuse(request):
     if request.method == "POST":
         pk = request.data["order_id"]
         if not pk:
-            raise exceptions.ValidationError({"order_id": "This field is required."})
+            raise exceptions.ValidationError({"detail": "order_id field is required."})
         try:
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_no()
-
             return Response({"status": "The order has been moved to HISTORY"}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
-            logging.error(f"{pk} does not exist")
-            return Response({"status": "fail", "message": "Order does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logging.error(f"An error occurred: {e}")
-            return Response(
-                {"status": "fail", "message": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            raise exceptions.ValidationError({"detail": "No such order found"})
     return Response({"status": "fail", "message": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)

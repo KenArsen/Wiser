@@ -2,8 +2,8 @@ from django.urls import path
 
 from apps.order.api.v1.apis import (
     LastSimilarOrdersAPI,
-    MyBidsListAPI,
     MyBidsHistoryAPI,
+    MyBidsListAPI,
     MyLoadsCheckoutAPI,
     MyLoadsCompletedAPI,
     MyLoadsListAPI,
