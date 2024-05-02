@@ -14,4 +14,3 @@ from .order_apis import (
     OrderListAPI,
     OrderUpdateAPI,
 )
-from .order_history_api import OrderHistoryListAPI

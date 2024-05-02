@@ -7,8 +7,9 @@ from apps.common.base_model import BaseModel
 class Letter(BaseModel):
     order_id = models.OneToOneField("order.Order", on_delete=models.CASCADE, related_name="letter")
     driver_id = models.ForeignKey("driver.Driver", on_delete=models.CASCADE, related_name="letters")
-    broker_price = models.DecimalField(max_digits=10, decimal_places=3, default=0)
-    driver_price = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    dispatcher_id = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name="letters")
+    broker_price = models.DecimalField(max_digits=10, decimal_places=3, default=1)
+    driver_price = models.DecimalField(max_digits=10, decimal_places=3, default=1)
     comment = models.TextField(blank=True, null=True)
 
     def __str__(self):

@@ -12,7 +12,6 @@ from apps.order.api.v1.apis import (
     OrderDeleteAPI,
     OrderDetailAPI,
     OrderFilterView,
-    OrderHistoryListAPI,
     OrderListAPI,
     OrderUpdateAPI,
     assign,
@@ -30,13 +29,8 @@ urlpatterns = [
     path("<int:pk>/update/", OrderUpdateAPI.as_view(), name="order-update"),
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
     path("filter/", OrderFilterView.as_view(), name="order-filter"),
-    path("get-location/", GetLocationAPI.as_view(), name="get-location-drivers"),
-    path("last-two/<int:pk>/", LastTwoOrdersAPI.as_view(), name="last-two-orders"),
-]
-
-# order-history
-urlpatterns += [
-    path("history/", OrderHistoryListAPI.as_view(), name="order-history-list"),
+    # path("get_location/", GetLocationAPI.as_view(), name="get-location-drivers"),
+    # path("last_similer/<int:pk>/", LastTwoOrdersAPI.as_view(), name="last-two-orders"),
 ]
 
 # my bids

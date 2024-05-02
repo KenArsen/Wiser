@@ -19,7 +19,7 @@ from apps.order.models import Order
 class OrderListAPI(generics.ListAPIView):
     queryset = Order.objects.filter(is_active=True, order_status="DEFAULT")
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
 
     def get(self, request, *args, **kwargs):
@@ -29,7 +29,8 @@ class OrderListAPI(generics.ListAPIView):
 class OrderCreateAPI(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderWriteSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -118,50 +119,42 @@ class OrderFilterView(generics.ListAPIView):
 
 
 class LastTwoOrdersAPI(views.APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get(self, request, *args, **kwargs):
         order_id = kwargs["pk"]
         order = get_object_or_404(Order, pk=order_id)
 
-        # Получаем координаты текущего заказа
-        lat_from, lon_from = order.coordinate_from.split(",")
-        lat_to, lon_to = order.coordinate_to.split(",")
+        order_my_bids = Order.objects.filter(is_active=True, order_status="PENDING").order_by("-id")
 
-        # Формируем квадрат, внутри которого будем искать другие заказы
-        max_latitude = float(lat_from) + 0.1  # Примерный радиус в градусах
-        min_latitude = float(lat_from) - 0.1
-        max_longitude = float(lon_from) + 0.1
-        min_longitude = float(lon_from) - 0.1
+        nearby_orders = []
 
-        # Получаем другие заказы в радиусе 20 миль от текущего заказа
-        other_orders = Order.objects.filter(
-            ~Q(pk=order_id),  # Исключаем текущий заказ
-            Q(coordinate_from__lte=max_latitude, coordinate_from__gte=min_latitude)
-            & Q(coordinate_to__lte=max_latitude, coordinate_to__gte=min_latitude),
-        ).order_by("-id")
+        for bid in order_my_bids:
+            distance_from = get_distance(order.coordinate_from, bid.coordinate_from)
+            distance_to = get_distance(order.coordinate_to, bid.coordinate_to)
+            print(distance_from)
+            print(distance_to)
+            if distance_from <= 20 and distance_to <= 20:  # Радиус 20 миль
+                nearby_orders.append(order)
 
-        # # Инициализируем список для хранения найденных заказов
-        # orders_within_20_miles = []
-        #
-        # # Отфильтруем заказы, расстояние между координатами которых менее 20 миль
-        # for other_order in other_orders:
-        #     lat_other_from, lon_other_from = other_order.coordinate_from.split(',')
-        #     lat_other_to, lon_other_to = other_order.coordinate_to.split(',')
-        #     lat_other_from = float(lat_other_from)
-        #     lon_other_from = float(lon_other_from)
-        #     lat_other_to = float(lat_other_to)
-        #     lon_other_to = float(lon_other_to)
-        #     distance_from = geodesic((lat_from, lon_from), (lat_other_from, lon_other_from)).miles
-        #     distance_to = geodesic((lat_to, lon_to), (lat_other_to, lon_other_to)).miles
-        #     if distance_from <= 20 and distance_to <= 20:
-        #         orders_within_20_miles.append(other_order)
-        #
-        #     # Если найдено два заказа, выходим из цикла
-        #     if len(orders_within_20_miles) >= 2:
-        #         break
+            if len(nearby_orders) > 2:  # Не более двух ближайших заказов
+                break
+        print(nearby_orders)
 
-        serialized_data = OrderSerializer(other_orders, many=True)
+        return Response({'nearby_orders': 'ok'})
 
-        # return Response({"orders_within_20_miles": orders_within_20_miles})
-        return Response({"orders_within_20_miles": serialized_data.data})
+
+from geopy.distance import geodesic
+
+
+def get_distance(coord1, coord2):
+    # Преобразовать координаты в кортежи чисел
+    lat1, lon1 = map(float, coord1.split(","))
+    lat2, lon2 = map(float, coord2.split(","))
+    print(lat1, lon1)
+    print(lat2, lon2)
+
+    # Вычислить расстояние между координатами
+    distance = geodesic((lat1, lon1), (lat2, lon2)).km
+    print(distance)
+    return distance

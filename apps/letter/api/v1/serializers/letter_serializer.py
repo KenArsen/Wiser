@@ -22,6 +22,8 @@ class LetterWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"error": "Order ID is required."})
         if not attrs.get("driver_id"):
             raise serializers.ValidationError({"error": "Driver ID is required."})
+        if not attrs.get("dispatcher_id"):
+            raise serializers.ValidationError({"error": "Dispatcher ID is required."})
         if not attrs.get("comment"):
             raise serializers.ValidationError({"error": "Comment is required."})
         return attrs
