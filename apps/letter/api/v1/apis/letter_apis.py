@@ -40,17 +40,18 @@ class SendEmailView(views.APIView):
         request_body=LetterWriteSerializer,
     )
     def post(self, request, *args, **kwargs):
-        order_id = request.data.get("order_id")
         try:
+            order_id = request.data.get("order_id")
+            if not order_id:
+                raise exceptions.ValidationError({"order_id": "order_id is required"})
             order = Order.objects.get(id=order_id)
             if hasattr(order, "letter"):
                 order.letter.delete()
-                order.save()
-            serializer = LetterWriteSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                send_email(serializer.data)
-                return Response({"success": "Message sent successfully"}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Order.DoesNotExist:
-            raise exceptions.ValidationError({"detail": "No such order found"})
+            raise exceptions.ValidationError({"detail": "Order does not exist"})
+        serializer = LetterWriteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            send_email(serializer.data)
+            return Response({"success": "Message sent successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

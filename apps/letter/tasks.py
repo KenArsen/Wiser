@@ -5,14 +5,12 @@ from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework.exceptions import ValidationError
 
-from apps.letter.models import Letter
 from apps.order.models import Order
 
 
 def send_email(data):
     try:
         logging.info(f"***** Sending email for letter {data['id']} *****")
-        letter = Letter.objects.get(id=data["id"])
         order = Order.objects.get(id=data["order_id"])
         order.order_status = "AWAITING_BID"
         order.save()
@@ -25,11 +23,11 @@ def send_email(data):
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=["arsen.kenjegulov.bj@gmail.com", "yryskeldiaidarbekuulu@gmail.com"],
                 fail_silently=False,
-                html_message=letter.comment,
+                html_message=data["comment"],
             )
             logging.info(f"***** Email to {order.email} sent successfully *****")
-    except Letter.DoesNotExist or Order.DoesNotExist:
-        raise ValidationError({"detail": "No such letter or order found"})
+    except Order.DoesNotExist:
+        raise ValidationError({"detail": "No such order found"})
     except (SMTPAuthenticationError, SMTPException) as e:
         raise ValidationError({"error", f"{e}"})
     except Exception as e:

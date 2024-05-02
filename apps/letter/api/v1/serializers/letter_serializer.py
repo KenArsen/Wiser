@@ -16,14 +16,3 @@ class LetterWriteSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
         ref_name = "LetterWrite"
-
-    def validate(self, attrs):
-        if not attrs.get("order_id"):
-            raise serializers.ValidationError({"error": "Order ID is required."})
-        if not attrs.get("driver_id"):
-            raise serializers.ValidationError({"error": "Driver ID is required."})
-        if not attrs.get("dispatcher_id"):
-            raise serializers.ValidationError({"error": "Dispatcher ID is required."})
-        if not attrs.get("comment"):
-            raise serializers.ValidationError({"error": "Comment is required."})
-        return attrs

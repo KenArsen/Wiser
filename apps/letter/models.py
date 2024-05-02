@@ -10,7 +10,7 @@ class Letter(BaseModel):
     dispatcher_id = models.ForeignKey("user.User", on_delete=models.CASCADE, related_name="letters")
     broker_price = models.IntegerField(default=1)
     driver_price = models.IntegerField(default=1)
-    comment = models.TextField(blank=True, null=True)
+    comment = models.TextField()
 
     def __str__(self):
         return f"Order ID: {self.order_id.id} - Driver ID: {self.driver_id.id}"
