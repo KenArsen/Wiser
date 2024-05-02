@@ -131,8 +131,7 @@ class LastSimilarOrdersAPI(views.APIView):
         ]
     )
     def get(self, request, *args, **kwargs):
-        order_id = kwargs["pk"]
-        order = get_object_or_404(Order, pk=order_id)
+        order = get_object_or_404(Order, pk=kwargs["pk"])
 
         radius = int(request.query_params.get('radius', 20))
         count = int(request.query_params.get('count', 2))
@@ -144,11 +143,12 @@ class LastSimilarOrdersAPI(views.APIView):
         for bid in order_my_bids:
             distance_from = get_distance(order.coordinate_from, bid.coordinate_from)
             distance_to = get_distance(order.coordinate_to, bid.coordinate_to)
-            if distance_from <= radius and distance_to <= radius:  # Используем значение radius
-                nearby_orders.append(order)
+            if distance_from <= radius and distance_to <= radius:
+                nearby_orders.append(bid)
 
-            if len(nearby_orders) >= count:
+            if len(nearby_orders) > count:
                 break
+        print(nearby_orders)
 
         serializer = OrderReadSerializer(nearby_orders, many=True)
 
