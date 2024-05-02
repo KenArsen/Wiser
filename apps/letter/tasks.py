@@ -1,7 +1,6 @@
 import logging
 from smtplib import SMTPAuthenticationError, SMTPException
 
-from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -9,7 +8,6 @@ from apps.letter.models import Letter
 from apps.order.models import Order
 
 
-@shared_task
 def send_email(data):
     try:
         logging.info(f"***** Sending email for letter {data['id']} *****")
@@ -24,7 +22,7 @@ def send_email(data):
                 subject=subject,
                 message=message,
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[order.email, "arsen.kenjegulov.bj@gmail.com", "yryskeldiaidarbekuulu@gmail.com"],
+                recipient_list=["arsen.kenjegulov.bj@gmail.com", "yryskeldiaidarbekuulu@gmail.com"],
                 fail_silently=False,
                 html_message=letter.comment,
             )
@@ -32,6 +30,6 @@ def send_email(data):
     except Letter.DoesNotExist or Order.DoesNotExist:
         logging.error(f"***** Unable to send email for letter {data['id']} *****")
     except (SMTPAuthenticationError, SMTPException) as e:
-        print(f"Ошибка при отправке почты: {e}")
+        logging.error(f"Ошибка при отправке почты: {e}")
     except Exception as e:
-        print(f"Общая ошибка: {e}")
+        logging.error(f"Общая ошибка: {e}")

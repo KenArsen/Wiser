@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Очистка кэша APT
+sudo apt autoclean
+sudo apt autoremove
+
 # Apply migrations
 python manage.py migrate
 
