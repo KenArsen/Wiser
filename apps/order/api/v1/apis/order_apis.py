@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from geopy.distance import geodesic
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
@@ -121,9 +122,20 @@ class OrderFilterView(generics.ListAPIView):
 class LastSimilarOrdersAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('radius', openapi.IN_QUERY, description="Radius in miles", type=openapi.TYPE_INTEGER,
+                              default=20),
+            openapi.Parameter('count', openapi.IN_QUERY, description="Number of nearby orders to return",
+                              type=openapi.TYPE_INTEGER, default=2),
+        ]
+    )
     def get(self, request, *args, **kwargs):
         order_id = kwargs["pk"]
         order = get_object_or_404(Order, pk=order_id)
+
+        radius = int(request.query_params.get('radius', 20))
+        count = int(request.query_params.get('count', 2))
 
         order_my_bids = Order.objects.filter(is_active=True, order_status="PENDING").order_by("-id")
 
@@ -132,10 +144,10 @@ class LastSimilarOrdersAPI(views.APIView):
         for bid in order_my_bids:
             distance_from = get_distance(order.coordinate_from, bid.coordinate_from)
             distance_to = get_distance(order.coordinate_to, bid.coordinate_to)
-            if distance_from <= 20 and distance_to <= 20:  # Радиус 20 миль
+            if distance_from <= radius and distance_to <= radius:  # Используем значение radius
                 nearby_orders.append(order)
 
-            if len(nearby_orders) > 2:  # Не более двух ближайших заказов
+            if len(nearby_orders) >= count:
                 break
 
         serializer = OrderReadSerializer(nearby_orders, many=True)
