@@ -18,7 +18,7 @@ from apps.order.services import order_service
 
 
 class MyBidsListAPI(generics.ListAPIView):
-    queryset = Order.objects.filter(is_active=True, order_status="PENDING")
+    queryset = Order.objects.filter(is_active=True, order_status="EXPIRED")
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
@@ -28,7 +28,7 @@ class MyBidsListAPI(generics.ListAPIView):
 
 
 class MyBidsHistoryAPI(generics.ListAPIView):
-    queryset = Order.objects.filter(is_active=False, order_status="PENDING")
+    queryset = Order.objects.filter(is_active=False, order_status="REFUSED")
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination

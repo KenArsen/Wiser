@@ -10,7 +10,8 @@ from apps.common.base_model import BaseModel
 class Order(BaseModel):
     class OrderStatus(models.TextChoices):
         DEFAULT = "DEFAULT", "----"
-        PENDING = "PENDING", "Pending"
+        EXPIRED = "EXPIRED", "EXPIRED"
+        REFUSED = "REFUSED", "REFUSED"
         MY_LOADS = "MY_LOADS", "My Loads"
 
     class MyLoadsStatus(models.IntegerChoices):

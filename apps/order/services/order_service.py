@@ -11,4 +11,5 @@ class MyBids:
 
     def get_bids_no(self):
         self.order.is_active = False
+        self.order.order_status = "REFUSED"
         self.order.save()

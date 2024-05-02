@@ -15,7 +15,7 @@ def send_email(data):
         logging.info(f"***** Sending email for letter {data['id']} *****")
         letter = Letter.objects.get(id=data["id"])
         order = Order.objects.get(id=data["order_id"])
-        order.order_status = "PENDING"
+        order.order_status = "EXPIRED"
         order.save()
         if order.email:
             subject = "New comment added"
