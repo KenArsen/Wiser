@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.order.api.v1.apis import (
+    LastTwoOrdersAPI,
     MyBidsListAPI,
     MyLoadsCheckoutAPI,
     MyLoadsCompletedAPI,
@@ -12,7 +13,6 @@ from apps.order.api.v1.apis import (
     OrderFilterView,
     OrderHistoryListAPI,
     OrderListAPI,
-    LastTwoOrdersAPI,
     OrderUpdateAPI,
     assign,
     refuse,

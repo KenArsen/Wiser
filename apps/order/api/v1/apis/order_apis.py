@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
+from geopy.distance import geodesic
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,11 +10,10 @@ from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     OrderReadSerializer,
-    OrderWriteSerializer,
     OrderSerializer,
+    OrderWriteSerializer,
 )
 from apps.order.models import Order
-from geopy.distance import geodesic
 
 
 class OrderListAPI(generics.ListAPIView):
@@ -115,12 +115,12 @@ class LastTwoOrdersAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get(self, request, *args, **kwargs):
-        order_id = kwargs['pk']
+        order_id = kwargs["pk"]
         order = get_object_or_404(Order, pk=order_id)
 
         # Получаем координаты текущего заказа
-        lat_from, lon_from = order.coordinate_from.split(',')
-        lat_to, lon_to = order.coordinate_to.split(',')
+        lat_from, lon_from = order.coordinate_from.split(",")
+        lat_to, lon_to = order.coordinate_to.split(",")
 
         # Формируем квадрат, внутри которого будем искать другие заказы
         max_latitude = float(lat_from) + 0.1  # Примерный радиус в градусах
@@ -131,9 +131,9 @@ class LastTwoOrdersAPI(views.APIView):
         # Получаем другие заказы в радиусе 20 миль от текущего заказа
         other_orders = Order.objects.filter(
             ~Q(pk=order_id),  # Исключаем текущий заказ
-            Q(coordinate_from__lte=max_latitude, coordinate_from__gte=min_latitude) &
-            Q(coordinate_to__lte=max_latitude, coordinate_to__gte=min_latitude)
-        ).order_by('-id')
+            Q(coordinate_from__lte=max_latitude, coordinate_from__gte=min_latitude)
+            & Q(coordinate_to__lte=max_latitude, coordinate_to__gte=min_latitude),
+        ).order_by("-id")
 
         # # Инициализируем список для хранения найденных заказов
         # orders_within_20_miles = []

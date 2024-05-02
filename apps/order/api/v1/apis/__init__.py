@@ -6,12 +6,12 @@ from .my_loads_apis import (
     MyLoadsStatus,
 )
 from .order_apis import (
+    LastTwoOrdersAPI,
     OrderCreateAPI,
     OrderDeleteAPI,
     OrderDetailAPI,
     OrderFilterView,
     OrderListAPI,
     OrderUpdateAPI,
-    LastTwoOrdersAPI,
 )
 from .order_history_api import OrderHistoryListAPI
