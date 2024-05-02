@@ -38,22 +38,15 @@ class OrderWriteSerializer(serializers.ModelSerializer):
 
 
 class OrderReadSerializer(serializers.ModelSerializer):
-    created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
     letter = LetterReadSerializer(required=False, read_only=True)
     assign = AssignSerializer(read_only=True)
 
     class Meta:
         model = Order
-        exclude = (
-            "created_at",
-            "updated_at",
-        )
+        fields = '__all__'
         ref_name = "OrderRead"
 
-    def get_created_time(self, obj):
-        formatted_time = dateformat.format(obj.created_at, "h:i A")
-        return formatted_time
 
 
 class OrderSerializer(serializers.ModelSerializer):

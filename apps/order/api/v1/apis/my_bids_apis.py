@@ -2,7 +2,7 @@ import logging
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import exceptions, status, views
+from rest_framework import exceptions, status, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,24 +17,24 @@ from apps.order.models import Order
 from apps.order.services import order_service
 
 
-class MyBidsListAPI(views.APIView):
+class MyBidsListAPI(generics.ListAPIView):
+    queryset = Order.objects.filter(is_active=True, order_status="PENDING")
+    serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
 
     def get(self, request, *args, **kwargs):
-        queryset = Order.objects.filter(is_active=True, order_status="PENDING")
-        serializer = OrderSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return self.list(request, *args, **kwargs)
 
 
-class MyBidsHistoryAPI(views.APIView):
+class MyBidsHistoryAPI(generics.ListAPIView):
+    queryset = Order.objects.filter(is_active=False, order_status="PENDING")
+    serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
 
     def get(self, request, *args, **kwargs):
-        queryset = Order.objects.filter(is_active=False, order_status="PENDING")
-        serializer = OrderSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return self.list(request, *args, **kwargs)
 
 
 @swagger_auto_schema(
