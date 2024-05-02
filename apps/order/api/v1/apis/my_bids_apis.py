@@ -49,7 +49,6 @@ def assign(request):
         if not pk:
             raise exceptions.ValidationError({"order_id": "This field is required."})
         try:
-            pk = request.data["order_id"]
             order = Order.objects.get(pk=pk)
             order_service.MyBids(order=order).get_bids_yes()
             serializer = AssignSerializer(data=request.data)

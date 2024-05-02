@@ -73,12 +73,18 @@ class OrderUpdateAPI(generics.UpdateAPIView):
 
 class OrderDeleteAPI(generics.DestroyAPIView):
     queryset = Order.objects.all()
+    serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def destroy(self, request, *args, **kwargs):
-        instance = get_object_or_404(Order, pk=kwargs["pk"])
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        instance = self.get_object()
+        if instance.user:
+            instance.is_active = False
+            instance.save()
+            return Response({"detail": "This order has been marked as inactive."})
+        else:
+            self.perform_destroy(instance)
+        return Response({"detail": "Order deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
         instance.delete()
