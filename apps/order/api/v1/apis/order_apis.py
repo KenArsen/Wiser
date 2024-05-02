@@ -19,7 +19,7 @@ from apps.order.models import Order
 class OrderListAPI(generics.ListAPIView):
     queryset = Order.objects.filter(is_active=True, order_status="DEFAULT")
     serializer_class = OrderReadSerializer
-    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
 
     def get(self, request, *args, **kwargs):
@@ -30,7 +30,7 @@ class OrderCreateAPI(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderWriteSerializer
 
-    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -118,8 +118,8 @@ class OrderFilterView(generics.ListAPIView):
         return Response(serialized_data.data)
 
 
-class LastTwoOrdersAPI(views.APIView):
-    # permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+class LastSimilarOrdersAPI(views.APIView):
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get(self, request, *args, **kwargs):
         order_id = kwargs["pk"]
@@ -132,29 +132,22 @@ class LastTwoOrdersAPI(views.APIView):
         for bid in order_my_bids:
             distance_from = get_distance(order.coordinate_from, bid.coordinate_from)
             distance_to = get_distance(order.coordinate_to, bid.coordinate_to)
-            print(distance_from)
-            print(distance_to)
             if distance_from <= 20 and distance_to <= 20:  # Радиус 20 миль
                 nearby_orders.append(order)
 
             if len(nearby_orders) > 2:  # Не более двух ближайших заказов
                 break
-        print(nearby_orders)
 
-        return Response({'nearby_orders': 'ok'})
+        serializer = OrderReadSerializer(nearby_orders, many=True)
 
-
-from geopy.distance import geodesic
+        return Response({'nearby_orders': serializer.data}, status=status.HTTP_200_OK)
 
 
 def get_distance(coord1, coord2):
     # Преобразовать координаты в кортежи чисел
     lat1, lon1 = map(float, coord1.split(","))
     lat2, lon2 = map(float, coord2.split(","))
-    print(lat1, lon1)
-    print(lat2, lon2)
 
     # Вычислить расстояние между координатами
     distance = geodesic((lat1, lon1), (lat2, lon2)).km
-    print(distance)
     return distance

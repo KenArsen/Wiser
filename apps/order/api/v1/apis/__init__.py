@@ -6,7 +6,7 @@ from .my_loads_apis import (
     MyLoadsStatus,
 )
 from .order_apis import (
-    LastTwoOrdersAPI,
+    LastSimilarOrdersAPI,
     OrderCreateAPI,
     OrderDeleteAPI,
     OrderDetailAPI,

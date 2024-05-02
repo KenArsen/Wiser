@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.order.api.v1.apis import (
-    LastTwoOrdersAPI,
+    LastSimilarOrdersAPI,
     MyBidsListAPI,
     MyBidsHistoryAPI,
     MyLoadsCheckoutAPI,
@@ -30,7 +30,7 @@ urlpatterns = [
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
     path("filter/", OrderFilterView.as_view(), name="order-filter"),
     # path("get_location/", GetLocationAPI.as_view(), name="get-location-drivers"),
-    # path("last_similer/<int:pk>/", LastTwoOrdersAPI.as_view(), name="last-two-orders"),
+    path("last_similar/<int:pk>/", LastSimilarOrdersAPI.as_view(), name="last-similar-orders"),
 ]
 
 # my bids
