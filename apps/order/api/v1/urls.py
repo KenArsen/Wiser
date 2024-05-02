@@ -11,7 +11,6 @@ from apps.order.api.v1.apis import (
     OrderCreateAPI,
     OrderDeleteAPI,
     OrderDetailAPI,
-    OrderFilterView,
     OrderListAPI,
     OrderUpdateAPI,
     assign,
@@ -28,7 +27,6 @@ urlpatterns = [
     path("<int:pk>/", OrderDetailAPI.as_view(), name="order-detail"),
     path("<int:pk>/update/", OrderUpdateAPI.as_view(), name="order-update"),
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
-    path("filter/", OrderFilterView.as_view(), name="order-filter"),
     # path("get_location/", GetLocationAPI.as_view(), name="get-location-drivers"),
     path("last_similar/<int:pk>/", LastSimilarOrdersAPI.as_view(), name="last-similar-orders"),
 ]

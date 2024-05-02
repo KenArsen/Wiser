@@ -15,7 +15,7 @@ class MyLoadsListAPI(views.APIView):
     pagination_class = LargeResultsSetPagination
 
     def get(self, request):
-        queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status__lte=5)
+        queryset = Order.objects.filter(order_status="CONFIRMED", my_loads_status__lte=5)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -24,7 +24,7 @@ class MyLoadsCheckoutAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get(self, request):
-        queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status=6)
+        queryset = Order.objects.filter(order_status="CONFIRMED", my_loads_status=6)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -33,7 +33,7 @@ class MyLoadsCompletedAPI(views.APIView):
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
 
     def get(self, request):
-        queryset = Order.objects.filter(is_active=True, order_status="MY_LOADS", my_loads_status=7)
+        queryset = Order.objects.filter(order_status="CONFIRMED", my_loads_status=7)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

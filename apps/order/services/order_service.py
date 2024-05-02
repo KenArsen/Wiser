@@ -6,7 +6,7 @@ class MyBids:
         self.order = order
 
     def get_bids_yes(self):
-        self.order.order_status = "MY_LOADS"
+        self.order.order_status = "CONFIRMED"
         self.order.save()
 
     def get_bids_no(self):

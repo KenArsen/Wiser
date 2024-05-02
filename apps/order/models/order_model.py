@@ -9,10 +9,13 @@ from apps.common.base_model import BaseModel
 
 class Order(BaseModel):
     class OrderStatus(models.TextChoices):
-        DEFAULT = "DEFAULT", "----"
+        PENDING = "PENDING", "PENDING"
+        AWAITING_BID = "AWAITING_BID", "AWAITING BID"
         EXPIRED = "EXPIRED", "EXPIRED"
         REFUSED = "REFUSED", "REFUSED"
-        MY_LOADS = "MY_LOADS", "My Loads"
+        COMPLETED = "COMPLETED", "COMPLETED"
+        CANCELLED = "CANCELLED", "CANCELLED"
+        CONFIRMED = "CONFIRMED", "CONFIRMED"
 
     class MyLoadsStatus(models.IntegerChoices):
         DEFAULT = 0, "Active"
@@ -26,9 +29,7 @@ class Order(BaseModel):
 
     user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
 
-    is_active = models.BooleanField(default=True, null=True, blank=True)
-
-    order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.DEFAULT)
+    order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING)
     my_loads_status = models.IntegerField(choices=MyLoadsStatus.choices, default=MyLoadsStatus.DEFAULT)
 
     order_number = models.CharField(max_length=255, blank=True, null=True)
@@ -73,12 +74,12 @@ class Order(BaseModel):
         if self.expires is None:
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} нет!"})
 
-        if self.expires <= timezone.localtime(timezone.now()) and self.order_status == "DEFAULT":
+        if self.expires <= timezone.localtime(timezone.now()) and self.order_status == "PENDING":
             raise exceptions.ValidationError({"error": f"Срок действия этого {self.order_number} заказа уже истек!"})
 
     def move_to_history(self):
         if self.user is not None:
-            self.is_active = False
+            self.order_status = "EXPIRED"
             self.save()
             logging.info(f"------ Заказ {self.id} перемещен в историю --------")
         else:

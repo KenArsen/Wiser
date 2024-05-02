@@ -4,7 +4,6 @@ import logging
 import re
 from datetime import datetime, timedelta
 
-import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 from django.core.exceptions import ValidationError
@@ -13,59 +12,7 @@ from django.utils import timezone
 
 from wiser_load_board.settings import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
 
-from ..vehicle.models import Vehicles
 from .models import Order
-
-
-@shared_task()
-def get_location():
-    pass
-    # logging.info(f'{"#" * 10} Getting location start {"#" * 10}')
-    # orders = Order.objects.all()
-    # for order in orders:
-    #     lat_order, lon_order = order.coordinate_from.split(",")
-    #
-    #     match = 0
-    #     sources = f'"location":[{lat_order},{lon_order}]'
-    #     targets = ''
-    #     vehicles = Vehicles.objects.all()
-    #     drivers = []
-    #     for vehicle in vehicles:
-    #         drivers.append(vehicle.driver)
-    #         lat_driver, lon_driver = vehicle.coordinate_from.split(",")
-    #         targets += '{"location":[' + lat_driver + ',' + lon_driver + ']},'
-    #     targets = targets[:-1]
-    #
-    #     for vehicle in vehicles:
-    #         lat_driver, lon_driver = vehicle.coordinate_from.split(",")
-    #         distance_miles = get_distance_and_time(lon_order, lat_order, lon_driver, lat_driver)
-    #         if distance_miles <= 1000:
-    #             match += 1
-    #
-    #     order.match = match
-    #     order.save()
-    # logging.info(f'{"#" * 10} Getting location end {"#" * 10}')
-
-
-@shared_task()
-def deactivate_expired_order(order_id):
-    logging.info(f"####### Время удаление {order_id} #######")
-    try:
-        order = Order.objects.filter(pk=order_id, order_status="DEFAULT").first()
-        if order:
-            if order.user is None:
-                logging.info(f"Время действия заказа: {order.id} истекло в: {order.expires}")
-                order.delete()
-                logging.info(f"Заказ с номером {order_id} удален")
-            else:
-                logging.info(f"Время действия заказа {order.order_number} истекло. Заказ перемещен в историю")
-                order.is_active = False
-                order.save()
-        else:
-            logging.info(f"Order {order_id} уже удален")
-    except Exception as e:
-        logging.error(f"Error in order: deactivate_expired_order {str(e)}")
-        raise ValueError(f"Error in order deactivate_expired_order {str(e)}")
 
 
 @shared_task()
@@ -74,7 +21,7 @@ def delete_expired_data():
         with transaction.atomic():
             logging.info("##### Начато удаление просроченных данных. #####")
 
-            expired_orders = Order.objects.filter(expires__lt=timezone.now(), is_active=True, order_status="DEFAULT")
+            expired_orders = Order.objects.filter(expires__lt=timezone.now(), order_status="PENDING")
             for order in expired_orders:
                 order.move_to_history()
 
@@ -117,12 +64,13 @@ def process_and_save_emails_task():
                     if order_data:
                         save_order(order_data)
                         mail.store(num, "+FLAGS", "\\Seen")
+                        continue
                     else:
-                        logging.warning("Недостаточно данных для создания заказа")
                         mail.store(num, "+FLAGS", "\\Seen")
+                        continue
 
                 except Exception as e:
-                    logging.error(f"Ошибка {num}", e)
+                    logging.error(f"Ошибка {e}")
                     mail.store(num, "+FLAGS", "\\Seen")
                     continue
             mail.logout()
@@ -274,24 +222,11 @@ def extract_order_data(soup):
 
 @transaction.atomic
 def save_order(order_data):
-    try:
-        if not order_data.get("order_number"):
-            raise ValidationError({"error": "Этот номер заказа не может быть пустым."})
+    if not order_data.get("order_number"):
+        raise ValidationError({"error": "Этот номер заказа не может быть пустым."})
 
-        order = Order(**order_data)
-        order.full_clean()
-        order.save()
-        logging.info(f"Заказ {order.id} сохранен в базу")
-
-        eta_time = order.expires + timedelta(seconds=3)
-        logging.info(f"ORDER id : {order.id} - ETA TIME : {eta_time}")
-        logging.info(f"ORDER id : {order.id} - LOCAL TIME : {timezone.localtime(timezone.now())}")
-
-        transaction.on_commit(lambda: deactivate_expired_order.apply_async((order.id,), eta=eta_time))
-        logging.info(f"Запуск задачи для Expires {order.id}")
-        logging.info(f"{order.id}: Время удаления через {eta_time - timezone.localtime(timezone.now())}")
-        return order
-    except ValidationError as e:
-        logging.error(e)
-    except Exception as e:
-        logging.error(f"Ошибка при сохранении заказа: {e}")
+    order = Order(**order_data)
+    order.full_clean()
+    order.save()
+    logging.info(f"Заказ {order.id} сохранен в базу")
+    return order

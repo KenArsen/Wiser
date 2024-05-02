@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -18,7 +17,7 @@ from apps.order.models import Order
 
 
 class OrderListAPI(generics.ListAPIView):
-    queryset = Order.objects.filter(is_active=True, order_status="DEFAULT")
+    queryset = Order.objects.filter(order_status="PENDING")
     serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
@@ -81,7 +80,7 @@ class OrderDeleteAPI(generics.DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.user:
-            instance.is_active = False
+            instance.order_status = "EXPIRED"
             instance.save()
             return Response({"detail": "This order has been marked as inactive."})
         else:
@@ -90,33 +89,6 @@ class OrderDeleteAPI(generics.DestroyAPIView):
 
     def perform_destroy(self, instance):
         instance.delete()
-
-
-class OrderFilterView(generics.ListAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
-    pagination_class = LargeResultsSetPagination
-
-    @swagger_auto_schema(
-        operation_summary="Filter orders",
-    )
-    def get(self, request):
-        pick_up_at = request.query_params.get("pick_up_at")
-        deliver_to = request.query_params.get("deliver_to")
-        miles = request.query_params.get("miles")
-        filtered_orders = self.queryset.filter(is_active=True)
-        filter_conditions = Q()
-        if pick_up_at:
-            filter_conditions |= Q(pick_up_at__icontains=pick_up_at)
-        if deliver_to:
-            filter_conditions |= Q(deliver_to__icontains=deliver_to)
-        if miles:
-            filter_conditions |= Q(miles__exact=miles)
-        if filter_conditions:
-            filtered_orders = filtered_orders.filter(filter_conditions)
-        serialized_data = OrderReadSerializer(filtered_orders, many=True)
-        return Response(serialized_data.data)
 
 
 class LastSimilarOrdersAPI(views.APIView):
@@ -132,11 +104,10 @@ class LastSimilarOrdersAPI(views.APIView):
     )
     def get(self, request, *args, **kwargs):
         order = get_object_or_404(Order, pk=kwargs["pk"])
-
         radius = int(request.query_params.get('radius', 20))
         count = int(request.query_params.get('count', 2))
 
-        order_my_bids = Order.objects.filter(is_active=True, order_status="PENDING").order_by("-id")
+        order_my_bids = Order.objects.filter(order_status="AWAITING_BID").order_by("-id")
 
         nearby_orders = []
 
@@ -144,13 +115,12 @@ class LastSimilarOrdersAPI(views.APIView):
             distance_from = get_distance(order.coordinate_from, bid.coordinate_from)
             distance_to = get_distance(order.coordinate_to, bid.coordinate_to)
 
-            if len(nearby_orders) > count:
+            if len(nearby_orders) >= count:
                 break
-
             if distance_from <= radius and distance_to <= radius:
                 nearby_orders.append(bid)
-        serializer = OrderReadSerializer(nearby_orders, many=True)
 
+        serializer = OrderReadSerializer(nearby_orders, many=True)
         return Response({'nearby_orders': serializer.data}, status=status.HTTP_200_OK)
 
 

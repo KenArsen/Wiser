@@ -17,7 +17,6 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         exclude = (
             "created_at",
             "updated_at",
-            "is_active",
             "order_status",
             "my_loads_status",
         )
@@ -45,23 +44,19 @@ class OrderReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+        read_only_fields = ("created_at", "updated_at", "my_loads_status", "order_status")
         ref_name = "OrderRead"
 
 
-
 class OrderSerializer(serializers.ModelSerializer):
-    created_time = serializers.SerializerMethodField(read_only=True)
     my_loads_status = serializers.CharField(source="get_my_loads_status_display", read_only=True)
     letter = LetterReadSerializer(required=False, read_only=True)
     assign = AssignSerializer(read_only=True)
 
     class Meta:
         model = Order
-        read_only_fields = ["is_active", "order_status"]
-        exclude = (
-            "created_at",
-            "updated_at",
-        )
+        fields = '__all__'
+        read_only_fields = ("order_status", "created_at", "updated_at")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -83,7 +78,3 @@ class OrderSerializer(serializers.ModelSerializer):
         instance.full_clean()
         instance.save()
         return instance
-
-    def get_created_time(self, obj):
-        formatted_time = dateformat.format(obj.created_at, "h:i A")
-        return formatted_time
