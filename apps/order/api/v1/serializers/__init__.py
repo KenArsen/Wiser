@@ -1,5 +1,6 @@
 from .order_serializer import (
     AssignSerializer,
+    MyLoadStatusSerializer,
     OrderReadSerializer,
     OrderSerializer,
     OrderWriteSerializer,

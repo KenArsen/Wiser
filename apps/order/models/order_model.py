@@ -1,6 +1,8 @@
 import logging
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
@@ -11,26 +13,16 @@ class Order(BaseModel):
     class OrderStatus(models.TextChoices):
         PENDING = "PENDING", "PENDING"
         AWAITING_BID = "AWAITING_BID", "AWAITING BID"
-        EXPIRED = "EXPIRED", "EXPIRED"
         REFUSED = "REFUSED", "REFUSED"
+        ASSIGN = "ASSIGN", "ASSIGN"
+        CHECKOUT = "CHECKOUT", "CHECKOUT"
         COMPLETED = "COMPLETED", "COMPLETED"
         CANCELLED = "CANCELLED", "CANCELLED"
-        CONFIRMED = "CONFIRMED", "CONFIRMED"
-
-    class MyLoadsStatus(models.IntegerChoices):
-        DEFAULT = 0, "Active"
-        POINT_A = 1, "I am going to the load"
-        UPLOADED = 2, "Uploaded"
-        ON_THE_WAY = 3, "On the way"
-        UNLOADED = 4, "Unloaded"
-        DELIVERED = 5, "Delivered"
-        CHECKOUT = 6, "Checkout"
-        COMPLETED = 7, "Completed"
+        EXPIRED = "EXPIRED", "EXPIRED"
 
     user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
 
     order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING)
-    my_loads_status = models.IntegerField(choices=MyLoadsStatus.choices, default=MyLoadsStatus.DEFAULT)
 
     order_number = models.CharField(max_length=255, blank=True, null=True)
 
@@ -39,6 +31,9 @@ class Order(BaseModel):
 
     deliver_to = models.CharField(max_length=255, blank=True, null=True)
     deliver_date = models.DateTimeField(blank=True, null=True, default=timezone.now)
+
+    transit_time = models.IntegerField(blank=True, null=True)
+    transit_distance = models.IntegerField(blank=True, null=True)
 
     line = models.CharField(max_length=255, blank=True, null=True)
 
@@ -94,3 +89,33 @@ class Assign(BaseModel):
 
     def __str__(self):
         return f"{self.broker_company} - {self.rate_confirmation}"
+
+
+class MyLoadStatus(models.Model):
+    class Status(models.IntegerChoices):
+        NULL = 0, "NULL"
+        POINT_A = 1, "I am going to the load"
+        UPLOADED = 2, "Uploaded"
+        ON_THE_WAY = 3, "On the way"
+        UNLOADED = 4, "Unloaded"
+        DELIVERED = 5, "Delivered"
+        PAID_OFF = 6, "Paid off"
+        COMPLETED = 7, "Completed"
+
+    previous_status = models.IntegerField(choices=Status.choices, default=Status.NULL)
+    current_status = models.IntegerField(choices=Status.choices, default=Status.NULL)
+    next_status = models.IntegerField(choices=Status.choices, default=Status.NULL)
+    order = models.OneToOneField(
+        "order.Order",
+        on_delete=models.CASCADE,
+        related_name="my_load_status",
+    )
+
+    def __str__(self):
+        return f"{self.order}"
+
+
+@receiver(post_save, sender=Order)
+def create_status(sender, instance, created, **kwargs):
+    if created:
+        MyLoadStatus.objects.create(order=instance)

@@ -1,2 +1,2 @@
-from .order_model import Assign, Order
+from .order_model import Assign, MyLoadStatus, Order
 from .template_model import Template

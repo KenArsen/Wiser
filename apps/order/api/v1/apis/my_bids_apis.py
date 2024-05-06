@@ -12,7 +12,7 @@ from apps.order.api.v1.serializers.order_serializer import (
     OrderSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import order_service
+from apps.order.services import MyBidService
 
 
 class MyBidsListAPI(generics.ListAPIView):
@@ -58,7 +58,7 @@ def assign(request):
             raise exceptions.ValidationError({"detail": "order_id field is required."})
         try:
             order = Order.objects.get(pk=pk)
-            order_service.MyBids(order=order).get_bids_yes()
+            MyBidService(order=order).get_bids_yes()
             serializer = AssignSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -91,7 +91,7 @@ def refuse(request):
             raise exceptions.ValidationError({"detail": "order_id field is required."})
         try:
             order = Order.objects.get(pk=pk)
-            order_service.MyBids(order=order).get_bids_no()
+            MyBidService(order=order).get_bids_no()
             return Response({"status": "The order has been moved to HISTORY"}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             raise exceptions.ValidationError({"detail": "No such order found"})
