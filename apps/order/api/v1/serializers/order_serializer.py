@@ -54,35 +54,3 @@ class OrderReadSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("created_at", "updated_at", "my_load_status", "order_status")
         ref_name = "OrderRead"
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    my_load_status = MyLoadStatusSerializer(many=False, read_only=True)
-    letter = LetterReadSerializer(required=False, read_only=True)
-    assign = AssignSerializer(read_only=True)
-
-    class Meta:
-        model = Order
-        fields = "__all__"
-        read_only_fields = ("order_status", "created_at", "updated_at")
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if data["letter"] is None:
-            del data["letter"]
-        if data["assign"] is None:
-            del data["assign"]
-        return data
-
-    def create(self, validated_data):
-        instance = Order(**validated_data)
-        instance.full_clean()
-        instance.save()
-        return instance
-
-    def update(self, instance, validated_data):
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.full_clean()
-        instance.save()
-        return instance

@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import exceptions, generics, status
+from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,31 +9,27 @@ from apps.common import LargeResultsSetPagination
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     AssignSerializer,
-    OrderSerializer,
+    OrderReadSerializer,
 )
-from apps.order.models import Order
-from apps.order.repositories import MyBidRepository
-from apps.order.services import MyBidService
+from apps.order.services import MyBidService, OrderService
 
 
 class MyBidsListAPI(generics.ListAPIView):
-    queryset = MyBidRepository.get_all()
-    serializer_class = OrderSerializer
+    serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get_queryset(self):
+        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="AWAITING_BID")
 
 
 class MyBidsHistoryAPI(generics.ListAPIView):
-    queryset = MyBidRepository.get_all_history()
-    serializer_class = OrderSerializer
+    serializer_class = OrderReadSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get_queryset(self):
+        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="REFUSED")
 
 
 @swagger_auto_schema(
@@ -53,22 +49,8 @@ class MyBidsHistoryAPI(generics.ListAPIView):
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 @api_view(["POST"])
 def assign(request):
-    if request.method == "POST":
-        pk = request.data["order_id"]
-        if not pk:
-            raise exceptions.ValidationError({"detail": "order_id field is required."})
-        try:
-            order = Order.objects.get(pk=pk)
-            MyBidService(order=order).get_bids_yes()
-            serializer = AssignSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-            else:
-                raise exceptions.ValidationError({"error": "Broker company/Rate confirmation not is valid"})
-            return Response({"status": "The order has been moved to My Loads"}, status=status.HTTP_200_OK)
-        except Order.DoesNotExist:
-            raise exceptions.ValidationError({"detail": "No such order found"})
-    return Response({"status": "fail", "message": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)
+    service = MyBidService(serializer=AssignSerializer).assign(data=request.data)
+    return Response(service, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(
@@ -86,14 +68,5 @@ def assign(request):
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 @api_view(["POST"])
 def refuse(request):
-    if request.method == "POST":
-        pk = request.data["order_id"]
-        if not pk:
-            raise exceptions.ValidationError({"detail": "order_id field is required."})
-        try:
-            order = Order.objects.get(pk=pk)
-            MyBidService(order=order).get_bids_no()
-            return Response({"status": "The order has been moved to HISTORY"}, status=status.HTTP_200_OK)
-        except Order.DoesNotExist:
-            raise exceptions.ValidationError({"detail": "No such order found"})
-    return Response({"status": "fail", "message": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)
+    service = MyBidService(serializer=None).refuse(data=request.data)
+    return Response(service, status=status.HTTP_200_OK)

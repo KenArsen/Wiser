@@ -16,8 +16,6 @@ from apps.order.api.v1.apis import (
     refuse,
 )
 
-from .apis.get_location_apis import GetLocationAPI
-
 app_name = "orders"
 
 urlpatterns = [
@@ -26,7 +24,6 @@ urlpatterns = [
     path("<int:pk>/", OrderDetailAPI.as_view(), name="order-detail"),
     path("<int:pk>/update/", OrderUpdateAPI.as_view(), name="order-update"),
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
-    # path("get_location/", GetLocationAPI.as_view(), name="get-location-drivers"),
     path("last_similar/<int:pk>/", LastSimilarOrdersAPI.as_view(), name="last-similar-orders"),
 ]
 

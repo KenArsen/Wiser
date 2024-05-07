@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-from apps.order.api.v1.serializers import OrderSerializer
+from apps.order.api.v1.serializers import OrderReadSerializer
 
 filtered_drivers_response = {
     200: openapi.Response(
@@ -51,5 +51,5 @@ order_data_spec = {
         openapi.Parameter("deliver_to", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Delivery location"),
         openapi.Parameter("miles", openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description="Miles"),
     ],
-    "responses": {200: openapi.Response("Order data description", OrderSerializer)},
+    "responses": {200: openapi.Response("Order data description", OrderReadSerializer)},
 }
