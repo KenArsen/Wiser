@@ -15,7 +15,7 @@ class MyLoadsListAPI(views.APIView):
     pagination_class = LargeResultsSetPagination
 
     def get(self, request):
-        queryset = MyLoadRepository.get_my_loads()
+        queryset = MyLoadRepository.get_all()
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

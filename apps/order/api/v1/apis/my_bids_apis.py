@@ -12,11 +12,12 @@ from apps.order.api.v1.serializers.order_serializer import (
     OrderSerializer,
 )
 from apps.order.models import Order
+from apps.order.repositories import MyBidRepository
 from apps.order.services import MyBidService
 
 
 class MyBidsListAPI(generics.ListAPIView):
-    queryset = Order.objects.filter(order_status="AWAITING_BID")
+    queryset = MyBidRepository.get_all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination
@@ -26,7 +27,7 @@ class MyBidsListAPI(generics.ListAPIView):
 
 
 class MyBidsHistoryAPI(generics.ListAPIView):
-    queryset = Order.objects.filter(order_status="REFUSED")
+    queryset = MyBidRepository.get_all_history()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
     pagination_class = LargeResultsSetPagination

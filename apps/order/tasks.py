@@ -27,7 +27,7 @@ def delete_expired_data():
 
             logging.info("##### Deletion of expired data completed #####")
     except Exception as e:
-        raise ValidationError({"error": f"An error occurred while deleting expired data: {e}"})
+        logging.error(f"An error occurred while deleting expired data: {e}")
 
 
 @shared_task()
