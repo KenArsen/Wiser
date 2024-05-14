@@ -15,7 +15,7 @@ class MyLoadsListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="ASSIGN")
+        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="ASSIGNED")
 
 
 class MyCheckoutListAPI(generics.ListAPIView):

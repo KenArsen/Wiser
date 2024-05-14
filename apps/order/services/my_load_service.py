@@ -47,9 +47,11 @@ class MyLoadService(OrderService):
             order.my_load_status.previous_status = current_status - 2
             order.my_load_status.save()
 
-            if order.my_load_status.current_status < MyLoadStatus.Status.DELIVERED and order.order_status != "ASSIGN":
-                order.order_status = "ASSIGN"
-            elif order.my_load_status.current_status < MyLoadStatus.Status.PAID_OFF and order.order_status != "ASSIGN":
+            if order.my_load_status.current_status < MyLoadStatus.Status.DELIVERED and order.order_status != "ASSIGNED":
+                order.order_status = "ASSIGNED"
+            elif (
+                order.my_load_status.current_status < MyLoadStatus.Status.PAID_OFF and order.order_status != "ASSIGNED"
+            ):
                 order.order_status = "CHECKOUT"
 
             order.save()

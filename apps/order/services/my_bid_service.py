@@ -15,13 +15,23 @@ class MyBidService(OrderService):
 
     def assign(self, data):
         order = self._get_order(data=data)
-        order.order_status = "ASSIGN"
+        order.order_status = "ASSIGNED"
         order.my_load_status.current_status = MyLoadStatus.Status.POINT_A
         order.my_load_status.next_status = MyLoadStatus.Status.UPLOADED
         order.my_load_status.save()
         order.save()
         if hasattr(order, "assign"):
             order.assign.delete()
+        print(data)
+        broker_price = data.get("broker_price", None)
+        driver_price = data.get("driver_price", None)
+        if broker_price is not None:
+            order.letter.broker_price = broker_price
+            order.letter.save()
+        if driver_price is not None:
+            order.letter.driver_price = driver_price
+            order.letter.save()
+
         serializer = self.serializer(data=data)
         if serializer.is_valid():
             serializer.save()
