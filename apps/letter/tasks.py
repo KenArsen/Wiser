@@ -21,7 +21,7 @@ def send_email(data):
                 subject=subject,
                 message=message,
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=["arsen.kenjegulov.bj@gmail.com", "yryskeldiaidarbekuulu@gmail.com"],
+                recipient_list=["arsen.kenjegulov.bj@gmail.com", "alymbekjenishbekuulu@gmail.com"],
                 fail_silently=False,
                 html_message=data["comment"],
             )
