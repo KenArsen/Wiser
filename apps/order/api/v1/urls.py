@@ -4,6 +4,8 @@ from apps.order.api.v1.apis import (
     LastSimilarOrdersAPI,
     MyBidsHistoryAPI,
     MyBidsListAPI,
+    MyCheckoutListAPI,
+    MyCompletedListAPI,
     MyLoadsListAPI,
     OrderCreateAPI,
     OrderDeleteAPI,
@@ -38,6 +40,8 @@ urlpatterns += [
 # my loads
 urlpatterns += [
     path("my_loads/", MyLoadsListAPI.as_view(), name="my-loads"),
+    path("my_loads/checkout/", MyCheckoutListAPI.as_view(), name="my-checkouts"),
+    path("my_loads/complete/", MyCompletedListAPI.as_view(), name="my-complete"),
     path("my_loads/next_status/", next_status, name="next-status"),
     path("my_loads/previous_status/", previous_status, name="previous-status"),
 ]

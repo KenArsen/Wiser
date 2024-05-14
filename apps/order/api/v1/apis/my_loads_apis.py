@@ -18,6 +18,24 @@ class MyLoadsListAPI(generics.ListAPIView):
         return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="ASSIGN")
 
 
+class MyCheckoutListAPI(generics.ListAPIView):
+    serializer_class = OrderReadSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self):
+        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="CHECKOUT")
+
+
+class MyCompletedListAPI(generics.ListAPIView):
+    serializer_class = OrderReadSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self):
+        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="COMPLETED")
+
+
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
 @api_view(["POST"])
 def next_status(request):
