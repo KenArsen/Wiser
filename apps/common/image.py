@@ -15,7 +15,7 @@ class ImageService(object):
         if image and (image.width > max_width or image.height > max_height):
             width = image.width if image.width < max_width else max_width
             height = image.height if image.height < max_height else max_height
-            img.thumbnail((width, height), Image.ANTIALIAS)
+            img.thumbnail((width, height), Image.LANCZOS)
         output = BytesIO()
         img.save(output, format="JPEG", quality=70, optimize=True, progressive=True)
         output.seek(0)
