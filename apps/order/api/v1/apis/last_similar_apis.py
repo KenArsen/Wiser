@@ -31,6 +31,5 @@ class LastSimilarOrdersAPI(views.APIView):
         data, status_code = LastSimilarService(serializer=self.serializer_class).get_last_similar_orders(
             order_pk=self.kwargs["pk"],
             radius=int(request.query_params.get("radius", 20)),
-            count=int(request.query_params.get("count", 2)),
         )
         return Response(data, status=status_code)
