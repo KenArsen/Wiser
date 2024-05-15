@@ -22,7 +22,6 @@ class MyBidService(OrderService):
         order.save()
         if hasattr(order, "assign"):
             order.assign.delete()
-        print(data)
         broker_price = data.get("broker_price", None)
         driver_price = data.get("driver_price", None)
         if broker_price is not None:

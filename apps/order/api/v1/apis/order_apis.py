@@ -9,6 +9,7 @@ from apps.order.api.v1.serializers.order_serializer import (
     OrderWriteSerializer,
 )
 from apps.order.services import OrderService
+from apps.order.models import Order
 
 
 class OrderListAPI(generics.ListAPIView):
@@ -67,3 +68,15 @@ class OrderDeleteAPI(generics.DestroyAPIView):
             OrderService(serializer=self.serializer_class).delete_order(self.get_object()),
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
+class SetTransitDataAPI(generics.GenericAPIView):
+    serializer_class = OrderWriteSerializer
+
+    def get(self, request, *args, **kwargs):
+        queryset = Order.objects.all()
+        for order in queryset:
+            order.transit_time = 5
+            order.transit_distance = 330
+            order.save()
+        return Response(status=status.HTTP_200_OK)
