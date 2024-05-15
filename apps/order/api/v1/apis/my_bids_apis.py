@@ -20,7 +20,7 @@ class MyBidsListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="AWAITING_BID")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="AWAITING_BID")
 
 
 class MyBidsHistoryAPI(generics.ListAPIView):
@@ -29,7 +29,7 @@ class MyBidsHistoryAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="REFUSED")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="REFUSED")
 
 
 @swagger_auto_schema(

@@ -12,8 +12,8 @@ class OrderService:
     def get_order(self, pk):
         return self.repository.get_order(pk=pk)
 
-    def get_orders_by_status(self, status_):
-        return self.repository.get_orders_by_status(status_=status_)
+    def get_filtered_orders(self, **kwargs):
+        return self.repository.get_filtered_orders(**kwargs)
 
     def get_orders(self):
         return self.repository.get_orders()

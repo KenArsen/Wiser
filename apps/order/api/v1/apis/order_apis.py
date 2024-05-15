@@ -9,7 +9,6 @@ from apps.order.api.v1.serializers.order_serializer import (
     OrderWriteSerializer,
 )
 from apps.order.services import OrderService
-from apps.order.models import Order
 
 
 class OrderListAPI(generics.ListAPIView):
@@ -18,7 +17,7 @@ class OrderListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="PENDING")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="PENDING")
 
 
 class OrderCreateAPI(generics.CreateAPIView):
@@ -68,15 +67,3 @@ class OrderDeleteAPI(generics.DestroyAPIView):
             OrderService(serializer=self.serializer_class).delete_order(self.get_object()),
             status=status.HTTP_204_NO_CONTENT,
         )
-
-
-class SetTransitDataAPI(generics.GenericAPIView):
-    serializer_class = OrderWriteSerializer
-
-    def get(self, request, *args, **kwargs):
-        queryset = Order.objects.all()
-        for order in queryset:
-            order.transit_time = 5
-            order.transit_distance = 330
-            order.save()
-        return Response(status=status.HTTP_200_OK)

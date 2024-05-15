@@ -15,7 +15,7 @@ class MyLoadsListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="ASSIGNED")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="ASSIGNED")
 
 
 class MyCheckoutListAPI(generics.ListAPIView):
@@ -24,7 +24,7 @@ class MyCheckoutListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="CHECKOUT")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="CHECKOUT")
 
 
 class MyCompletedListAPI(generics.ListAPIView):
@@ -33,7 +33,7 @@ class MyCompletedListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders_by_status(status_="COMPLETED")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="COMPLETED")
 
 
 @permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])

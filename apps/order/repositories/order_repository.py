@@ -9,7 +9,10 @@ class OrderRepository:
         return Order.objects.all()
 
     @classmethod
-    def get_filter(cls, **kwargs) -> list:
+    def get_filtered_orders(cls, **kwargs) -> list:
+        order_by_ = kwargs.pop("order_by_", None)
+        if order_by_:
+            return Order.objects.filter(**kwargs).order_by(order_by_)
         return Order.objects.filter(**kwargs)
 
     @classmethod
@@ -18,9 +21,3 @@ class OrderRepository:
             return Order.objects.get(pk=pk)
         except Order.DoesNotExist:
             raise ValidationError({"detail": "Order not found"})
-
-    @classmethod
-    def get_orders_by_status(cls, status_: str, order_by_=None) -> list:
-        if order_by_ is None:
-            return Order.objects.filter(order_status=status_)
-        return Order.objects.filter(order_status=status_).order_by(order_by_)

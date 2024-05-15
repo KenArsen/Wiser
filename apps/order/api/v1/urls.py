@@ -18,8 +18,6 @@ from apps.order.api.v1.apis import (
     refuse,
 )
 
-from apps.order.api.v1.apis.order_apis import SetTransitDataAPI
-
 app_name = "orders"
 
 urlpatterns = [
@@ -29,7 +27,6 @@ urlpatterns = [
     path("<int:pk>/update/", OrderUpdateAPI.as_view(), name="order-update"),
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
     path("last_similar/<int:pk>/", LastSimilarOrdersAPI.as_view(), name="last-similar-orders"),
-    path('set_transit_data/', SetTransitDataAPI.as_view(), name='set-transit-data'),
 ]
 
 # my bids

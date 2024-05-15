@@ -1,4 +1,5 @@
-from math import radians, sin, cos, sqrt, asin
+from math import asin, cos, radians, sin, sqrt
+
 from rest_framework import status
 
 from apps.order.repositories import OrderRepository
@@ -11,7 +12,7 @@ class LastSimilarService:
 
     def get_last_similar_orders(self, order_pk, radius=20):
         order = self.repository.get_order(pk=order_pk)
-        order_my_bids = self.repository.get_orders_by_status(status_="COMPLETED", order_by_="-id")
+        order_my_bids = self.repository.get_filtered_orders(order_status="COMPLETED", order_by_="-id")
 
         nearby_orders = []
 
