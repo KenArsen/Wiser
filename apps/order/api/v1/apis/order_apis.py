@@ -81,16 +81,13 @@ class OrderRefuseAPI(generics.GenericAPIView):
 
 
 class MyLoadSet(generics.GenericAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.filter(Q(order_status='AWAITING_BID') | Q(order_status='PENDING'))
 
     def post(self, request, *args, **kwargs):
         for order in self.queryset.all():
-            if order.my_load_status.previous_status == "0":
-                order.my_load_status.previous_status = None
-            if order.my_load_status.current_status == "0":
-                order.my_load_status.current_status = None
-            if order.my_load_status.next_status == "0":
-                order.my_load_status.next_status = None
+            order.my_load_status.previous_status = None
+            order.my_load_status.current_status = None
+            order.my_load_status.next_status = None
             order.my_load_status.save()
         return Response(status=status.HTTP_200_OK)
 
