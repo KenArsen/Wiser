@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from apps.common import LargeResultsSetPagination
 from apps.common.permissions import IsAdmin, IsDispatcher
 from apps.order.api.v1.serializers import MyLoadStatusSerializer, OrderReadSerializer
+from apps.order.models import Order
 from apps.order.services import MyLoadService, OrderService
 
 
@@ -15,7 +17,18 @@ class MyLoadsListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="ASSIGNED")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="ACTIVE")
+
+
+class MyLoadsHistoryAPI(generics.ListAPIView):
+    serializer_class = OrderReadSerializer
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self):
+        return Order.objects.filter(
+            Q(order_status="REFUSED", assign__isnull=False) | Q(order_status="CHECKOUT") | Q(order_status="COMPLETED"),
+        )
 
 
 class MyCheckoutListAPI(generics.ListAPIView):

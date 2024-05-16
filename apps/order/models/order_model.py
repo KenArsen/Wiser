@@ -14,7 +14,7 @@ class Order(BaseModel):
         PENDING = "PENDING", "PENDING"
         AWAITING_BID = "AWAITING_BID", "AWAITING BID"
         REFUSED = "REFUSED", "REFUSED"
-        ASSIGNED = "ASSIGNED", "ASSIGNED"
+        ACTIVE = "ACTIVE", "ACTIVE"
         CHECKOUT = "CHECKOUT", "CHECKOUT"
         COMPLETED = "COMPLETED", "COMPLETED"
         CANCELLED = "CANCELLED", "CANCELLED"
@@ -93,7 +93,6 @@ class Assign(BaseModel):
 
 class MyLoadStatus(models.Model):
     class Status(models.IntegerChoices):
-        NULL = 0, "NULL"
         POINT_A = 1, "I am going to the load"
         UPLOADED = 2, "Uploaded"
         ON_THE_WAY = 3, "On the way"
@@ -102,9 +101,9 @@ class MyLoadStatus(models.Model):
         PAID_OFF = 6, "Paid off"
         COMPLETED = 7, "Completed"
 
-    previous_status = models.IntegerField(choices=Status.choices, default=Status.NULL)
-    current_status = models.IntegerField(choices=Status.choices, default=Status.NULL)
-    next_status = models.IntegerField(choices=Status.choices, default=Status.NULL)
+    previous_status = models.IntegerField(choices=Status.choices, null=True)
+    current_status = models.IntegerField(choices=Status.choices, null=True)
+    next_status = models.IntegerField(choices=Status.choices, null=True)
     order = models.OneToOneField(
         "order.Order",
         on_delete=models.CASCADE,

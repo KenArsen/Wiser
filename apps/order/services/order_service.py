@@ -40,3 +40,9 @@ class OrderService:
         else:
             instance.delete()
             return {"detail": "Order deleted successfully."}
+
+    def order_refuse(self, order_id):
+        instance = self.get_order(pk=order_id)
+        instance.order_status = "REFUSED"
+        instance.save()
+        return {"detail": "The order has been moved to HISTORY"}

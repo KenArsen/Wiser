@@ -29,7 +29,10 @@ class MyBidsHistoryAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="REFUSED")
+        return OrderService(serializer=self.serializer_class).get_filtered_orders(
+            order_status="REFUSED",
+            assign__isnull=True,
+        )
 
 
 @swagger_auto_schema(
@@ -50,23 +53,4 @@ class MyBidsHistoryAPI(generics.ListAPIView):
 @api_view(["POST"])
 def assign(request):
     service = MyBidService(serializer=AssignSerializer).assign(data=request.data)
-    return Response(service, status=status.HTTP_200_OK)
-
-
-@swagger_auto_schema(
-    method="post",
-    operation_summary="Refuse order",
-    responses={200: "Success", 400: "Bad Request"},
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        required=["id"],
-        properties={
-            "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
-        },
-    ),
-)
-@permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
-@api_view(["POST"])
-def refuse(request):
-    service = MyBidService(serializer=None).refuse(data=request.data)
     return Response(service, status=status.HTTP_200_OK)

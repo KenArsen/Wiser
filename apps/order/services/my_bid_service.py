@@ -15,7 +15,7 @@ class MyBidService(OrderService):
 
     def assign(self, data):
         order = self._get_order(data=data)
-        order.order_status = "ASSIGNED"
+        order.order_status = "ACTIVE"
         order.my_load_status.current_status = MyLoadStatus.Status.POINT_A
         order.my_load_status.next_status = MyLoadStatus.Status.UPLOADED
         order.my_load_status.save()
@@ -37,10 +37,3 @@ class MyBidService(OrderService):
         else:
             raise ValidationError({"error": "Broker company/Rate confirmation not is valid"})
         return {"detail": "The order has been moved to My Loads"}
-
-    def refuse(self, data):
-        order = self._get_order(data=data)
-        order.is_active = False
-        order.order_status = "REFUSED"
-        order.save()
-        return {"detail": "The order has been moved to HISTORY"}

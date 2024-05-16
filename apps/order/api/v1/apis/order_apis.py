@@ -67,3 +67,12 @@ class OrderDeleteAPI(generics.DestroyAPIView):
             OrderService(serializer=self.serializer_class).delete_order(self.get_object()),
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
+class OrderRefuseAPI(generics.GenericAPIView):
+    serializer_class = None
+    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+
+    def post(self, request, *args, **kwargs):
+        service = OrderService(serializer=self.serializer_class).order_refuse(order_id=self.request.data["order_id"])
+        return Response(service, status=status.HTTP_200_OK)
