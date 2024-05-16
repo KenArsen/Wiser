@@ -19,6 +19,8 @@ from apps.order.api.v1.apis import (
     previous_status,
 )
 
+from apps.order.api.v1.apis.order_apis import MyLoadSet
+
 app_name = "orders"
 
 urlpatterns = [
@@ -36,6 +38,7 @@ urlpatterns += [
     path("my_bids/", MyBidsListAPI.as_view(), name="my-bids-list"),
     path("my_bids/history/", MyBidsHistoryAPI.as_view(), name="my-bids-history"),
     path("my_bids/assign/", assign, name="my-bids-assign"),
+    path("my_bids/my_load/", MyLoadSet.as_view(), name="my-bids-load"),
 ]
 
 # my loads
