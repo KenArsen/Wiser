@@ -90,3 +90,13 @@ class MyLoadSet(generics.GenericAPIView):
             order.my_load_status.next_status = None
             order.my_load_status.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class SetStatusAPI(generics.GenericAPIView):
+    queryset = Order.objects.filter(order_status="ASSIGNED")
+
+    def post(self, request, *args, **kwargs):
+        for order in self.queryset.all():
+            order.order_status = "ACTIVE"
+            order.save()
+        return Response(status=status.HTTP_200_OK)
