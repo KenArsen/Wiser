@@ -27,7 +27,7 @@ class MyLoadsHistoryAPI(generics.ListAPIView):
 
     def get_queryset(self):
         return Order.objects.filter(
-            Q(order_status="REFUSED", assign__isnull=False) | Q(order_status="CHECKOUT") | Q(order_status="COMPLETED"),
+            Q(order_status="REFUSED", assign__isnull=False) | Q(order_status="COMPLETED"),
         )
 
 
