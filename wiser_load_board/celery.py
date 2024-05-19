@@ -20,5 +20,5 @@ app.conf.beat_schedule = {
     "delete_expired_data": {
         "task": "apps.order.tasks.delete_expired_data",
         "schedule": timedelta(minutes=3),
-    }
+    },
 }
