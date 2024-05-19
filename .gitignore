@@ -40,7 +40,6 @@ venv
 .wsr/
 myvenv
 .env_local
-.env.local
 
 *.manifest
 *.spec
