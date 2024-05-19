@@ -11,7 +11,7 @@ class MyLoadStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyLoadStatus
-        fields = ("previous_status", "current_status", "next_status")
+        fields = ("previous_status", "current_status", "next_status", "location_updated_at")
 
 
 class AssignSerializer(serializers.ModelSerializer):

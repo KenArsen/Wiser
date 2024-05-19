@@ -104,11 +104,16 @@ class MyLoadStatus(models.Model):
     previous_status = models.IntegerField(choices=Status.choices, null=True)
     current_status = models.IntegerField(choices=Status.choices, null=True)
     next_status = models.IntegerField(choices=Status.choices, null=True)
+    location_updated_at = models.DateTimeField(default=timezone.now)
     order = models.OneToOneField(
         "order.Order",
         on_delete=models.CASCADE,
         related_name="my_load_status",
     )
+
+    def save(self, *args, **kwargs):
+        self.location_updated_at = timezone.now()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.order}"
