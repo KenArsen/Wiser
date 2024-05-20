@@ -12,6 +12,8 @@ class OrderRepository:
     def get_filtered_orders(cls, **kwargs) -> list:
         order_by_ = kwargs.pop("order_by_", None)
         if order_by_:
+            if isinstance(order_by_, (list, tuple)):
+                return Order.objects.filter(**kwargs).order_by(*order_by_)
             return Order.objects.filter(**kwargs).order_by(order_by_)
         return Order.objects.filter(**kwargs)
 

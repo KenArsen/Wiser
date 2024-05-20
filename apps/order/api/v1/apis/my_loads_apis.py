@@ -28,7 +28,7 @@ class MyLoadsHistoryAPI(generics.ListAPIView):
     def get_queryset(self):
         return Order.objects.filter(
             Q(order_status="REFUSED", assign__isnull=False) | Q(order_status="COMPLETED"),
-        )
+        ).order_by("-updated_at", "-id")
 
 
 class MyCheckoutListAPI(generics.ListAPIView):
