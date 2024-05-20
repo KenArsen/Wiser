@@ -30,7 +30,7 @@ class MyBidsHistoryAPI(generics.ListAPIView):
 
     def get_queryset(self):
         return OrderService(serializer=self.serializer_class).get_filtered_orders(
-            order_status="REFUSED", assign__isnull=True, order_by_=("-updated_at", "-id")
+            order_status="REFUSED", assign__isnull=True
         )
 
 

@@ -12,7 +12,7 @@ class LastSimilarService:
 
     def get_last_similar_orders(self, order_pk, radius=20):
         order = self.repository.get_order(pk=order_pk)
-        order_my_bids = self.repository.get_filtered_orders(order_status="COMPLETED", order_by_="-id")
+        order_my_bids = self.repository.get_filtered_orders(order_status="COMPLETED")
 
         nearby_orders = []
 
