@@ -2,11 +2,10 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.common import LargeResultsSetPagination
-from apps.common.permissions import IsAdmin, IsDispatcher
+from apps.common.permissions import IsAdminOrDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     AssignSerializer,
     OrderReadSerializer,
@@ -16,7 +15,7 @@ from apps.order.services import MyBidService, OrderService
 
 class MyBidsListAPI(generics.ListAPIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
@@ -25,7 +24,7 @@ class MyBidsListAPI(generics.ListAPIView):
 
 class MyBidsHistoryAPI(generics.ListAPIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
@@ -48,7 +47,7 @@ class MyBidsHistoryAPI(generics.ListAPIView):
         },
     ),
 )
-@permission_classes([IsAuthenticated, IsAdmin | IsDispatcher])
+@permission_classes((IsAdminOrDispatcher,))
 @api_view(["POST"])
 def assign(request):
     service = MyBidService(serializer=AssignSerializer).assign(data=request.data)

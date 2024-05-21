@@ -1,9 +1,8 @@
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.common.paginations import LargeResultsSetPagination
-from apps.common.permissions import IsAdmin, IsDispatcher
+from apps.common.permissions import IsAdminOrDispatcher
 from apps.order.api.v1.serializers.order_serializer import (
     OrderReadSerializer,
     OrderWriteSerializer,
@@ -13,7 +12,7 @@ from apps.order.services import OrderService
 
 class OrderListAPI(generics.ListAPIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
@@ -22,7 +21,7 @@ class OrderListAPI(generics.ListAPIView):
 
 class OrderCreateAPI(generics.CreateAPIView):
     serializer_class = OrderWriteSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
 
     def post(self, request, *args, **kwargs):
         return Response(
@@ -32,7 +31,7 @@ class OrderCreateAPI(generics.CreateAPIView):
 
 class OrderDetailAPI(generics.RetrieveAPIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
 
     def get_object(self):
         return OrderService(serializer=self.serializer_class).get_order(self.kwargs["pk"])
@@ -40,7 +39,7 @@ class OrderDetailAPI(generics.RetrieveAPIView):
 
 class OrderUpdateAPI(generics.UpdateAPIView):
     serializer_class = OrderWriteSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
 
     def get_object(self):
         return OrderService(serializer=self.serializer_class).get_order(self.kwargs["pk"])
@@ -57,7 +56,7 @@ class OrderUpdateAPI(generics.UpdateAPIView):
 
 class OrderDeleteAPI(generics.DestroyAPIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
 
     def get_object(self):
         return OrderService(serializer=self.serializer_class).get_order(self.kwargs["pk"])
@@ -71,7 +70,7 @@ class OrderDeleteAPI(generics.DestroyAPIView):
 
 class OrderRefuseAPI(generics.GenericAPIView):
     serializer_class = None
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
 
     def post(self, request, *args, **kwargs):
         service = OrderService(serializer=self.serializer_class).order_refuse(order_id=self.request.data["order_id"])

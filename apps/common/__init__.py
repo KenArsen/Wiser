@@ -6,4 +6,11 @@ from .decorators_swagger import (
 )
 from .image import ImageService
 from .paginations import LargeResultsSetPagination
-from .permissions import IsAccounting, IsAdmin, IsAdminOrHR, IsDispatcher, IsHR
+from .permissions import (
+    IsAccounting,
+    IsAdmin,
+    IsAdminOrDispatcher,
+    IsAdminOrHR,
+    IsDispatcher,
+    IsHR,
+)

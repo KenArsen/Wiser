@@ -1,17 +1,16 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.common.permissions import IsAdmin, IsDispatcher
+from apps.common.permissions import IsAdminOrDispatcher
 from apps.order.api.v1.serializers.order_serializer import OrderReadSerializer
 from apps.order.services import LastSimilarService
 
 
 class LastSimilarOrdersAPI(views.APIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsDispatcher)
+    permission_classes = (IsAdminOrDispatcher,)
 
     @swagger_auto_schema(
         manual_parameters=[
