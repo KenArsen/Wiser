@@ -10,12 +10,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from apps.common.permissions import IsAdmin, IsAdminOrHR, IsHR
+from apps.common.permissions import IsSuperAdmin
 from apps.user.api.v1.serializers.user_serializer import (
     InvitationSerializer,
     ResetPasswordConfirmSerializer,
@@ -34,13 +34,13 @@ from wiser_load_board.settings import EMAIL_HOST_USER
 class RolesViewSet(ModelViewSet):
     queryset = Roles.objects.all()
     serializer_class = RolesSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
+    permission_classes = (IsSuperAdmin,)
 
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
+    permission_classes = (IsSuperAdmin,)
 
     def get_serializer_class(self):
         if self.action == "retrieve" or self.action == "me":
@@ -56,7 +56,7 @@ class UserViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action in ["create"]:
             return [AllowAny()]
-        return [IsAdminOrHR()]
+        return [IsSuperAdmin()]
 
     @action(["get"], detail=False)
     def me(self, request, *args, **kwargs):
@@ -84,7 +84,7 @@ class UserViewSet(ModelViewSet):
 
 
 class InvitationView(APIView):
-    permission_classes = (IsAuthenticated, IsAdmin | IsHR)
+    permission_classes = (IsSuperAdmin,)
 
     @swagger_auto_schema(
         request_body=openapi.Schema(

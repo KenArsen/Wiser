@@ -1,10 +1,10 @@
-from .last_similar_apis import LastSimilarOrdersAPI
-from .my_bids_apis import MyBidsHistoryAPI, MyBidsListAPI, assign
+from .load_board_apis import LastSimilarOrdersAPI, LoadBoardListAPI
+from .my_bids_apis import MyBidHistoryAPI, MyBidListAPI, assign
 from .my_loads_apis import (
     MyCheckoutListAPI,
     MyCompletedListAPI,
-    MyLoadsHistoryAPI,
-    MyLoadsListAPI,
+    MyLoadHistoryAPI,
+    MyLoadListAPI,
     next_status,
     previous_status,
 )

@@ -14,8 +14,6 @@ SECRET_KEY = env.str("SECRET_KEY")
 
 DEBUG = env.bool("DEBUG", default=False)
 
-LOGGING = env.bool("LOGGING", default=False)
-
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 DOMAIN_NAME = env.str("DOMAIN_NAME", "http://localhost:8000")
@@ -176,28 +174,6 @@ SWAGGER_SETTINGS = {
             "in": "header",
             "name": "Authorization",
         },
-    },
-}
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {  # выводит сообщения на консоль
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-        },
-        "file": {  # записывает сообщения в файл
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": "debug.log",
-        },
-    },
-    "loggers": {
-        "django.db.backends": {
-            "level": LOGGING,
-            "handlers": ["console"],
-        }
     },
 }
 

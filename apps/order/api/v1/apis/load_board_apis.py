@@ -1,16 +1,25 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import views
+from rest_framework import generics
 from rest_framework.response import Response
 
-from apps.common.permissions import IsAdminOrDispatcher
-from apps.order.api.v1.serializers.order_serializer import OrderReadSerializer
-from apps.order.services import LastSimilarService
+from apps.common import HasAccessToLoadBoardPanel, LargeResultsSetPagination
+from apps.order.api.v1.serializers import OrderReadSerializer
+from apps.order.services import LoadBoardService
 
 
-class LastSimilarOrdersAPI(views.APIView):
+class LoadBoardListAPI(generics.ListAPIView):
     serializer_class = OrderReadSerializer
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (HasAccessToLoadBoardPanel,)
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self):
+        return LoadBoardService(serializer=self.serializer_class).get_filtered_orders(order_status="PENDING")
+
+
+class LastSimilarOrdersAPI(generics.GenericAPIView):
+    serializer_class = OrderReadSerializer
+    permission_classes = (HasAccessToLoadBoardPanel,)
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -27,7 +36,7 @@ class LastSimilarOrdersAPI(views.APIView):
         ]
     )
     def get(self, request, *args, **kwargs):
-        data, status_code = LastSimilarService(serializer=self.serializer_class).get_last_similar_orders(
+        data, status_code = LoadBoardService(serializer=self.serializer_class).get_last_similar_orders(
             order_pk=self.kwargs["pk"],
             radius=int(request.query_params.get("radius", 20)),
         )
