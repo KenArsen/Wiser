@@ -1,12 +1,11 @@
 import logging
 
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from apps.common.base_model import BaseModel
+from apps.common.nominatim import get_location
 
 
 class Order(BaseModel):
@@ -56,14 +55,14 @@ class Order(BaseModel):
 
     match = models.IntegerField(default=0)
 
-    coordinate_to = models.CharField(max_length=255, default="40.650002,-73.949997")
-    coordinate_from = models.CharField(max_length=255, default="40.730610,-73.935242")
-
-    def __str__(self):
-        return self.email
+    coordinate_to = models.CharField(max_length=255, blank=True, null=True)
+    coordinate_from = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.email
 
     def clean(self):
         if self.expires is None:
@@ -71,6 +70,15 @@ class Order(BaseModel):
 
         if self.expires <= timezone.localtime(timezone.now()) and self.order_status == "PENDING":
             raise ValidationError({"error": f"This {self.order_number} order has already expired!"})
+
+    def save(self, *args, **kwargs):
+        if self.pick_up_at:
+            coordinate_from = get_location(self.pick_up_at)
+            self.coordinate_from = coordinate_from
+        if self.deliver_to:
+            coordinate_to = get_location(self.deliver_to)
+            self.coordinate_to = coordinate_to
+        super(Order, self).save(*args, **kwargs)
 
     def move_to_history(self):
         if self.user is not None:
@@ -104,22 +112,11 @@ class MyLoadStatus(models.Model):
     previous_status = models.IntegerField(choices=Status.choices, null=True)
     current_status = models.IntegerField(choices=Status.choices, null=True)
     next_status = models.IntegerField(choices=Status.choices, null=True)
-    location_updated_at = models.DateTimeField(default=timezone.now)
     order = models.OneToOneField(
         "order.Order",
         on_delete=models.CASCADE,
         related_name="my_load_status",
     )
 
-    def save(self, *args, **kwargs):
-        self.location_updated_at = timezone.now()
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.order}"
-
-
-@receiver(post_save, sender=Order)
-def create_status(sender, instance, created, **kwargs):
-    if created:
-        MyLoadStatus.objects.create(order=instance)

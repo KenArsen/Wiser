@@ -1,23 +1,21 @@
 from django.db import models
-from geopy.exc import GeocoderServiceError, GeocoderTimedOut
-from geopy.geocoders import Nominatim
-
 from apps.common.base_model import BaseModel
+from apps.common.nominatim import get_location
 
 
 class Vehicles(BaseModel):
     class Transport(models.TextChoices):
-        CARGO_VAN = "CARGO VAN", "CARGO VAN"
-        SPRINTER_VAN = "SPRINTER VAN", "SPRINTER VAN"
-        VAN = "VAN", "VAN"
-        SPRINTER = "SPRINTER", "SPRINTER"
-        BOX_TRUCK = "BOX TRUCK", "BOX TRUCK"
-        SMALL_STRAIGHT = "SMALL STRAIGHT", "SMALL STRAIGHT"
-        LARGE_STRAIGHT = "LARGE STRAIGHT", "LARGE STRAIGHT"
-        LIFTGATE = "LIFTGATE", "LIFTGATE"
-        FLATBED = "FLATBED", "FLATBED"
-        TRACTOR = "TRACTOR", "TRACTOR"
-        REEFER = "REEFER", "REEFER"
+        CARGO_VAN = "CARGO VAN", "Cargo Van"
+        SPRINTER_VAN = "SPRINTER VAN", "Sprinter Van"
+        VAN = "VAN", "Van"
+        SPRINTER = "SPRINTER", "Sprinter"
+        BOX_TRUCK = "BOX TRUCK", "Box Truck"
+        SMALL_STRAIGHT = "SMALL STRAIGHT", "Small Straight"
+        LARGE_STRAIGHT = "LARGE STRAIGHT", "Large Straight"
+        LIFTGATE = "LIFTGATE", "Liftgate"
+        FLATBED = "FLATBED", "Flatbed"
+        TRACTOR = "TRACTOR", "Tractor"
+        REEFER = "REEFER", "Reefer"
 
     # general info
     unit_id = models.CharField(max_length=255)
@@ -27,10 +25,10 @@ class Vehicles(BaseModel):
     dock_high = models.CharField(max_length=255, default="No")
 
     # vehicle sizes
-    width = models.IntegerField(default=0, blank=True, null=True)
-    height = models.IntegerField(default=0, blank=True, null=True)
-    length = models.IntegerField(default=0, blank=True, null=True)
-    payload = models.IntegerField(default=0, blank=True, null=True)
+    width = models.IntegerField(blank=True, null=True)
+    height = models.IntegerField(blank=True, null=True)
+    length = models.IntegerField(blank=True, null=True)
+    payload = models.IntegerField(blank=True, null=True)
 
     # vehicle details
     vin = models.CharField(max_length=255, blank=True, null=True)
@@ -62,14 +60,8 @@ class Vehicles(BaseModel):
 
     def save(self, *args, **kwargs):
         if self.driver and self.driver.address:
-            try:
-                geolocator = Nominatim(user_agent="Wiser")
-                self.location_from = self.driver.address
-                location = geolocator.geocode(self.driver.address)
-                if location:
-                    lat, lon = location.latitude, location.longitude
-                    self.coordinate_from = f"{lat},{lon}"
-            except (GeocoderTimedOut, GeocoderServiceError) as e:
-                pass
-
+            self.location_from = self.driver.address
+            location = get_location(address=self.driver.address)
+            if location:
+                self.coordinate_from = location
         super().save(*args, **kwargs)

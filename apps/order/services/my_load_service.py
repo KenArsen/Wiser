@@ -30,6 +30,9 @@ class MyLoadService(OrderService):
             elif order.my_load_status.current_status == MyLoadStatus.Status.PAID_OFF:
                 order.order_status = "COMPLETED"
 
+            order.letter.driver_id.vehicle.location_from = order.letter.driver_id.address
+            order.letter.driver_id.vehicle.save()
+
             order.save()
 
             serializer = self.serializer(order.my_load_status)
