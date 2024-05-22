@@ -10,6 +10,8 @@ from apps.order.api.v1.serializers.order_serializer import (
     AssignSerializer,
     OrderReadSerializer,
 )
+from apps.order.models import Order
+from django.db.models import Q
 from apps.order.services import MyBidService, OrderService
 
 
@@ -28,9 +30,16 @@ class MyBidHistoryAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(
-            order_status="REFUSED", assign__isnull=True
+        return Order.objects.filter(
+            Q(order_status="REFUSED") |
+            Q(order_status="ACTIVE") |
+            Q(order_status="CHECKOUT") |
+            Q(order_status="COMPLETED"),
+            assign__isnull=True
         )
+        # return OrderService(serializer=self.serializer_class).get_filtered_orders(
+        #     order_status="REFUSED", assign__isnull=True
+        # )
 
 
 @swagger_auto_schema(
