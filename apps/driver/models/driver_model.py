@@ -7,24 +7,24 @@ from apps.common.image import ImageService
 
 class Driver(BaseModel, ImageService):
     # driver info
-    first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
-    last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Last Name")
-    date_of_birth = models.DateField(blank=True, null=True, verbose_name="Date of Birth")
-    email = models.EmailField(max_length=255, unique=True, db_index=True)
-    ssn = models.CharField(max_length=255, blank=True, null=True, verbose_name="SSN")
-    address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Address")
-    city = models.CharField(max_length=255, blank=True, null=True, verbose_name="City")
-    state = models.CharField(max_length=255, blank=True, null=True, verbose_name="State")
-    zip_code = models.CharField(max_length=255, blank=True, null=True, verbose_name="Zip")
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    email = models.EmailField(max_length=255, unique=True)
+    ssn = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    state = models.CharField(max_length=255, blank=True, null=True)
+    zip_code = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    emergency_phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Emergency Phone")
-    second_driver = models.BooleanField(default=False, verbose_name="Second Driver (team)")
+    emergency_phone = models.CharField(max_length=20, blank=True, null=True)
+    second_driver = models.BooleanField(default=False)
 
     # driver license
-    lisense_number = models.CharField(max_length=255, blank=True, null=True, verbose_name="Lisense Number")
-    lisense_state = models.CharField(max_length=255, blank=True, null=True, verbose_name="Lisense State")
-    type = models.CharField(max_length=255, blank=True, null=True, verbose_name="Type")
-    expiration_date = models.DateField(blank=True, null=True, verbose_name="Expiration Date")
+    lisense_number = models.CharField(max_length=255, blank=True, null=True)
+    lisense_state = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    expiration_date = models.DateField(blank=True, null=True)
 
     # driver status
     is_active = models.BooleanField(default=True)
