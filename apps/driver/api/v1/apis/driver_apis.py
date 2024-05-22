@@ -3,7 +3,7 @@ from rest_framework import generics, views
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from apps.common.permissions import IsAdminOrDispatcher
+from apps.common.permissions import IsSuperAdmin
 from apps.driver.api.v1.serializers import DriverSerializers
 from apps.driver.models import Driver
 from apps.order.api.v1.serializers import TemplateSerializer
@@ -14,7 +14,7 @@ from apps.vehicle.api.v1.serializers import VehicleSerializer
 class DriverListAPI(generics.ListAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverSerializers
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -23,7 +23,7 @@ class DriverListAPI(generics.ListAPIView):
 class DriverDetailAPI(generics.RetrieveAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverSerializers
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -39,7 +39,7 @@ class DriverDetailAPI(generics.RetrieveAPIView):
 class DriverCreateAPI(generics.CreateAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverSerializers
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -48,7 +48,7 @@ class DriverCreateAPI(generics.CreateAPIView):
 class DriverUpdateAPI(generics.UpdateAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverSerializers
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
@@ -59,7 +59,7 @@ class DriverUpdateAPI(generics.UpdateAPIView):
 
 class DriverDeleteAPI(generics.DestroyAPIView):
     queryset = Driver.objects.all()
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
@@ -68,7 +68,7 @@ class DriverDeleteAPI(generics.DestroyAPIView):
 class DriverFilterAPI(generics.ListAPIView):
     queryset = Driver.objects.filter(is_active=True)
     serializer_class = DriverSerializers
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     @swagger_auto_schema(
         operation_summary="List active drivers",
@@ -78,7 +78,7 @@ class DriverFilterAPI(generics.ListAPIView):
 
 
 class DriverSetStatusAPI(views.APIView):
-    permission_classes = (IsAdminOrDispatcher,)
+    permission_classes = (IsSuperAdmin,)
 
     @swagger_auto_schema(operation_summary="Set driver status", responses={200: "Driver Status"})
     def get(self, request, pk):

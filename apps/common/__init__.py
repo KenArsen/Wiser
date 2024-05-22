@@ -7,10 +7,8 @@ from .decorators_swagger import (
 from .image import ImageService
 from .paginations import LargeResultsSetPagination
 from .permissions import (
-    IsAccounting,
-    IsAdmin,
-    IsAdminOrDispatcher,
-    IsAdminOrHR,
-    IsDispatcher,
-    IsHR,
+    HasAccessToDashboardPanel,
+    HasAccessToLoadBoardPanel,
+    HasAccessToMyBidsPanel,
+    HasAccessToMyLoadsPanel,
 )

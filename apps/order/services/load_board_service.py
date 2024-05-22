@@ -2,13 +2,10 @@ from math import asin, cos, radians, sin, sqrt
 
 from rest_framework import status
 
-from apps.order.repositories import OrderRepository
+from apps.order.services import OrderService
 
 
-class LastSimilarService:
-    def __init__(self, serializer, repository=OrderRepository):
-        self.serializer = serializer
-        self.repository = repository
+class LoadBoardService(OrderService):
 
     def get_last_similar_orders(self, order_pk, radius=20):
         order = self.repository.get_order(pk=order_pk)
