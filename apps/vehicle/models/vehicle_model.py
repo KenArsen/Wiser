@@ -1,4 +1,6 @@
 from django.db import models
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+from geopy.geocoders import Nominatim
 
 from apps.common.base_model import BaseModel
 
@@ -35,7 +37,7 @@ class Vehicles(BaseModel):
     location_to = models.CharField(max_length=255, blank=True, null=True)
     location_from = models.CharField(max_length=255, blank=True, null=True)
     location_from_date = models.DateTimeField(blank=True, null=True)
-    coordinate_from = models.CharField(max_length=255, default="40.730610,-73.935242")
+    coordinate_from = models.CharField(max_length=255, blank=True, null=True)
 
     # lisense info
     lisense_plate = models.CharField(max_length=255, blank=True, null=True)
@@ -57,3 +59,17 @@ class Vehicles(BaseModel):
 
     def __str__(self):
         return f"ID: {self.id}, UNIT ID: {self.unit_id} - DRIVER: {self.driver}"
+
+    def save(self, *args, **kwargs):
+        if self.driver and self.driver.address:
+            try:
+                geolocator = Nominatim(user_agent="Wiser")
+                self.location_from = self.driver.address
+                location = geolocator.geocode(self.driver.address)
+                if location:
+                    lat, lon = location.latitude, location.longitude
+                    self.coordinate_from = f"{lat},{lon}"
+            except (GeocoderTimedOut, GeocoderServiceError) as e:
+                pass
+
+        super().save(*args, **kwargs)
