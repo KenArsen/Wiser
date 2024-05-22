@@ -36,9 +36,6 @@ class MyBidHistoryAPI(generics.ListAPIView):
             | Q(order_status="CHECKOUT")
             | Q(order_status="COMPLETED")
         )
-        # return OrderService(serializer=self.serializer_class).get_filtered_orders(
-        #     order_status="REFUSED", assign__isnull=True
-        # )
 
 
 @swagger_auto_schema(
