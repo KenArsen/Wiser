@@ -71,14 +71,14 @@ class Order(BaseModel):
         if self.expires <= timezone.localtime(timezone.now()) and self.order_status == "PENDING":
             raise ValidationError({"error": f"This {self.order_number} order has already expired!"})
 
-    # def save(self, *args, **kwargs):
-    #     if self.pick_up_at:
-    #         coordinate_from = get_location(self.pick_up_at)
-    #         self.coordinate_from = coordinate_from
-    #     if self.deliver_to:
-    #         coordinate_to = get_location(self.deliver_to)
-    #         self.coordinate_to = coordinate_to
-    #     super(Order, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if self.pick_up_at:
+            coordinate_from = get_location(self.pick_up_at)
+            self.coordinate_from = coordinate_from
+        if self.deliver_to:
+            coordinate_to = get_location(self.deliver_to)
+            self.coordinate_to = coordinate_to
+        super(Order, self).save(*args, **kwargs)
 
     def move_to_history(self):
         if self.user is not None:

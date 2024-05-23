@@ -58,10 +58,10 @@ class Vehicles(BaseModel):
     def __str__(self):
         return f"ID: {self.id}, UNIT ID: {self.unit_id} - DRIVER: {self.driver}"
 
-    # def save(self, *args, **kwargs):
-    #     if self.driver and self.driver.address:
-    #         self.location_from = self.driver.address
-    #         location = get_location(address=self.driver.address)
-    #         if location:
-    #             self.coordinate_from = location
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if self.driver and self.driver.address:
+            self.location_from = self.driver.address
+            location = get_location(address=self.driver.address)
+            if location:
+                self.coordinate_from = location
+        super().save(*args, **kwargs)
