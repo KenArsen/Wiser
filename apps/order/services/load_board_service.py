@@ -2,7 +2,7 @@ from math import asin, cos, radians, sin, sqrt
 
 from rest_framework import status
 
-from apps.order.services import OrderService
+from .order_service import OrderService
 
 
 class LoadBoardService(OrderService):

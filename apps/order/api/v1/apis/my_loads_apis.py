@@ -7,7 +7,7 @@ from apps.common import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToMyLoadsPanel
 from apps.order.api.v1.serializers import MyLoadStatusSerializer, OrderReadSerializer
 from apps.order.models import Order
-from apps.order.services import MyLoadService, OrderService
+from apps.order.services import MyLoadService
 
 
 class MyLoadListAPI(generics.ListAPIView):
@@ -16,7 +16,7 @@ class MyLoadListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="ACTIVE")
+        return MyLoadService(serializer=self.serializer_class).get_filtered_orders(order_status="ACTIVE")
 
 
 class MyLoadHistoryAPI(generics.ListAPIView):
@@ -36,7 +36,7 @@ class MyCheckoutListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="CHECKOUT")
+        return MyLoadService(serializer=self.serializer_class).get_filtered_orders(order_status="CHECKOUT")
 
 
 class MyCompletedListAPI(generics.ListAPIView):
@@ -45,7 +45,7 @@ class MyCompletedListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="COMPLETED")
+        return MyLoadService(serializer=self.serializer_class).get_filtered_orders(order_status="COMPLETED")
 
 
 @permission_classes((HasAccessToMyLoadsPanel,))

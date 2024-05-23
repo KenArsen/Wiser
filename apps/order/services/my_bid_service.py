@@ -1,5 +1,5 @@
-from rest_framework.exceptions import ValidationError
 from django.db import IntegrityError
+from rest_framework.exceptions import ValidationError
 
 from apps.order.models import MyLoadStatus
 
@@ -20,9 +20,7 @@ class MyBidService(OrderService):
 
         try:
             MyLoadStatus.objects.create(
-                order=order,
-                current_status=MyLoadStatus.Status.POINT_A,
-                next_status=MyLoadStatus.Status.UPLOADED
+                order=order, current_status=MyLoadStatus.Status.POINT_A, next_status=MyLoadStatus.Status.UPLOADED
             )
         except IntegrityError:
             raise ValidationError({"detail": "Order already assigned."})
@@ -34,11 +32,11 @@ class MyBidService(OrderService):
 
         if broker_price is not None:
             order.letter.broker_price = broker_price
-            order.letter.save(update_fields=['broker_price'])
+            order.letter.save(update_fields=["broker_price"])
 
         if driver_price is not None:
             order.letter.driver_price = driver_price
-            order.letter.save(update_fields=['driver_price'])
+            order.letter.save(update_fields=["driver_price"])
 
         serializer = self.serializer(data=data)
         if serializer.is_valid():

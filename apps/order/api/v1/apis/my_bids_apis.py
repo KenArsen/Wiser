@@ -12,7 +12,7 @@ from apps.order.api.v1.serializers.order_serializer import (
     OrderReadSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import MyBidService, OrderService
+from apps.order.services import MyBidService
 
 
 class MyBidListAPI(generics.ListAPIView):
@@ -21,7 +21,7 @@ class MyBidListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_filtered_orders(order_status="AWAITING_BID")
+        return MyBidService(serializer=self.serializer_class).get_filtered_orders(order_status="AWAITING_BID")
 
 
 class MyBidHistoryAPI(generics.ListAPIView):
