@@ -58,6 +58,9 @@ class MyLoadService(OrderService):
             elif order.my_load_status.current_status < MyLoadStatus.Status.PAID_OFF and order.order_status != "ACTIVE":
                 order.order_status = "CHECKOUT"
 
+            order.letter.driver_id.vehicle.location_from = order.letter.driver_id.address
+            order.letter.driver_id.vehicle.save()
+
             order.save()
 
             serializer = self.serializer(order.my_load_status)
