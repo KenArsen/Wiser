@@ -31,8 +31,8 @@ class Order(BaseModel):
     deliver_to = models.CharField(max_length=255, blank=True, null=True)
     deliver_date = models.DateTimeField(blank=True, null=True, default=timezone.now)
 
-    transit_time = models.IntegerField(blank=True, null=True)
-    transit_distance = models.IntegerField(blank=True, null=True)
+    transit_time = models.PositiveIntegerField(blank=True, null=True)
+    transit_distance = models.PositiveIntegerField(blank=True, null=True)
 
     line = models.CharField(max_length=255, blank=True, null=True)
 
@@ -53,7 +53,7 @@ class Order(BaseModel):
     dimensions = models.CharField(max_length=255, blank=True, null=True)
     stackable = models.CharField(max_length=255, blank=True, null=True)
 
-    match = models.IntegerField(default=0)
+    match = models.PositiveSmallIntegerField(default=0)
 
     coordinate_to = models.CharField(max_length=255, blank=True, null=True)
     coordinate_from = models.CharField(max_length=255, blank=True, null=True)
@@ -109,9 +109,9 @@ class MyLoadStatus(models.Model):
         PAID_OFF = 6, "Paid off"
         COMPLETED = 7, "Completed"
 
-    previous_status = models.IntegerField(choices=Status.choices, null=True)
-    current_status = models.IntegerField(choices=Status.choices, null=True)
-    next_status = models.IntegerField(choices=Status.choices, null=True)
+    previous_status = models.PositiveSmallIntegerField(choices=Status.choices, null=True)
+    current_status = models.PositiveSmallIntegerField(choices=Status.choices, null=True)
+    next_status = models.PositiveSmallIntegerField(choices=Status.choices, null=True)
     order = models.OneToOneField(
         "order.Order",
         on_delete=models.CASCADE,
