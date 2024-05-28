@@ -1,5 +1,5 @@
 from .common_serializer import AssignSerializer, MyLoadStatusSerializer, PointSerializer
-from .letter_serializer import LetterSerializer, PriceSerializer
+from .letter_serializer import LetterSerializer
 from .load_board_serializer import LoadBoardDetailSerializer, LoadBoardListSerializer
 from .my_bid_serializer import (
     MyBidDetailSerializer,

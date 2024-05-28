@@ -13,24 +13,9 @@ class Letter(BaseModel):
     dispatcher = models.ForeignKey(
         "user.User", on_delete=models.CASCADE, related_name="letters"
     )
+    broker_price = models.PositiveIntegerField()
+    driver_price = models.PositiveIntegerField()
     comment = models.TextField()
 
     def __str__(self):
         return f"{self.order}"
-
-
-class Price(BaseModel):
-    order = models.OneToOneField(
-        "order.Order", on_delete=models.CASCADE, related_name="price"
-    )
-    driver = models.ForeignKey(
-        "driver.Driver", on_delete=models.CASCADE, related_name="prices"
-    )
-    dispatcher = models.ForeignKey(
-        "user.User", on_delete=models.CASCADE, related_name="prices"
-    )
-    broker_price = models.PositiveIntegerField()
-    driver_price = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.broker_price}, {self.driver_price}"

@@ -81,7 +81,6 @@ class LoadBoardListSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         nearby_drivers, match_count = _get_nearby_drivers(instance)
         representation["match"] = match_count
-        representation["miles"] = _get_miles(instance)
         return representation
 
 
@@ -99,5 +98,4 @@ class LoadBoardDetailSerializer(serializers.ModelSerializer):
         representation["nearby_drivers"] = nearby_drivers
         representation["nearby_orders"] = _get_nearby_orders(instance)
         representation["match"] = match_count
-        representation["miles"] = _get_miles(instance)
         return representation

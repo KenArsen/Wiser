@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.order.api.v1.apis import (
+    SendEmailView,
     LoadBoardDetailAPI,
     LoadBoardListAPI,
     MyBidHistoryAPI,
@@ -37,6 +38,7 @@ urlpatterns += [
     path(
         "load_boards/<int:pk>/", LoadBoardDetailAPI.as_view(), name="load-board-detail"
     ),
+    path("send/", SendEmailView.as_view(), name="send-email"),
 ]
 
 # my bids

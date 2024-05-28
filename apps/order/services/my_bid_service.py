@@ -31,21 +31,6 @@ class MyBidService(OrderService):
         except IntegrityError:
             raise ValidationError({"detail": "Order already assigned."})
 
-        broker_price = data.pop("broker_price", None)
-        driver_price = data.pop("driver_price", None)
-        if broker_price is not None and driver_price is not None:
-            price_data = {
-                "broker_price": broker_price,
-                "driver_price": driver_price,
-                "order": order.id,
-                "driver": order.letter.driver.id,
-                "dispatcher": order.letter.dispatcher.id,
-            }
-
-            serializer = PriceSerializer(data=price_data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
         serializer = self.serializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
