@@ -4,14 +4,18 @@ from rest_framework.response import Response
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToLoadBoardPanel
 from apps.order.api.v1.serializers.order_serializer import (
-    OrderReadSerializer,
-    OrderWriteSerializer,
+    OrderCreateSerializer,
+    OrderDetailSerializer,
+    OrderListSerializer,
+    OrderUpdateSerializer,
 )
+from apps.order.models import Order
 from apps.order.services import OrderService
 
 
 class OrderListAPI(generics.ListAPIView):
-    serializer_class = OrderReadSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderListSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
     pagination_class = LargeResultsSetPagination
 
@@ -20,33 +24,43 @@ class OrderListAPI(generics.ListAPIView):
 
 
 class OrderCreateAPI(generics.CreateAPIView):
-    serializer_class = OrderWriteSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderCreateSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
         return Response(
-            OrderService(serializer=self.serializer_class).create_order(request.data), status=status.HTTP_201_CREATED
+            OrderService(serializer=self.serializer_class).create_order(request.data),
+            status=status.HTTP_201_CREATED,
         )
 
 
 class OrderDetailAPI(generics.RetrieveAPIView):
-    serializer_class = OrderReadSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def get_object(self):
-        return OrderService(serializer=self.serializer_class).get_order(self.kwargs["pk"])
+        return OrderService(serializer=self.serializer_class).get_order(
+            self.kwargs["pk"]
+        )
 
 
 class OrderUpdateAPI(generics.UpdateAPIView):
-    serializer_class = OrderWriteSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderUpdateSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def get_object(self):
-        return OrderService(serializer=self.serializer_class).get_order(self.kwargs["pk"])
+        return OrderService(serializer=self.serializer_class).get_order(
+            self.kwargs["pk"]
+        )
 
     def update(self, request, *args, **kwargs):
         return Response(
-            OrderService(serializer=self.serializer_class).update_order(self.get_object(), request.data),
+            OrderService(serializer=self.serializer_class).update_order(
+                self.get_object(), request.data
+            ),
             status=status.HTTP_200_OK,
         )
 
@@ -55,23 +69,31 @@ class OrderUpdateAPI(generics.UpdateAPIView):
 
 
 class OrderDeleteAPI(generics.DestroyAPIView):
-    serializer_class = OrderReadSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def get_object(self):
-        return OrderService(serializer=self.serializer_class).get_order(self.kwargs["pk"])
+        return OrderService(serializer=self.serializer_class).get_order(
+            self.kwargs["pk"]
+        )
 
     def destroy(self, request, *args, **kwargs):
         return Response(
-            OrderService(serializer=self.serializer_class).delete_order(self.get_object()),
+            OrderService(serializer=self.serializer_class).delete_order(
+                self.get_object()
+            ),
             status=status.HTTP_204_NO_CONTENT,
         )
 
 
 class OrderRefuseAPI(generics.GenericAPIView):
-    serializer_class = None
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
-        service = OrderService(serializer=self.serializer_class).order_refuse(order_id=self.request.data["order_id"])
+        service = OrderService(serializer=self.serializer_class).order_refuse(
+            order_id=self.request.data["order_id"]
+        )
         return Response(service, status=status.HTTP_200_OK)

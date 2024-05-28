@@ -11,15 +11,9 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from apps.common.base_model import BaseModel
+from apps.common.enums import Role
 from apps.common.image import ImageService
-
-
-class Roles(models.Model):
-    name = models.CharField(max_length=255, unique=True, null=True, blank=True)
-
-    def __str__(self):
-        return self.name
+from apps.common.models import BaseModel
 
 
 class UserManager(BaseUserManager):
@@ -43,21 +37,18 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
-    role = models.ForeignKey(Roles, on_delete=models.SET_NULL, related_name="users", null=True, blank=True)
+class User(ImageService, BaseModel, AbstractBaseUser, PermissionsMixin):
+    role = models.CharField(max_length=255, choices=Role.choices)
 
-    email = models.EmailField(max_length=255, unique=True, db_index=True)
-    first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="First Name")
-    last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Last Name")
+    email = models.EmailField(max_length=255, unique=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="Avatar")
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
 
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
-    lat = models.FloatField(null=True, blank=True)
-    lon = models.FloatField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -78,11 +69,15 @@ class User(ImageService, AbstractBaseUser, BaseModel, PermissionsMixin):
             if not self.pk:
                 if self.avatar:
                     # image compress
-                    self.compress_image("avatar", delete_source=True, max_width=300, max_height=300)
+                    self.compress_image(
+                        "avatar", delete_source=True, max_width=300, max_height=300
+                    )
             else:
                 if self.avatar:
                     # image compress
-                    self.compress_image("avatar", delete_source=True, max_width=300, max_height=300)
+                    self.compress_image(
+                        "avatar", delete_source=True, max_width=300, max_height=300
+                    )
 
             this = User.objects.get(id=self.id)
 
@@ -102,7 +97,9 @@ def user_avatar(sender, instance, **kwargs):
 
 
 class Invitation(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="invitation"
+    )
     email = models.EmailField(unique=True)
     invitation_token = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -9,12 +9,14 @@ class LoadBoardService(OrderService):
 
     def get_last_similar_orders(self, order_pk, radius=20):
         order = self.repository.get_order(pk=order_pk)
-        order_my_bids = self.repository.get_filtered_orders(order_status="COMPLETED")
+        order_my_bids = self.repository.get_filtered_orders(status="COMPLETED")
 
         nearby_orders = []
 
         for bid in order_my_bids:
-            distance_from = self._get_distance(order.coordinate_from, bid.coordinate_from)
+            distance_from = self._get_distance(
+                order.coordinate_from, bid.coordinate_from
+            )
             distance_to = self._get_distance(order.coordinate_to, bid.coordinate_to)
 
             if distance_from <= radius and distance_to <= radius:

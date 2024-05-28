@@ -19,5 +19,7 @@ urlpatterns = [
     path("<int:pk>/", DriverDetailAPI.as_view(), name="driver-details"),
     path("<int:pk>/update/", DriverUpdateAPI.as_view(), name="driver-update"),
     path("<int:pk>/delete/", DriverDeleteAPI.as_view(), name="driver-delete"),
-    path("<int:pk>/set_status/", DriverSetStatusAPI.as_view(), name="driver-set-status"),
+    path(
+        "<int:pk>/set_status/", DriverSetStatusAPI.as_view(), name="driver-set-status"
+    ),
 ]

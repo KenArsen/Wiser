@@ -3,7 +3,9 @@ from rest_framework.permissions import BasePermission
 
 class IsSuperAdmin(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and (request.user.is_superuser or request.user.roles.name == "ADMIN")
+        return request.user.is_authenticated and (
+            request.user.is_superuser or request.user.roles.name == "ADMIN"
+        )
 
 
 class IsDispatcher(BasePermission):
@@ -33,12 +35,16 @@ class HasAccessToDashboardPanel(BasePermission):
 
 class HasAccessToLoadBoardPanel(BasePermission):
     def has_permission(self, request, view):
-        return IsSuperAdmin().has_permission(request, view) or IsDispatcher().has_permission(request, view)
+        return IsSuperAdmin().has_permission(
+            request, view
+        ) or IsDispatcher().has_permission(request, view)
 
 
 class HasAccessToMyBidsPanel(BasePermission):
     def has_permission(self, request, view):
-        return IsSuperAdmin().has_permission(request, view) or IsDispatcher().has_permission(request, view)
+        return IsSuperAdmin().has_permission(
+            request, view
+        ) or IsDispatcher().has_permission(request, view)
 
 
 class HasAccessToMyLoadsPanel(BasePermission):

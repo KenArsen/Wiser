@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "apps.user.apps.UserConfig",
     "apps.order.apps.OrderConfig",
-    "apps.letter.apps.LetterConfig",
     "apps.driver.apps.DriverConfig",
     "apps.vehicle.apps.VehicleConfig",
 ]

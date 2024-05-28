@@ -1,1 +1,0 @@
-from .letter_serializer import LetterReadSerializer, LetterWriteSerializer

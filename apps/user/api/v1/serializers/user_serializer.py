@@ -1,15 +1,7 @@
 from django.core import signing
 from rest_framework import serializers
 
-from apps.user.models import Invitation, Roles, User
-
-
-class RolesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Roles
-        fields = ("id", "name")
-        read_only_fields = ("id",)
-        ref_name = "Roles"
+from apps.user.models import Invitation, User
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -20,16 +12,12 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
-    role = RolesSerializer(read_only=True)
-
     class Meta:
         model = User
         exclude = (
             "password",
             "user_permissions",
             "groups",
-            "lat",
-            "lon",
             "last_login",
             "created_at",
             "updated_at",
@@ -48,7 +36,15 @@ class UserSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "password", "phone_number", "first_name", "last_name", "role")
+        fields = (
+            "id",
+            "email",
+            "password",
+            "phone_number",
+            "first_name",
+            "last_name",
+            "role",
+        )
         read_only_fields = ("id",)
         extra_kwargs = {"password": {"write_only": True}}
         ref_name = "UserCreate"

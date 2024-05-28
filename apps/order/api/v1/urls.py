@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.order.api.v1.apis import (
-    LastSimilarOrdersAPI,
+    LoadBoardDetailAPI,
     LoadBoardListAPI,
     MyBidHistoryAPI,
     MyBidListAPI,
@@ -33,8 +33,10 @@ urlpatterns = [
 
 # load board
 urlpatterns += [
-    path("", LoadBoardListAPI.as_view(), name="load-board-list"),
-    path("last_similar/<int:pk>/", LastSimilarOrdersAPI.as_view(), name="last-similar-orders"),
+    path("load_boards/", LoadBoardListAPI.as_view(), name="load-board-list"),
+    path(
+        "load_boards/<int:pk>/", LoadBoardDetailAPI.as_view(), name="load-board-detail"
+    ),
 ]
 
 # my bids

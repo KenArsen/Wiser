@@ -3,9 +3,29 @@ from rest_framework import serializers
 from apps.driver.models import Driver
 
 
-class DriverSerializers(serializers.ModelSerializer):
+class DriverListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
-        read_only_fields = ("created_at", "updated_at", "is_active")
         fields = "__all__"
-        ref_name = "Driver"
+        ref_name = "DriverList"
+
+
+class DriverDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = "__all__"
+        ref_name = "DriverDetail"
+
+
+class DriverCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = "__all__"
+        ref_name = "DriverCreate"
+
+
+class DriverUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = "__all__"
+        ref_name = "DriverUpdate"

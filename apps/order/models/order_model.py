@@ -4,32 +4,20 @@ from django.db import models
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from apps.common.base_model import BaseModel
-from apps.common.nominatim import get_location
+from apps.common.enums import OrderStatus, PointType, SubStatus
+from apps.common.models import BaseModel
 
 
 class Order(BaseModel):
-    class OrderStatus(models.TextChoices):
-        PENDING = "PENDING", "PENDING"
-        AWAITING_BID = "AWAITING_BID", "AWAITING BID"
-        REFUSED = "REFUSED", "REFUSED"
-        ACTIVE = "ACTIVE", "ACTIVE"
-        CHECKOUT = "CHECKOUT", "CHECKOUT"
-        COMPLETED = "COMPLETED", "COMPLETED"
-        CANCELLED = "CANCELLED", "CANCELLED"
-        EXPIRED = "EXPIRED", "EXPIRED"
+    user = models.ForeignKey(
+        "user.User", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
-    user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
-
-    order_status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING)
+    status = models.CharField(
+        max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING
+    )
 
     order_number = models.CharField(max_length=255, blank=True, null=True)
-
-    pick_up_at = models.CharField(max_length=255, blank=True, null=True)
-    pick_up_date = models.DateTimeField(blank=True, null=True, default=timezone.now)
-
-    deliver_to = models.CharField(max_length=255, blank=True, null=True)
-    deliver_date = models.DateTimeField(blank=True, null=True, default=timezone.now)
 
     transit_time = models.PositiveIntegerField(blank=True, null=True)
     transit_distance = models.PositiveIntegerField(blank=True, null=True)
@@ -38,7 +26,7 @@ class Order(BaseModel):
 
     broker = models.CharField(max_length=255, blank=True, null=True)
     broker_phone = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField(null=True, blank=True)
+    broker_email = models.EmailField(null=True, blank=True)
     posted = models.DateTimeField(blank=True, null=True, default=timezone.now)
     expires = models.DateTimeField(blank=True, null=True, default=timezone.now)
     dock_level = models.CharField(max_length=255, blank=True, null=True)
@@ -53,36 +41,29 @@ class Order(BaseModel):
     dimensions = models.CharField(max_length=255, blank=True, null=True)
     stackable = models.CharField(max_length=255, blank=True, null=True)
 
-    match = models.PositiveSmallIntegerField(default=0)
-
-    coordinate_to = models.CharField(max_length=255, blank=True, null=True)
-    coordinate_from = models.CharField(max_length=255, blank=True, null=True)
-
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.email
+        return self.broker_email
 
     def clean(self):
         if self.expires is None:
-            raise ValidationError({"error": f"This {self.order_number} does not expire!"})
+            raise ValidationError(
+                {"error": f"This {self.order_number} does not expire!"}
+            )
 
-        if self.expires <= timezone.localtime(timezone.now()) and self.order_status == "PENDING":
-            raise ValidationError({"error": f"This {self.order_number} order has already expired!"})
-
-    def save(self, *args, **kwargs):
-        if self.pick_up_at:
-            coordinate_from = get_location(self.pick_up_at)
-            self.coordinate_from = coordinate_from
-        if self.deliver_to:
-            coordinate_to = get_location(self.deliver_to)
-            self.coordinate_to = coordinate_to
-        super(Order, self).save(*args, **kwargs)
+        if (
+            self.expires <= timezone.localtime(timezone.now())
+            and self.status == "PENDING"
+        ):
+            raise ValidationError(
+                {"error": f"This {self.order_number} order has already expired!"}
+            )
 
     def move_to_history(self):
         if self.user is not None:
-            self.order_status = "EXPIRED"
+            self.status = "EXPIRED"
             self.save()
             logging.info(f"------ Order {self.id} moved to history --------")
         else:
@@ -90,33 +71,60 @@ class Order(BaseModel):
             self.delete()
 
 
-class Assign(BaseModel):
-    broker_company = models.CharField(max_length=255)
-    rate_confirmation = models.CharField(max_length=255)
-    order_id = models.OneToOneField("order.Order", on_delete=models.CASCADE, related_name="assign")
+class Point(BaseModel):
+    order = models.ForeignKey(
+        "order.Order", on_delete=models.CASCADE, related_name="points"
+    )
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    state = models.CharField(max_length=255, blank=True, null=True)
+    county = models.CharField(max_length=255, blank=True, null=True)
+    zip_code = models.CharField(max_length=255, blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
+    type = models.CharField(
+        max_length=255, choices=PointType.choices, default=PointType.PICK_UP
+    )
 
     def __str__(self):
-        return f"{self.broker_company} - {self.rate_confirmation}"
+        return f"{self.address}"
 
 
-class MyLoadStatus(models.Model):
-    class Status(models.IntegerChoices):
-        POINT_A = 1, "I am going to the load"
-        UPLOADED = 2, "Uploaded"
-        ON_THE_WAY = 3, "On the way"
-        UNLOADED = 4, "Unloaded"
-        DELIVERED = 5, "Delivered"
-        PAID_OFF = 6, "Paid off"
-        COMPLETED = 7, "Completed"
+class Assign(BaseModel):
+    order = models.OneToOneField(
+        "order.Order", on_delete=models.CASCADE, related_name="assign"
+    )
+    broker_company = models.CharField(max_length=255)
+    rate_confirmation = models.CharField(max_length=255)
 
-    previous_status = models.PositiveSmallIntegerField(choices=Status.choices, null=True)
-    current_status = models.PositiveSmallIntegerField(choices=Status.choices, null=True)
-    next_status = models.PositiveSmallIntegerField(choices=Status.choices, null=True)
+    def __str__(self):
+        return f"{self.broker_company}"
+
+
+class MyLoadStatus(BaseModel):
+    previous_status = models.PositiveSmallIntegerField(
+        choices=SubStatus.choices, null=True
+    )
+    current_status = models.PositiveSmallIntegerField(
+        choices=SubStatus.choices, null=True
+    )
+    next_status = models.PositiveSmallIntegerField(choices=SubStatus.choices, null=True)
     order = models.OneToOneField(
         "order.Order",
         on_delete=models.CASCADE,
         related_name="my_load_status",
     )
+
+    def __str__(self):
+        return f"{self.order}"
+
+
+class File(BaseModel):
+    order = models.ForeignKey(
+        "order.Order", on_delete=models.CASCADE, related_name="files"
+    )
+    file = models.FileField(upload_to="order_files/%Y/%m/%d")
 
     def __str__(self):
         return f"{self.order}"

@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
-from apps.order.models import MyLoadStatus
+from apps.common.enums import SubStatus
 
 from .order_service import OrderService
 
@@ -19,18 +19,20 @@ class MyLoadService(OrderService):
         order = self._get_order(data)
         current_status = order.my_load_status.current_status
 
-        if current_status < MyLoadStatus.Status.PAID_OFF:
+        if current_status < SubStatus.PAID_OFF:
             order.my_load_status.previous_status = current_status
             order.my_load_status.current_status = current_status + 1
             order.my_load_status.next_status = current_status + 2
             order.my_load_status.save()
 
-            if order.my_load_status.current_status == MyLoadStatus.Status.DELIVERED:
-                order.order_status = "CHECKOUT"
-            elif order.my_load_status.current_status == MyLoadStatus.Status.PAID_OFF:
-                order.order_status = "COMPLETED"
+            if order.my_load_status.current_status == SubStatus.DELIVERED:
+                order.status = "CHECKOUT"
+            elif order.my_load_status.current_status == SubStatus.PAID_OFF:
+                order.status = "COMPLETED"
 
-            order.letter.driver_id.vehicle.location_from = order.letter.driver_id.address
+            order.letter.driver_id.vehicle.location_from = (
+                order.letter.driver_id.address
+            )
             order.letter.driver_id.vehicle.save()
 
             order.save()
@@ -44,7 +46,7 @@ class MyLoadService(OrderService):
         order = self._get_order(data)
         current_status = order.my_load_status.current_status
 
-        if current_status > MyLoadStatus.Status.POINT_A:
+        if current_status > SubStatus.POINT_A:
             order.my_load_status.next_status = current_status
             order.my_load_status.current_status = current_status - 1
             if current_status - 2 == 0:
@@ -53,12 +55,20 @@ class MyLoadService(OrderService):
                 order.my_load_status.previous_status = current_status - 2
             order.my_load_status.save()
 
-            if order.my_load_status.current_status < MyLoadStatus.Status.DELIVERED and order.order_status != "ACTIVE":
-                order.order_status = "ACTIVE"
-            elif order.my_load_status.current_status < MyLoadStatus.Status.PAID_OFF and order.order_status != "ACTIVE":
-                order.order_status = "CHECKOUT"
+            if (
+                order.my_load_status.current_status < SubStatus.DELIVERED
+                and order.status != "ACTIVE"
+            ):
+                order.status = "ACTIVE"
+            elif (
+                order.my_load_status.current_status < SubStatus.PAID_OFF
+                and order.status != "ACTIVE"
+            ):
+                order.status = "CHECKOUT"
 
-            order.letter.driver_id.vehicle.location_from = order.letter.driver_id.address
+            order.letter.driver_id.vehicle.location_from = (
+                order.letter.driver_id.address
+            )
             order.letter.driver_id.vehicle.save()
 
             order.save()

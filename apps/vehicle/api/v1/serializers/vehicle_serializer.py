@@ -1,11 +1,42 @@
 from rest_framework import serializers
 
-from apps.vehicle.models import Vehicles
+from apps.vehicle.models import Location, Vehicle
 
 
-class VehicleSerializer(serializers.ModelSerializer):
+class LocationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Vehicles
+        model = Location
         fields = "__all__"
-        read_only_fields = ("created_at", "updated_at")
-        ref_name = "Vehicle"
+        ref_name = "Location"
+
+
+class VehicleListSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Vehicle
+        fields = "__all__"
+        ref_name = "VehicleList"
+
+
+class VehicleDetailSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Vehicle
+        fields = "__all__"
+        ref_name = "VehicleDetail"
+
+
+class VehicleCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = "__all__"
+        ref_name = "VehicleCreate"
+
+
+class VehicleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = "__all__"
+        ref_name = "VehicleUpdate"

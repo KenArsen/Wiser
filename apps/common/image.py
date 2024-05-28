@@ -6,7 +6,9 @@ from PIL import Image
 
 
 class ImageService(object):
-    def compress_image(self, field, delete_source=False, max_width=1200, max_height=1200):
+    def compress_image(
+        self, field, delete_source=False, max_width=1200, max_height=1200
+    ):
         image = getattr(self, field)
         img = Image.open(image)
         if img.mode != "RGB":
@@ -20,7 +22,12 @@ class ImageService(object):
         img.save(output, format="JPEG", quality=70, optimize=True, progressive=True)
         output.seek(0)
         new_image = InMemoryUploadedFile(
-            output, "ImageField", f"{image.name.split('.')[0]}.jpg", "image/jpeg", sys.getsizeof(output), None
+            output,
+            "ImageField",
+            f"{image.name.split('.')[0]}.jpg",
+            "image/jpeg",
+            sys.getsizeof(output),
+            None,
         )
         if delete_source:
             image.delete(False)

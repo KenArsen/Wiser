@@ -10,9 +10,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.common.nominatim import create_point, get_location
 from wiser_load_board.settings import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
 
-from .models import Order
+from .models import Order, Point
 
 
 @shared_task()
@@ -21,7 +22,9 @@ def delete_expired_data():
         with transaction.atomic():
             logging.info("##### Started deleting expired data. #####")
 
-            expired_orders = Order.objects.filter(expires__lt=timezone.now(), order_status="PENDING")
+            expired_orders = Order.objects.filter(
+                expires__lt=timezone.now(), status="PENDING"
+            )
             for order in expired_orders:
                 order.move_to_history()
 
@@ -86,23 +89,39 @@ def extract_order_data(soup):
     try:
         html_text = soup.find("div", class_="divBidLoad").text.strip()
         order_number_match = re.search(r"Order #(\d+)", html_text)
-        order_data["order_number"] = order_number_match.group(1) if order_number_match else None
+        order_data["order_number"] = (
+            order_number_match.group(1) if order_number_match else None
+        )
 
         if soup.find("div", class_="column1").find("a"):
             pick_up_at = soup.find("div", class_="column1").a.strong.text.strip()
         else:
             pick_up_at = soup.find("div", class_="column1").strong.text.strip()
-        pick_up_date = soup.find("div", class_="column1").contents[-1].strip().replace(" EST", "").replace(" CEN", "")
+        pick_up_date = (
+            soup.find("div", class_="column1")
+            .contents[-1]
+            .strip()
+            .replace(" EST", "")
+            .replace(" CEN", "")
+        )
 
         if soup.find("div", class_="column3").find("a"):
             deliver_to = soup.find("div", class_="column3").a.strong.text.strip()
         else:
             deliver_to = soup.find("div", class_="column3").strong.text.strip()
-        deliver_date = soup.find("div", class_="column3").contents[-1].strip().replace(" EST", "").replace(" CEN", "")
+        deliver_date = (
+            soup.find("div", class_="column3")
+            .contents[-1]
+            .strip()
+            .replace(" EST", "")
+            .replace(" CEN", "")
+        )
 
         order_data["line"] = soup.find("div", class_="line").text.strip()
 
-        broker_data = soup.find_all("div", class_="column4")[0].find_all("p", class_="dataColumn")
+        broker_data = soup.find_all("div", class_="column4")[0].find_all(
+            "p", class_="dataColumn"
+        )
         i = 0
         if broker_data[i].strong.text.strip() == "Broker:":
             order_data["broker"] = broker_data[i].contents[-1].strip().rstrip(":")
@@ -121,14 +140,24 @@ def extract_order_data(soup):
             order_data["email"] = None
         if broker_data[i].strong.text.strip() == "Posted:":
             order_data["posted"] = (
-                broker_data[i].contents[-1].strip().rstrip(":").replace(" EST", "").replace(" CEN", "")
+                broker_data[i]
+                .contents[-1]
+                .strip()
+                .rstrip(":")
+                .replace(" EST", "")
+                .replace(" CEN", "")
             )
             i += 1
         else:
             order_data["posted"] = None
         if broker_data[i].strong.text.strip() == "Expires:":
             order_data["expires"] = (
-                broker_data[i].contents[-1].strip().rstrip(":").replace(" EST", "").replace(" CEN", "")
+                broker_data[i]
+                .contents[-1]
+                .strip()
+                .rstrip(":")
+                .replace(" EST", "")
+                .replace(" CEN", "")
             )
             i += 1
         else:
@@ -154,7 +183,9 @@ def extract_order_data(soup):
         else:
             order_data["notes"] = None
 
-        transport_data = soup.find_all("div", class_="column5")[0].find_all("p", class_="dataColumn")
+        transport_data = soup.find_all("div", class_="column5")[0].find_all(
+            "p", class_="dataColumn"
+        )
         i = 0
         if transport_data[i].strong.text.strip() == "Load Type:":
             order_data["load_type"] = transport_data[i].contents[-1].strip().rstrip(":")
@@ -162,7 +193,9 @@ def extract_order_data(soup):
         else:
             order_data["load_type"] = None
         if transport_data[i].strong.text.strip() == "Vehicle required:":
-            order_data["vehicle_required"] = transport_data[i].contents[-1].strip().rstrip(":")
+            order_data["vehicle_required"] = (
+                transport_data[i].contents[-1].strip().rstrip(":")
+            )
             i += 1
         else:
             order_data["vehicle_required"] = None
@@ -177,7 +210,9 @@ def extract_order_data(soup):
         else:
             order_data["weight"] = None
         if transport_data[i].strong.text.strip() == "Dimensions:":
-            order_data["dimensions"] = transport_data[i].contents[-1].strip().rstrip(":")
+            order_data["dimensions"] = (
+                transport_data[i].contents[-1].strip().rstrip(":")
+            )
             i += 1
         else:
             order_data["dimensions"] = None
@@ -187,28 +222,36 @@ def extract_order_data(soup):
             order_data["stackable"] = None
 
         # Определение формата даты и времени
-        date_format = "%m/%d/%Y %H:%M" if len(pick_up_date.split()[0].split("/")[2]) == 4 else "%m/%d/%y %H:%M"
+        date_format = (
+            "%m/%d/%Y %H:%M"
+            if len(pick_up_date.split()[0].split("/")[2]) == 4
+            else "%m/%d/%y %H:%M"
+        )
 
         order_data["pick_up_at"] = pick_up_at
         order_data["pick_up_date"] = (
-            timezone.make_aware(datetime.strptime(pick_up_date, date_format)) + timedelta(hours=6)
+            timezone.make_aware(datetime.strptime(pick_up_date, date_format))
+            + timedelta(hours=6)
             if pick_up_date
             else None
         )
         order_data["deliver_to"] = deliver_to
         order_data["deliver_date"] = (
-            timezone.make_aware(datetime.strptime(deliver_date, date_format)) + timedelta(hours=6)
+            timezone.make_aware(datetime.strptime(deliver_date, date_format))
+            + timedelta(hours=6)
             if deliver_date
             else None
         )
 
         order_data["posted"] = (
-            timezone.make_aware(datetime.strptime(order_data["posted"], date_format)) + timedelta(hours=6)
+            timezone.make_aware(datetime.strptime(order_data["posted"], date_format))
+            + timedelta(hours=6)
             if order_data["posted"]
             else None
         )
         order_data["expires"] = (
-            timezone.make_aware(datetime.strptime(order_data["expires"], date_format)) + timedelta(hours=6)
+            timezone.make_aware(datetime.strptime(order_data["expires"], date_format))
+            + timedelta(hours=6)
             if order_data["expires"]
             else None
         )
@@ -225,8 +268,17 @@ def save_order(order_data):
     if not order_data.get("order_number"):
         raise ValidationError({"error": "This order number cannot be empty."})
 
+    pick_up_at = order_data.pop("pick_up_at")
+    pick_up_date = order_data.pop("pick_up_date")
+    deliver_to = order_data.pop("deliver_to")
+    deliver_date = order_data.pop("deliver_date")
+
     order = Order(**order_data)
     order.full_clean()
     order.save()
+
+    create_point(order, pick_up_at, pick_up_date, "PICK_UP")
+    create_point(order, deliver_to, deliver_date, "DELIVER_TO")
+
     logging.info(f"{'#' * 10} Order {order.id} saved to the database")
     return order

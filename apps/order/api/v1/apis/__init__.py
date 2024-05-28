@@ -1,4 +1,4 @@
-from .load_board_apis import LastSimilarOrdersAPI, LoadBoardListAPI
+from .load_board_apis import LoadBoardDetailAPI, LoadBoardListAPI
 from .my_bids_apis import MyBidHistoryAPI, MyBidListAPI, assign
 from .my_loads_apis import (
     MyCheckoutListAPI,

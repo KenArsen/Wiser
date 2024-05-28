@@ -20,21 +20,14 @@ from apps.user.api.v1.serializers.user_serializer import (
     InvitationSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
-    RolesSerializer,
     UserActivationSerializer,
     UserCreateSerializer,
     UserListSerializer,
     UserRetrieveSerializer,
     UserSerializer,
 )
-from apps.user.models import Invitation, Roles, User
+from apps.user.models import Invitation, User
 from wiser_load_board.settings import EMAIL_HOST_USER
-
-
-class RolesViewSet(ModelViewSet):
-    queryset = Roles.objects.all()
-    serializer_class = RolesSerializer
-    permission_classes = (IsSuperAdmin,)
 
 
 class UserViewSet(ModelViewSet):
@@ -72,14 +65,18 @@ class UserViewSet(ModelViewSet):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"message": "User with this email was not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "User with this email was not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         if request.user.is_superuser:
             user.is_active = True
             user.save()
             return Response({"message": "User activated."}, status=status.HTTP_200_OK)
         else:
             return Response(
-                {"message": "You do not have rights to activate the user."}, status=status.HTTP_403_FORBIDDEN
+                {"message": "You do not have rights to activate the user."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
 
@@ -90,7 +87,10 @@ class InvitationView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "email": openapi.Schema(type=openapi.TYPE_STRING, description="Email address for the invitation"),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Email address for the invitation",
+                ),
             },
             required=["email"],
         ),
@@ -108,26 +108,36 @@ class InvitationView(APIView):
             email = serializer.validated_data.get("email")
             if Invitation.objects.filter(email=email, is_used=False).exists():
                 return Response(
-                    {"detail": "Invitation already sent to this email."}, status=status.HTTP_400_BAD_REQUEST
+                    {"detail": "Invitation already sent to this email."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             user = User.objects.create(email=email)
             invitation_token = str(uuid.uuid4())
-            invitation = Invitation.objects.create(user=user, email=email, invitation_token=invitation_token)
+            invitation = Invitation.objects.create(
+                user=user, email=email, invitation_token=invitation_token
+            )
             # Отправьте приглашение на электронную почту пользователя здесь.
             subject = "Invitation to register"
             invitation_url = request.build_absolute_uri(
-                reverse("api:users:setup-password", kwargs={"invitation_token": invitation_token})
+                reverse(
+                    "api:users:setup-password",
+                    kwargs={"invitation_token": invitation_token},
+                )
             )
             message = f"To continue registration follow the link: {invitation_url}"
             from_email = EMAIL_HOST_USER
             recipient_list = [email]
             send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-            return Response(InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED)
+            return Response(
+                InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED
+            )
 
 
 class PasswordSetupView(APIView):
     def post(self, request, invitation_token):
-        invitation = Invitation.objects.filter(invitation_token=invitation_token, is_used=False)
+        invitation = Invitation.objects.filter(
+            invitation_token=invitation_token, is_used=False
+        )
         if not invitation:
             return Response({"error": "This invitation url is used"})
         else:
@@ -148,9 +158,14 @@ class PasswordSetupView(APIView):
             from_email = EMAIL_HOST_USER
             recipient_list = [email]
             send_mail(subject, message, from_email, recipient_list)
-            return Response({"success": "Your password succussfully changed!"}, status=status.HTTP_200_OK)
+            return Response(
+                {"success": "Your password succussfully changed!"},
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({"detail": "Invalid password."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid password."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ResetPasswordRequestView(generics.CreateAPIView):
@@ -162,7 +177,10 @@ class ResetPasswordRequestView(generics.CreateAPIView):
 
     def send_password_reset_email(self, email, reset_token, request):
         subject = "Password reset"
-        reset_url = request.build_absolute_uri(reverse("api:users:reset-password-confirm")) + f"?token={reset_token}"
+        reset_url = (
+            request.build_absolute_uri(reverse("api:users:reset-password-confirm"))
+            + f"?token={reset_token}"
+        )
 
         message = f"To reset your password, follow the link: {reset_url}"
         from_email = EMAIL_HOST_USER
@@ -177,9 +195,15 @@ class ResetPasswordRequestView(generics.CreateAPIView):
                 user1 = User.objects.get(email=email)
                 reset_token = self.generate_reset_token(user1)
                 self.send_password_reset_email(email, reset_token, request)
-                return Response({"message": "Email sent with reset instructions"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "Email sent with reset instructions"},
+                    status=status.HTTP_200_OK,
+                )
             except User.DoesNotExist:
-                return Response({"error": "User with this email does not exist"}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"error": "User with this email does not exist"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -198,5 +222,7 @@ class ResetPasswordConfirmView(generics.CreateAPIView):
             from_email = EMAIL_HOST_USER
             recipient_list = [user.email]
             send_mail(subject, message, from_email, recipient_list)
-            return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Password reset successfully"}, status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -29,7 +29,6 @@ urlpatterns = [
     path("drivers/", include("apps.driver.api.v1.urls", namespace="drivers")),
     path("vehicles/", include("apps.vehicle.api.v1.urls", namespace="vehicles")),
     path("orders/", include("apps.order.api.v1.urls", namespace="orders")),
-    path("letters/", include("apps.letter.api.v1.urls", namespace="letters")),
     path("healthcheck/", HealthCheckView.as_view(), name="healthcheck"),
 ]
 
