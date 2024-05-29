@@ -9,10 +9,10 @@ from .order_service import OrderService
 class MyLoadService(OrderService):
 
     def _get_order(self, data):
-        order_id = data.get("order_id", None)
+        order_id = data.get("order", None)
         if order_id is None:
-            raise ValidationError({"detail": "order_id field is required."})
-        order = self.repository.get_order(pk=order_id)
+            raise ValidationError({"detail": "order field is required."})
+        order = self.get_order(pk=order_id)
         return order
 
     def next_status(self, data):
@@ -29,11 +29,6 @@ class MyLoadService(OrderService):
                 order.status = "CHECKOUT"
             elif order.my_load_status.current_status == SubStatus.PAID_OFF:
                 order.status = "COMPLETED"
-
-            order.letter.driver_id.vehicle.location_from = (
-                order.letter.driver_id.address
-            )
-            order.letter.driver_id.vehicle.save()
 
             order.save()
 
@@ -65,11 +60,6 @@ class MyLoadService(OrderService):
                 and order.status != "ACTIVE"
             ):
                 order.status = "CHECKOUT"
-
-            order.letter.driver_id.vehicle.location_from = (
-                order.letter.driver_id.address
-            )
-            order.letter.driver_id.vehicle.save()
 
             order.save()
 

@@ -1,4 +1,4 @@
-from .common_serializer import AssignSerializer, MyLoadStatusSerializer, PointSerializer
+from .common_serializer import AssignSerializer, MyLoadStatusSerializer
 from .letter_serializer import LetterSerializer
 from .load_board_serializer import LoadBoardDetailSerializer, LoadBoardListSerializer
 from .my_bid_serializer import (

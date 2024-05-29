@@ -1,11 +1,6 @@
 from django.contrib import admin
 
-from apps.order.models import Assign, File, Letter, Order, Point, Price, Template
-
-
-class PointInline(admin.StackedInline):
-    model = Point
-    extra = 1
+from apps.order.models import Assign, File, Letter, Order, Template
 
 
 class LetterInline(admin.StackedInline):
@@ -18,18 +13,13 @@ class FileInline(admin.StackedInline):
     extra = 1
 
 
-class PriceInline(admin.StackedInline):
-    model = Price
-    extra = 1
-
-
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "status", "order_number")
     list_display_links = ("id", "user")
     search_fields = ("email", "user__email")
     readonly_fields = ("created_at", "updated_at")
-    inlines = [PointInline, LetterInline, PriceInline, FileInline]
+    inlines = [LetterInline, FileInline]
 
 
 @admin.register(Assign)

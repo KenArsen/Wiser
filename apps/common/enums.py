@@ -20,11 +20,6 @@ class OrderStatus(models.TextChoices):
     EXPIRED = "EXPIRED", "EXPIRED"
 
 
-class PointType(models.TextChoices):
-    PICK_UP = "PICK_UP", "PICK_UP"
-    DELIVER_TO = "DELIVER_TO", "DELIVER_TO"
-
-
 class SubStatus(models.IntegerChoices):
     POINT_A = 1, "I am going to the load"
     UPLOADED = 2, "Uploaded"

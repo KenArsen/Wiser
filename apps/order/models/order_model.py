@@ -4,7 +4,8 @@ from django.db import models
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from apps.common.enums import OrderStatus, PointType, SubStatus
+from apps.common.enums import OrderStatus, SubStatus
+from apps.common.locations import get_location
 from apps.common.models import BaseModel
 
 
@@ -12,34 +13,38 @@ class Order(BaseModel):
     user = models.ForeignKey(
         "user.User", on_delete=models.SET_NULL, null=True, blank=True
     )
-
     status = models.CharField(
         max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING
     )
 
     order_number = models.CharField(max_length=255, blank=True, null=True)
 
-    transit_time = models.PositiveIntegerField(blank=True, null=True)
-    transit_distance = models.PositiveIntegerField(blank=True, null=True)
+    pick_up_location = models.CharField(max_length=255, blank=True, null=True)
+    pick_up_latitude = models.FloatField(blank=True, null=True)
+    pick_up_longitude = models.FloatField(blank=True, null=True)
+    pick_up_date = models.DateTimeField(blank=True, null=True)
+    delivery_location = models.CharField(max_length=255, blank=True, null=True)
+    delivery_latitude = models.FloatField(blank=True, null=True)
+    delivery_longitude = models.FloatField(blank=True, null=True)
+    delivery_date = models.DateTimeField(blank=True, null=True)
 
-    line = models.CharField(max_length=255, blank=True, null=True)
-
+    stops = models.CharField(max_length=255, blank=True, null=True)
     broker = models.CharField(max_length=255, blank=True, null=True)
     broker_phone = models.CharField(max_length=255, blank=True, null=True)
     broker_email = models.EmailField(null=True, blank=True)
-    posted = models.DateTimeField(blank=True, null=True, default=timezone.now)
-    expires = models.DateTimeField(blank=True, null=True, default=timezone.now)
-    dock_level = models.CharField(max_length=255, blank=True, null=True)
-    hazmat = models.CharField(max_length=255, blank=True, null=True)
-    fast_load = models.CharField(max_length=255, blank=True, null=True)
-    notes = models.CharField(max_length=400, blank=True, null=True)
-
+    posted = models.DateTimeField(blank=True, null=True)
+    expires = models.DateTimeField(default=timezone.now)
+    dock_level = models.BooleanField(default=False)
+    hazmat = models.BooleanField(default=False)
+    amount = models.CharField(max_length=255, blank=True, null=True)
+    fast_load = models.BooleanField(default=False)
+    notes = models.TextField(max_length=400, blank=True, null=True)
     load_type = models.CharField(max_length=255, blank=True, null=True)
     vehicle_required = models.CharField(max_length=255, blank=True, null=True)
     pieces = models.CharField(max_length=255, blank=True, null=True)
     weight = models.CharField(max_length=255, blank=True, null=True)
     dimensions = models.CharField(max_length=255, blank=True, null=True)
-    stackable = models.CharField(max_length=255, blank=True, null=True)
+    stackable = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
@@ -47,12 +52,22 @@ class Order(BaseModel):
     def __str__(self):
         return self.broker_email
 
-    def clean(self):
-        if self.expires is None:
-            raise ValidationError(
-                {"error": f"This {self.order_number} does not expire!"}
-            )
+    def save(self, *args, **kwargs):
+        if self.pick_up_location:
+            pick_up_location = get_location(self.pick_up_location)
+            if pick_up_location:
+                self.pick_up_latitude = pick_up_location.latitude
+                self.pick_up_longitude = pick_up_location.longitude
 
+        if self.delivery_location:
+            delivery_location = get_location(self.delivery_location)
+            if delivery_location:
+                self.delivery_latitude = delivery_location.latitude
+                self.delivery_longitude = delivery_location.longitude
+
+        super().save(*args, **kwargs)
+
+    def clean(self):
         if (
             self.expires <= timezone.localtime(timezone.now())
             and self.status == "PENDING"
@@ -69,26 +84,6 @@ class Order(BaseModel):
         else:
             logging.info(f"------ Order {self.id} deleted --------")
             self.delete()
-
-
-class Point(BaseModel):
-    order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, related_name="points"
-    )
-    address = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
-    state = models.CharField(max_length=255, blank=True, null=True)
-    county = models.CharField(max_length=255, blank=True, null=True)
-    zip_code = models.CharField(max_length=255, blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
-    date = models.DateTimeField(blank=True, null=True)
-    type = models.CharField(
-        max_length=255, choices=PointType.choices, default=PointType.PICK_UP
-    )
-
-    def __str__(self):
-        return f"{self.address}"
 
 
 class Assign(BaseModel):

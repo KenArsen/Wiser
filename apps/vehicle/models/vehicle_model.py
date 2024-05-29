@@ -1,6 +1,7 @@
 from django.db import models
 
 from apps.common.enums import TransportType
+from apps.common.locations import get_location
 from apps.common.models import BaseModel
 
 
@@ -30,6 +31,10 @@ class Vehicle(BaseModel):
     lisense_expiry_date = models.DateTimeField(blank=True, null=True)
     insurance_expiry_date = models.DateTimeField(blank=True, null=True)
 
+    location = models.CharField(max_length=255, blank=True, null=True)
+    location_latitude = models.FloatField(blank=True, null=True)
+    location_longitude = models.FloatField(blank=True, null=True)
+
     # owner info
     dispatcher = models.ForeignKey(
         "user.User",
@@ -56,18 +61,11 @@ class Vehicle(BaseModel):
     def __str__(self):
         return f"{self.unit_id}"
 
+    def save(self, *args, **kwargs):
+        if self.driver.address:
+            location = get_location(self.driver.address)
+            self.location = self.driver.address
+            self.location_latitude = location.latitude
+            self.location_longitude = location.longitude
 
-class Location(BaseModel):
-    vehicle = models.OneToOneField(
-        Vehicle, on_delete=models.CASCADE, related_name="location"
-    )
-    address = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
-    state = models.CharField(max_length=255, blank=True, null=True)
-    county = models.CharField(max_length=255, blank=True, null=True)
-    zip_code = models.CharField(max_length=255, blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
-
-    def __str__(self):
-        return self.address
+        super().save(*args, **kwargs)

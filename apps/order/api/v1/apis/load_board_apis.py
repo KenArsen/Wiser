@@ -1,7 +1,4 @@
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
-from rest_framework.response import Response
 
 from apps.common import HasAccessToLoadBoardPanel, LargeResultsSetPagination
 from apps.order.api.v1.serializers import (
@@ -9,28 +6,30 @@ from apps.order.api.v1.serializers import (
     LoadBoardListSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import LoadBoardService
+from apps.order.services import OrderService
 
 
 class LoadBoardListAPI(generics.ListAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.filter(status="PENDING")
     serializer_class = LoadBoardListSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return LoadBoardService(serializer=self.serializer_class).get_filtered_orders(
-            status="PENDING"
-        )
+        return OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
+        ).get_orders()
 
 
 class LoadBoardDetailAPI(generics.RetrieveAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.filter(status="PENDING")
     serializer_class = LoadBoardDetailSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
     pagination_class = LargeResultsSetPagination
 
-    def get_queryset(self):
-        return LoadBoardService(serializer=self.serializer_class).get_filtered_orders(
-            status="PENDING"
-        )
+    def get_object(self):
+        return OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
+        ).get_order(pk=self.kwargs["pk"])

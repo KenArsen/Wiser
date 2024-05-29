@@ -1,1 +1,1 @@
-from .vehicle_model import Location, Vehicle
+from .vehicle_model import Vehicle

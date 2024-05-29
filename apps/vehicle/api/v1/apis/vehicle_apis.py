@@ -1,7 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from apps.common.nominatim import get_location
 from apps.common.permissions import IsSuperAdmin
 from apps.vehicle.api.v1.serializers import (
     VehicleCreateSerializer,
@@ -9,7 +8,7 @@ from apps.vehicle.api.v1.serializers import (
     VehicleListSerializer,
     VehicleUpdateSerializer,
 )
-from apps.vehicle.models import Location, Vehicle
+from apps.vehicle.models import Vehicle
 
 
 class VehicleListAPI(generics.ListAPIView):
@@ -30,18 +29,6 @@ class VehicleCreateAPI(generics.CreateAPIView):
         serializer = VehicleCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        vehicle = serializer.instance
-        location = get_location(vehicle.driver.address)
-        Location.objects.create(
-            vehicle=vehicle,
-            city=location["city"],
-            state=location["state"],
-            county=location["county"],
-            address=location["address"],
-            zip_code=location["zip_code"],
-            latitude=location["latitude"],
-            longitude=location["longitude"],
-        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

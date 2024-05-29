@@ -6,5 +6,13 @@ from apps.order.models import Letter
 class LetterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Letter
-        fields = ("id", "order", "driver", "comment", "dispatcher", "broker_price", "driver_price")
+        fields = (
+            "id",
+            "order",
+            "driver",
+            "comment",
+            "dispatcher",
+            "broker_price",
+            "driver_price",
+        )
         ref_name = "Letter"

@@ -2,26 +2,56 @@ from rest_framework import serializers
 
 from apps.order.models import Order
 
-from .common_serializer import AssignSerializer, MyLoadStatusSerializer, PointSerializer
-from .letter_serializer import LetterSerializer
+from .common_serializer import MyLoadStatusSerializer
 
 
 class MyLoadListSerializer(serializers.ModelSerializer):
-    points = PointSerializer(many=True, read_only=True)
-
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = (
+            "id",
+            "created_at",
+            "order_number",
+            "status",
+            "broker",
+            "pick_up_location",
+            "delivery_location",
+        )
         ref_name = "MyLoadList"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        letter = getattr(instance, "letter", None)
+        dispatcher = getattr(letter, "dispatcher", None) if letter else None
+
+        representation["dispatcher"] = (
+            f"{dispatcher.first_name} {dispatcher.last_name}" or None
+        )
+
+        return representation
 
 
 class MyLoadDetailSerializer(serializers.ModelSerializer):
-    points = PointSerializer(many=True, read_only=True)
     my_load_status = MyLoadStatusSerializer(many=False, read_only=True)
-    letter = LetterSerializer(required=False, read_only=True)
-    assign = AssignSerializer(read_only=True)
 
     class Meta:
         model = Order
         fields = "__all__"
         ref_name = "MyLoadDetail"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        letter = getattr(instance, "letter", None)
+        driver = getattr(letter, "driver", None) if letter else None
+
+        representation["broker_price"] = letter.broker_price or None
+        representation["driver_price"] = letter.driver_price or None
+        representation["driver_name"] = (
+            f"{driver.first_name} {driver.last_name}" or None
+        )
+        representation["driver_phone"] = driver.phone_number or None
+        representation["driver_email"] = driver.email or None
+
+        return representation

@@ -3,14 +3,13 @@ from smtplib import SMTPAuthenticationError, SMTPException
 
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework.exceptions import ValidationError
-
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import exceptions, generics, status, views
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from apps.order.models import Order, Letter
 from apps.order.api.v1.serializers import LetterSerializer
+from apps.order.models import Letter, Order
 
 
 def send_email(data):
@@ -26,7 +25,10 @@ def send_email(data):
                 subject=subject,
                 message=message,
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=["arsen.kenjegulov.bj@gmail.com", "alymbekjenishbekuulu@gmail.com"],
+                recipient_list=[
+                    "arsen.kenjegulov.bj@gmail.com",
+                    "alymbekjenishbekuulu@gmail.com",
+                ],
                 fail_silently=False,
                 html_message=data["comment"],
             )
@@ -59,5 +61,7 @@ class SendEmailView(views.APIView):
         if serializer.is_valid():
             serializer.save()
             send_email(serializer.data)
-            return Response({"success": "Message sent successfully"}, status=status.HTTP_200_OK)
+            return Response(
+                {"success": "Message sent successfully"}, status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

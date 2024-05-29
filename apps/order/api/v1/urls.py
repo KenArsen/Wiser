@@ -1,13 +1,14 @@
 from django.urls import path
 
 from apps.order.api.v1.apis import (
-    SendEmailView,
     LoadBoardDetailAPI,
     LoadBoardListAPI,
+    MyBidDetailAPI,
     MyBidHistoryAPI,
     MyBidListAPI,
     MyCheckoutListAPI,
     MyCompletedListAPI,
+    MyLoadDetailSerializer,
     MyLoadHistoryAPI,
     MyLoadListAPI,
     OrderCreateAPI,
@@ -16,10 +17,12 @@ from apps.order.api.v1.apis import (
     OrderListAPI,
     OrderRefuseAPI,
     OrderUpdateAPI,
+    SendEmailView,
     assign,
     next_status,
     previous_status,
 )
+from apps.order.api.v1.apis.my_loads_apis import MyLoadDetailAPI
 
 app_name = "orders"
 
@@ -44,6 +47,7 @@ urlpatterns += [
 # my bids
 urlpatterns += [
     path("my_bids/", MyBidListAPI.as_view(), name="my-bids-list"),
+    path("my_bids/<int:pk>/", MyBidDetailAPI.as_view(), name="my-bid-detail"),
     path("my_bids/history/", MyBidHistoryAPI.as_view(), name="my-bids-history"),
     path("my_bids/assign/", assign, name="my-bids-assign"),
 ]
@@ -51,6 +55,7 @@ urlpatterns += [
 # my loads
 urlpatterns += [
     path("my_loads/", MyLoadListAPI.as_view(), name="my-loads"),
+    path("my_loads/<int:pk>/", MyLoadDetailAPI.as_view(), name="my-load-detail"),
     path("my_loads/history/", MyLoadHistoryAPI.as_view(), name="my-loads-history"),
     path("my_loads/checkout/", MyCheckoutListAPI.as_view(), name="my-checkouts"),
     path("my_loads/complete/", MyCompletedListAPI.as_view(), name="my-complete"),

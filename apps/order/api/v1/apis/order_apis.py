@@ -20,7 +20,10 @@ class OrderListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return OrderService(serializer=self.serializer_class).get_orders()
+        return OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
+        ).get_orders()
 
 
 class OrderCreateAPI(generics.CreateAPIView):
@@ -29,10 +32,7 @@ class OrderCreateAPI(generics.CreateAPIView):
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
-        return Response(
-            OrderService(serializer=self.serializer_class).create_order(request.data),
-            status=status.HTTP_201_CREATED,
-        )
+        return self.create(request, *args, **kwargs)
 
 
 class OrderDetailAPI(generics.RetrieveAPIView):
@@ -41,9 +41,10 @@ class OrderDetailAPI(generics.RetrieveAPIView):
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def get_object(self):
-        return OrderService(serializer=self.serializer_class).get_order(
-            self.kwargs["pk"]
-        )
+        return OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
+        ).get_order(self.kwargs["pk"])
 
 
 class OrderUpdateAPI(generics.UpdateAPIView):
@@ -51,18 +52,19 @@ class OrderUpdateAPI(generics.UpdateAPIView):
     serializer_class = OrderUpdateSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
-    def get_object(self):
-        return OrderService(serializer=self.serializer_class).get_order(
-            self.kwargs["pk"]
+    def get_service(self):
+        return OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
         )
 
+    def get_object(self):
+        return self.get_service().get_order(self.kwargs["pk"])
+
     def update(self, request, *args, **kwargs):
-        return Response(
-            OrderService(serializer=self.serializer_class).update_order(
-                self.get_object(), request.data
-            ),
-            status=status.HTTP_200_OK,
-        )
+        order_service = self.get_service()
+        updated_data = order_service.update_order(self.get_object(), request.data)
+        return Response(updated_data, status=status.HTTP_200_OK)
 
     def partial_update(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
@@ -73,18 +75,20 @@ class OrderDeleteAPI(generics.DestroyAPIView):
     serializer_class = OrderDetailSerializer
     permission_classes = (HasAccessToLoadBoardPanel,)
 
-    def get_object(self):
-        return OrderService(serializer=self.serializer_class).get_order(
-            self.kwargs["pk"]
+    def get_service(self):
+        return OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
         )
 
+    def get_object(self):
+        return self.get_service().get_order(self.kwargs["pk"])
+
     def destroy(self, request, *args, **kwargs):
-        return Response(
-            OrderService(serializer=self.serializer_class).delete_order(
-                self.get_object()
-            ),
-            status=status.HTTP_204_NO_CONTENT,
-        )
+        service = self.get_service()
+        instance = self.get_object()
+        result = service.delete_order(instance)
+        return Response(result, status=status.HTTP_204_NO_CONTENT)
 
 
 class OrderRefuseAPI(generics.GenericAPIView):
@@ -93,7 +97,8 @@ class OrderRefuseAPI(generics.GenericAPIView):
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
-        service = OrderService(serializer=self.serializer_class).order_refuse(
-            order_id=self.request.data["order_id"]
-        )
+        service = OrderService(
+            serializer=self.serializer_class,
+            queryset=self.queryset,
+        ).order_refuse(id=self.request.data["order"])
         return Response(service, status=status.HTTP_200_OK)

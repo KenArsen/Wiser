@@ -1,28 +1,6 @@
 from rest_framework import serializers
 
-from apps.order.models import Assign, File, MyLoadStatus, Point
-
-
-class PointSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Point
-        fields = (
-            "id",
-            "created_at",
-            "updated_at",
-            "order",
-            "address",
-            "city",
-            "state",
-            "county",
-            "zip_code",
-            "latitude",
-            "longitude",
-            "date",
-            "type",
-        )
-        read_only_fields = ("id", "created_at", "updated_at")
-        ref_name = "Point"
+from apps.order.models import Assign, File, MyLoadStatus
 
 
 class MyLoadStatusSerializer(serializers.ModelSerializer):
