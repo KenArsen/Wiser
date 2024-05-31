@@ -69,15 +69,11 @@ class User(ImageService, BaseModel, AbstractBaseUser, PermissionsMixin):
             if not self.pk:
                 if self.avatar:
                     # image compress
-                    self.compress_image(
-                        "avatar", delete_source=True, max_width=300, max_height=300
-                    )
+                    self.compress_image("avatar", delete_source=True, max_width=300, max_height=300)
             else:
                 if self.avatar:
                     # image compress
-                    self.compress_image(
-                        "avatar", delete_source=True, max_width=300, max_height=300
-                    )
+                    self.compress_image("avatar", delete_source=True, max_width=300, max_height=300)
 
             this = User.objects.get(id=self.id)
 
@@ -97,9 +93,7 @@ def user_avatar(sender, instance, **kwargs):
 
 
 class Invitation(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="invitation"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="invitation")
     email = models.EmailField(unique=True)
     invitation_token = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)

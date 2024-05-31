@@ -113,9 +113,7 @@ class InvitationView(APIView):
                 )
             user = User.objects.create(email=email)
             invitation_token = str(uuid.uuid4())
-            invitation = Invitation.objects.create(
-                user=user, email=email, invitation_token=invitation_token
-            )
+            invitation = Invitation.objects.create(user=user, email=email, invitation_token=invitation_token)
             # Отправьте приглашение на электронную почту пользователя здесь.
             subject = "Invitation to register"
             invitation_url = request.build_absolute_uri(
@@ -128,16 +126,12 @@ class InvitationView(APIView):
             from_email = EMAIL_HOST_USER
             recipient_list = [email]
             send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-            return Response(
-                InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED
-            )
+            return Response(InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED)
 
 
 class PasswordSetupView(APIView):
     def post(self, request, invitation_token):
-        invitation = Invitation.objects.filter(
-            invitation_token=invitation_token, is_used=False
-        )
+        invitation = Invitation.objects.filter(invitation_token=invitation_token, is_used=False)
         if not invitation:
             return Response({"error": "This invitation url is used"})
         else:
@@ -163,9 +157,7 @@ class PasswordSetupView(APIView):
                 status=status.HTTP_200_OK,
             )
         else:
-            return Response(
-                {"detail": "Invalid password."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "Invalid password."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResetPasswordRequestView(generics.CreateAPIView):
@@ -177,10 +169,7 @@ class ResetPasswordRequestView(generics.CreateAPIView):
 
     def send_password_reset_email(self, email, reset_token, request):
         subject = "Password reset"
-        reset_url = (
-            request.build_absolute_uri(reverse("api:users:reset-password-confirm"))
-            + f"?token={reset_token}"
-        )
+        reset_url = request.build_absolute_uri(reverse("api:users:reset-password-confirm")) + f"?token={reset_token}"
 
         message = f"To reset your password, follow the link: {reset_url}"
         from_email = EMAIL_HOST_USER
@@ -222,7 +211,5 @@ class ResetPasswordConfirmView(generics.CreateAPIView):
             from_email = EMAIL_HOST_USER
             recipient_list = [user.email]
             send_mail(subject, message, from_email, recipient_list)
-            return Response(
-                {"message": "Password reset successfully"}, status=status.HTTP_200_OK
-            )
+            return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

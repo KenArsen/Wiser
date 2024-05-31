@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToLoadBoardPanel
@@ -32,7 +33,12 @@ class OrderCreateAPI(generics.CreateAPIView):
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        data = request.data.copy()
+        data["user"] = request.user.id
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OrderDetailAPI(generics.RetrieveAPIView):
@@ -97,8 +103,11 @@ class OrderRefuseAPI(generics.GenericAPIView):
     permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
+        order_id = request.data.get("order", None)
+        if order_id is None:
+            raise ValidationError({"detail": "order field is required."})
         service = OrderService(
             serializer=self.serializer_class,
             queryset=self.queryset,
-        ).order_refuse(id=self.request.data["order"])
+        ).refuse_order(order_id=self.request.data["order"])
         return Response(service, status=status.HTTP_200_OK)

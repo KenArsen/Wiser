@@ -11,8 +11,6 @@ from apps.driver.api.v1.serializers import (
     DriverUpdateSerializer,
 )
 from apps.driver.models import Driver
-from apps.order.api.v1.serializers import TemplateSerializer
-from apps.order.models import Template
 from apps.vehicle.api.v1.serializers import VehicleDetailSerializer
 
 
@@ -39,13 +37,9 @@ class DriverDetailAPI(generics.RetrieveAPIView):
             vehicles_serializer = VehicleDetailSerializer(instance.vehicle)
             vehicle_data = vehicles_serializer.data
 
-        template = Template.objects.filter(is_active=True).first()
-        template_serializer = TemplateSerializer(template)
-
         response_data = {
             "driver": serializer.data,
             "vehicle": vehicle_data,
-            "template": template_serializer.data,
         }
 
         return Response(data=response_data)
@@ -95,9 +89,7 @@ class DriverFilterAPI(generics.ListAPIView):
 class DriverSetStatusAPI(views.APIView):
     permission_classes = (IsSuperAdmin,)
 
-    @swagger_auto_schema(
-        operation_summary="Set driver status", responses={200: "Driver Status"}
-    )
+    @swagger_auto_schema(operation_summary="Set driver status", responses={200: "Driver Status"})
     def get(self, request, pk):
         try:
             driver = Driver.objects.get(pk=pk)

@@ -38,9 +38,7 @@ time_until_delivery_response = {
                     type="array",
                     items=openapi.Schema(
                         type="object",
-                        properties={
-                            "time_until_delivery": openapi.Schema(type="number")
-                        },
+                        properties={"time_until_delivery": openapi.Schema(type="number")},
                     ),
                 ),
             },
@@ -61,11 +59,7 @@ order_data_spec = {
             type=openapi.TYPE_STRING,
             description="Delivery location",
         ),
-        openapi.Parameter(
-            "miles", openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description="Miles"
-        ),
+        openapi.Parameter("miles", openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description="Miles"),
     ],
-    "responses": {
-        200: openapi.Response("Order data description", OrderDetailSerializer)
-    },
+    "responses": {200: openapi.Response("Order data description", OrderDetailSerializer)},
 }

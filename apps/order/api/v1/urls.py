@@ -8,7 +8,6 @@ from apps.order.api.v1.apis import (
     MyBidListAPI,
     MyCheckoutListAPI,
     MyCompletedListAPI,
-    MyLoadDetailSerializer,
     MyLoadHistoryAPI,
     MyLoadListAPI,
     OrderCreateAPI,
@@ -35,12 +34,10 @@ urlpatterns = [
     path("<int:pk>/delete/", OrderDeleteAPI.as_view(), name="order-delete"),
 ]
 
-# load board
+# load boards
 urlpatterns += [
     path("load_boards/", LoadBoardListAPI.as_view(), name="load-board-list"),
-    path(
-        "load_boards/<int:pk>/", LoadBoardDetailAPI.as_view(), name="load-board-detail"
-    ),
+    path("load_boards/<int:pk>/", LoadBoardDetailAPI.as_view(), name="load-board-detail"),
     path("send/", SendEmailView.as_view(), name="send-email"),
 ]
 

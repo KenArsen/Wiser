@@ -29,10 +29,7 @@ class MyLoadListAPI(generics.ListAPIView):
 
 class MyLoadDetailAPI(generics.RetrieveAPIView):
     queryset = Order.objects.filter(
-        Q(status="COMPLETED")
-        | Q(status="CHECKOUT")
-        | Q(status="ACTIVE")
-        | Q(status="REFUSED", assign__isnull=False)
+        Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE") | Q(status="REFUSED", assign__isnull=False)
     )
     serializer_class = MyLoadDetailSerializer
     permission_classes = (HasAccessToMyLoadsPanel,)
@@ -45,9 +42,7 @@ class MyLoadDetailAPI(generics.RetrieveAPIView):
 
 
 class MyLoadHistoryAPI(generics.ListAPIView):
-    queryset = Order.objects.filter(
-        Q(status="REFUSED", assign__isnull=False) | Q(status="COMPLETED")
-    )
+    queryset = Order.objects.filter(Q(status="REFUSED", assign__isnull=False) | Q(status="COMPLETED"))
     serializer_class = MyLoadListSerializer
     permission_classes = (HasAccessToMyLoadsPanel,)
     pagination_class = LargeResultsSetPagination
@@ -90,9 +85,7 @@ class MyCompletedListAPI(generics.ListAPIView):
 def next_status(request):
     service_data, status_ = MyLoadService(
         serializer=MyLoadStatusSerializer,
-        queryset=Order.objects.filter(
-            Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE")
-        ),
+        queryset=Order.objects.filter(Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE")),
     ).next_status(data=request.data)
     return Response(service_data, status=status_)
 
@@ -102,8 +95,6 @@ def next_status(request):
 def previous_status(request):
     service_data, status_ = MyLoadService(
         serializer=MyLoadStatusSerializer,
-        queryset=Order.objects.filter(
-            Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE")
-        ),
+        queryset=Order.objects.filter(Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE")),
     ).previous_status(data=request.data)
     return Response(service_data, status=status_)

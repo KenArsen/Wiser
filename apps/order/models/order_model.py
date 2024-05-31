@@ -10,12 +10,8 @@ from apps.common.models import BaseModel
 
 
 class Order(BaseModel):
-    user = models.ForeignKey(
-        "user.User", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    status = models.CharField(
-        max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING
-    )
+    user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING)
 
     order_number = models.CharField(max_length=255, blank=True, null=True)
 
@@ -46,8 +42,10 @@ class Order(BaseModel):
     dimensions = models.CharField(max_length=255, blank=True, null=True)
     stackable = models.BooleanField(default=False)
 
+    match = models.PositiveSmallIntegerField(default=0)
+
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-updated_at"]
 
     def __str__(self):
         return self.broker_email
@@ -68,13 +66,8 @@ class Order(BaseModel):
         super().save(*args, **kwargs)
 
     def clean(self):
-        if (
-            self.expires <= timezone.localtime(timezone.now())
-            and self.status == "PENDING"
-        ):
-            raise ValidationError(
-                {"error": f"This {self.order_number} order has already expired!"}
-            )
+        if self.expires <= timezone.localtime(timezone.now()) and self.status == "PENDING":
+            raise ValidationError({"error": f"This {self.order_number} order has already expired!"})
 
     def move_to_history(self):
         if self.user is not None:
@@ -87,9 +80,7 @@ class Order(BaseModel):
 
 
 class Assign(BaseModel):
-    order = models.OneToOneField(
-        "order.Order", on_delete=models.CASCADE, related_name="assign"
-    )
+    order = models.OneToOneField("order.Order", on_delete=models.CASCADE, related_name="assign")
     broker_company = models.CharField(max_length=255)
     rate_confirmation = models.CharField(max_length=255)
 
@@ -98,12 +89,8 @@ class Assign(BaseModel):
 
 
 class MyLoadStatus(BaseModel):
-    previous_status = models.PositiveSmallIntegerField(
-        choices=SubStatus.choices, null=True
-    )
-    current_status = models.PositiveSmallIntegerField(
-        choices=SubStatus.choices, null=True
-    )
+    previous_status = models.PositiveSmallIntegerField(choices=SubStatus.choices, null=True)
+    current_status = models.PositiveSmallIntegerField(choices=SubStatus.choices, null=True)
     next_status = models.PositiveSmallIntegerField(choices=SubStatus.choices, null=True)
     order = models.OneToOneField(
         "order.Order",
@@ -116,9 +103,7 @@ class MyLoadStatus(BaseModel):
 
 
 class File(BaseModel):
-    order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, related_name="files"
-    )
+    order = models.ForeignKey("order.Order", on_delete=models.CASCADE, related_name="files")
     file = models.FileField(upload_to="order_files/%Y/%m/%d")
 
     def __str__(self):

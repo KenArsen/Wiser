@@ -1,4 +1,4 @@
-from .common_serializer import AssignSerializer, MyLoadStatusSerializer
+from .common_serializer import AssignSerializer, MyLoadStatusSerializer, TemplateSerializer
 from .letter_serializer import LetterSerializer
 from .load_board_serializer import LoadBoardDetailSerializer, LoadBoardListSerializer
 from .my_bid_serializer import (
@@ -13,4 +13,3 @@ from .order_serializer import (
     OrderListSerializer,
     OrderUpdateSerializer,
 )
-from .template_serializer import TemplateSerializer

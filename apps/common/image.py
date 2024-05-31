@@ -6,9 +6,7 @@ from PIL import Image
 
 
 class ImageService(object):
-    def compress_image(
-        self, field, delete_source=False, max_width=1200, max_height=1200
-    ):
+    def compress_image(self, field, delete_source=False, max_width=1200, max_height=1200):
         image = getattr(self, field)
         img = Image.open(image)
         if img.mode != "RGB":

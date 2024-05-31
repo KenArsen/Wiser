@@ -24,9 +24,7 @@ class MyBidListAPI(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return MyBidService(
-            serializer=self.serializer_class, queryset=self.queryset
-        ).get_orders()
+        return MyBidService(serializer=self.serializer_class, queryset=self.queryset).get_orders()
 
 
 class MyBidDetailAPI(generics.RetrieveAPIView):
@@ -35,26 +33,19 @@ class MyBidDetailAPI(generics.RetrieveAPIView):
     permission_classes = (HasAccessToMyBidsPanel,)
 
     def get_object(self):
-        return MyBidService(
-            serializer=self.serializer_class, queryset=self.get_queryset
-        ).get_order(pk=self.kwargs["pk"])
+        return MyBidService(serializer=self.serializer_class, queryset=self.queryset).get_order(pk=self.kwargs["pk"])
 
 
 class MyBidHistoryAPI(generics.ListAPIView):
     queryset = Order.objects.filter(
-        Q(status="REFUSED")
-        | Q(status="ACTIVE")
-        | Q(status="CHECKOUT")
-        | Q(status="COMPLETED")
+        Q(status="REFUSED") | Q(status="ACTIVE") | Q(status="CHECKOUT") | Q(status="COMPLETED")
     )
     serializer_class = MyBidHistorySerializer
     permission_classes = (HasAccessToMyBidsPanel,)
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return MyBidService(
-            serializer=self.serializer_class, queryset=self.get_queryset
-        ).get_orders()
+        return MyBidService(serializer=self.serializer_class, queryset=self.queryset).get_orders()
 
 
 @swagger_auto_schema(
@@ -65,15 +56,9 @@ class MyBidHistoryAPI(generics.ListAPIView):
         type=openapi.TYPE_OBJECT,
         required=["id"],
         properties={
-            "order_id": openapi.Schema(
-                type=openapi.TYPE_INTEGER, description="The ID of the order"
-            ),
-            "broker_company": openapi.Schema(
-                type=openapi.TYPE_STRING, description="The broker company "
-            ),
-            "rate_confirmation": openapi.Schema(
-                type=openapi.TYPE_STRING, description="The rate confirmation"
-            ),
+            "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the order"),
+            "broker_company": openapi.Schema(type=openapi.TYPE_STRING, description="The broker company "),
+            "rate_confirmation": openapi.Schema(type=openapi.TYPE_STRING, description="The rate confirmation"),
         },
     ),
 )

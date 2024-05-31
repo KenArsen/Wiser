@@ -11,7 +11,6 @@ class LetterSerializer(serializers.ModelSerializer):
             "order",
             "driver",
             "comment",
-            "dispatcher",
             "broker_price",
             "driver_price",
         )
