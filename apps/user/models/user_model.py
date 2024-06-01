@@ -92,11 +92,10 @@ def user_avatar(sender, instance, **kwargs):
     instance.avatar.delete(False)
 
 
-class Invitation(models.Model):
+class Invitation(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="invitation")
     email = models.EmailField(unique=True)
     invitation_token = models.CharField(max_length=100, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
 
     class Meta:

@@ -15,9 +15,10 @@ class FileInline(admin.StackedInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "status", "order_number")
-    list_display_links = ("id", "user")
-    search_fields = ("email", "user__email")
+    list_display = ("id", "order_number", "broker", "broker_email", "status")
+    list_display_links = ("id", "order_number", "broker", "broker_email", "status")
+    search_fields = ("order_number", "broker", "broker_email")
+    list_filter = ("status", "user")
     readonly_fields = ("created_at", "updated_at")
     inlines = [LetterInline, FileInline]
 

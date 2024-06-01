@@ -7,10 +7,11 @@ from rest_framework.exceptions import ValidationError
 from apps.common.enums import OrderStatus, SubStatus
 from apps.common.locations import get_location
 from apps.common.models import BaseModel
+from apps.user.models import User
 
 
 class Order(BaseModel):
-    user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING)
 
     order_number = models.CharField(max_length=255, blank=True, null=True)
@@ -80,7 +81,7 @@ class Order(BaseModel):
 
 
 class Assign(BaseModel):
-    order = models.OneToOneField("order.Order", on_delete=models.CASCADE, related_name="assign")
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="assign")
     broker_company = models.CharField(max_length=255)
     rate_confirmation = models.CharField(max_length=255)
 
@@ -93,7 +94,7 @@ class MyLoadStatus(BaseModel):
     current_status = models.PositiveSmallIntegerField(choices=SubStatus.choices, null=True)
     next_status = models.PositiveSmallIntegerField(choices=SubStatus.choices, null=True)
     order = models.OneToOneField(
-        "order.Order",
+        Order,
         on_delete=models.CASCADE,
         related_name="my_load_status",
     )
@@ -103,7 +104,7 @@ class MyLoadStatus(BaseModel):
 
 
 class File(BaseModel):
-    order = models.ForeignKey("order.Order", on_delete=models.CASCADE, related_name="files")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="files")
     file = models.FileField(upload_to="order_files/%Y/%m/%d")
 
     def __str__(self):

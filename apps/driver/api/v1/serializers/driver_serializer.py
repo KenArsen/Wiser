@@ -1,6 +1,22 @@
 from rest_framework import serializers
 
 from apps.driver.models import Driver
+from apps.vehicle.models import Vehicle
+
+
+class DriversVehicleSerializer(serializers.ModelSerializer):
+    coordinate = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Vehicle
+        fields = ("id", "dispatcher", "owner", "location", "coordinate")
+
+    def get_coordinate(self, instance):
+        return (
+            f"{instance.location_latitude},{instance.location_longitude}"
+            if instance.location_latitude and instance.location_longitude
+            else None
+        )
 
 
 class DriverAvailabilityUpdateSerializer(serializers.ModelSerializer):
@@ -19,6 +35,8 @@ class DriverListSerializer(serializers.ModelSerializer):
 
 
 class DriverDetailSerializer(serializers.ModelSerializer):
+    vehicle = DriversVehicleSerializer(read_only=True)
+
     class Meta:
         model = Driver
         fields = "__all__"

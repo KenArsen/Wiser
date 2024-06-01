@@ -11,7 +11,6 @@ from apps.driver.api.v1.serializers import (
     DriverUpdateSerializer,
 )
 from apps.driver.models import Driver
-from apps.vehicle.api.v1.serializers import VehicleDetailSerializer
 
 
 class BaseDriverView(generics.GenericAPIView):
@@ -31,20 +30,7 @@ class DriverDetailAPI(BaseDriverView, generics.RetrieveAPIView):
     serializer_class = DriverDetailSerializer
 
     def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-
-        vehicle_data = None
-        if hasattr(instance, "vehicle"):
-            vehicles_serializer = VehicleDetailSerializer(instance.vehicle)
-            vehicle_data = vehicles_serializer.data
-
-        response_data = {
-            "driver": serializer.data,
-            "vehicle": vehicle_data,
-        }
-
-        return Response(data=response_data)
+        return self.retrieve(request, *args, **kwargs)
 
 
 class DriverCreateAPI(BaseDriverView, generics.CreateAPIView):

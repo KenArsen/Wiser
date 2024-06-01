@@ -3,6 +3,8 @@ from django.db import models
 from apps.common.enums import TransportType
 from apps.common.locations import get_location
 from apps.common.models import BaseModel
+from apps.driver.models import Driver
+from apps.user.models import User
 
 
 class Vehicle(BaseModel):
@@ -37,21 +39,21 @@ class Vehicle(BaseModel):
 
     # owner info
     dispatcher = models.ForeignKey(
-        "user.User",
+        User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="dispatchers",
     )
     owner = models.ForeignKey(
-        "user.User",
+        User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="owners",
     )
     driver = models.OneToOneField(
-        "driver.Driver",
+        Driver,
         on_delete=models.CASCADE,
         blank=True,
         null=True,

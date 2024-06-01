@@ -1,1 +1,1 @@
-from .models import Invitation, User
+from .user_model import Invitation, User
