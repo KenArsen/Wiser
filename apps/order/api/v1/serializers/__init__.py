@@ -1,5 +1,10 @@
-from .common_serializer import AssignSerializer, MyLoadStatusSerializer, TemplateSerializer
-from .letter_serializer import LetterSerializer
+from .common_serializer import (
+    AssignSerializer,
+    LetterSerializer,
+    MyLoadStatusSerializer,
+    RefuseSerializer,
+    TemplateSerializer,
+)
 from .load_board_serializer import LoadBoardDetailSerializer, LoadBoardListSerializer
 from .my_bid_serializer import (
     MyBidDetailSerializer,

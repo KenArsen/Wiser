@@ -1,5 +1,7 @@
 from django.db import IntegrityError, transaction
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from apps.common.enums import SubStatus
 from apps.order.models import MyLoadStatus
@@ -20,7 +22,7 @@ class MyBidService(OrderService):
         order = self._get_order(data=data)
         if order.status != "ACTIVE":
             order.status = "ACTIVE"
-            order.save(update_fields=["status"])
+            order.save(update_fields=["status", "updated_at"])
 
             try:
                 MyLoadStatus.objects.create(
@@ -36,16 +38,16 @@ class MyBidService(OrderService):
 
             if broker_price is not None:
                 order.letter.broker_price = broker_price
-                order.letter.save(update_fields=["broker_price"])
+                order.letter.save(update_fields=["broker_price", "updated_at"])
 
             if driver_price is not None:
                 order.letter.driver_price = driver_price
-                order.letter.save(update_fields=["driver_price"])
+                order.letter.save(update_fields=["driver_price", "updated_at"])
 
             serializer = self.serializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-            return {"detail": "The order has been moved to My Loads"}
+            return Response({"detail": "The order has been moved to My Loads"}, status=status.HTTP_200_OK)
         else:
             raise ValidationError({"detail": "Order is already assigned."})

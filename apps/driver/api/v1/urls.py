@@ -1,12 +1,12 @@
 from django.urls import path
 
 from apps.driver.api.v1.apis import (
+    DriverAvailabilityUpdateAPI,
     DriverCreateAPI,
     DriverDeleteAPI,
     DriverDetailAPI,
     DriverFilterAPI,
     DriverListAPI,
-    DriverSetStatusAPI,
     DriverUpdateAPI,
 )
 
@@ -19,5 +19,5 @@ urlpatterns = [
     path("<int:pk>/", DriverDetailAPI.as_view(), name="driver-details"),
     path("<int:pk>/update/", DriverUpdateAPI.as_view(), name="driver-update"),
     path("<int:pk>/delete/", DriverDeleteAPI.as_view(), name="driver-delete"),
-    path("<int:pk>/set_status/", DriverSetStatusAPI.as_view(), name="driver-set-status"),
+    path("<int:pk>/availability/", DriverAvailabilityUpdateAPI.as_view(), name="driver-set-status"),
 ]

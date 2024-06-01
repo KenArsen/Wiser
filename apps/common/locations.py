@@ -1,5 +1,6 @@
+from math import atan2, cos, radians, sin, sqrt
+
 from geopy.geocoders import Nominatim
-from math import radians, cos, sin, sqrt, atan2
 
 
 def get_location(address):

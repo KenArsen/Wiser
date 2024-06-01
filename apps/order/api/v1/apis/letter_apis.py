@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError, SMTPException
 
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework import exceptions, status, views
+from rest_framework import exceptions, generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
@@ -40,7 +40,8 @@ def send_email(data):
         raise ValidationError({"error": str(e)})
 
 
-class SendEmailView(views.APIView):
+class SendEmailView(generics.GenericAPIView):
+    serializer_class = LetterSerializer
     permission_classes = (HasAccessToMyBidsPanel,)
 
     @staticmethod

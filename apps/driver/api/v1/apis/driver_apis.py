@@ -1,10 +1,10 @@
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, views
-from rest_framework.exceptions import ValidationError
+from rest_framework import generics
 from rest_framework.response import Response
 
+from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import IsSuperAdmin
 from apps.driver.api.v1.serializers import (
+    DriverAvailabilityUpdateSerializer,
     DriverCreateSerializer,
     DriverDetailSerializer,
     DriverListSerializer,
@@ -14,19 +14,21 @@ from apps.driver.models import Driver
 from apps.vehicle.api.v1.serializers import VehicleDetailSerializer
 
 
-class DriverListAPI(generics.ListAPIView):
+class BaseDriverView(generics.GenericAPIView):
     queryset = Driver.objects.all()
-    serializer_class = DriverListSerializer
     permission_classes = (IsSuperAdmin,)
+    pagination_class = LargeResultsSetPagination
+
+
+class DriverListAPI(BaseDriverView, generics.ListAPIView):
+    serializer_class = DriverListSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
 
-class DriverDetailAPI(generics.RetrieveAPIView):
-    queryset = Driver.objects.all()
+class DriverDetailAPI(BaseDriverView, generics.RetrieveAPIView):
     serializer_class = DriverDetailSerializer
-    permission_classes = (IsSuperAdmin,)
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -45,19 +47,15 @@ class DriverDetailAPI(generics.RetrieveAPIView):
         return Response(data=response_data)
 
 
-class DriverCreateAPI(generics.CreateAPIView):
-    queryset = Driver.objects.all()
+class DriverCreateAPI(BaseDriverView, generics.CreateAPIView):
     serializer_class = DriverCreateSerializer
-    permission_classes = (IsSuperAdmin,)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
 
-class DriverUpdateAPI(generics.UpdateAPIView):
-    queryset = Driver.objects.all()
+class DriverUpdateAPI(BaseDriverView, generics.UpdateAPIView):
     serializer_class = DriverUpdateSerializer
-    permission_classes = (IsSuperAdmin,)
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
@@ -66,38 +64,26 @@ class DriverUpdateAPI(generics.UpdateAPIView):
         return self.partial_update(request, *args, **kwargs)
 
 
-class DriverDeleteAPI(generics.DestroyAPIView):
-    queryset = Driver.objects.all()
-    permission_classes = (IsSuperAdmin,)
+class DriverDeleteAPI(BaseDriverView, generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
 
-class DriverFilterAPI(generics.ListAPIView):
+class DriverFilterAPI(BaseDriverView, generics.ListAPIView):
     queryset = Driver.objects.filter(is_available=True)
     serializer_class = DriverListSerializer
-    permission_classes = (IsSuperAdmin,)
 
-    @swagger_auto_schema(
-        operation_summary="List active drivers",
-    )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
 
-class DriverSetStatusAPI(views.APIView):
-    permission_classes = (IsSuperAdmin,)
+class DriverAvailabilityUpdateAPI(BaseDriverView, generics.UpdateAPIView):
+    serializer_class = DriverAvailabilityUpdateSerializer
 
-    @swagger_auto_schema(operation_summary="Set driver status", responses={200: "Driver Status"})
-    def get(self, request, pk):
-        try:
-            driver = Driver.objects.get(pk=pk)
-            if driver.is_available:
-                driver.is_available = False
-            else:
-                driver.is_available = True
-            driver.save()
-            return Response({"message": f"Driver status {driver.is_available}"})
-        except Driver.DoesNotExist:
-            raise ValidationError({"detail": "No such driver"})
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_available = not instance.is_available  # Измените значение на противоположное
+        instance.save(update_fields=["is_available", "updated_at"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

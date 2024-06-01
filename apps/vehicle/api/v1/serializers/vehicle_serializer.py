@@ -6,7 +6,7 @@ from apps.vehicle.models import Vehicle
 class VehicleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = "__all__"
+        fields = ("id", "unit_id", "transport_type", "vehicle_model", "vin", "driver", "dispatcher", "owner")
         ref_name = "VehicleList"
 
 

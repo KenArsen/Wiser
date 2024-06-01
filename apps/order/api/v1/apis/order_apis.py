@@ -1,36 +1,39 @@
 from rest_framework import generics, status
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToLoadBoardPanel
-from apps.order.api.v1.serializers.order_serializer import (
+from apps.order.api.v1.serializers import (
     OrderCreateSerializer,
     OrderDetailSerializer,
     OrderListSerializer,
     OrderUpdateSerializer,
+    RefuseSerializer,
 )
 from apps.order.models import Order
 from apps.order.services import OrderService
 
 
-class OrderListAPI(generics.ListAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderListSerializer
+class BaseOrderView(generics.GenericAPIView):
     permission_classes = (HasAccessToLoadBoardPanel,)
     pagination_class = LargeResultsSetPagination
 
+    def get_service(self):
+        return OrderService(serializer=self.serializer_class, queryset=self.queryset)
+
+
+class OrderListAPI(BaseOrderView, generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderListSerializer
+
     def get_queryset(self):
-        return OrderService(
-            serializer=self.serializer_class,
-            queryset=self.queryset,
-        ).get_orders()
+        return self.get_service().get_orders()
 
 
-class OrderCreateAPI(generics.CreateAPIView):
+class OrderCreateAPI(BaseOrderView, generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderCreateSerializer
-    permission_classes = (HasAccessToLoadBoardPanel,)
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -41,28 +44,17 @@ class OrderCreateAPI(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class OrderDetailAPI(generics.RetrieveAPIView):
+class OrderDetailAPI(BaseOrderView, generics.RetrieveAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderDetailSerializer
-    permission_classes = (HasAccessToLoadBoardPanel,)
 
     def get_object(self):
-        return OrderService(
-            serializer=self.serializer_class,
-            queryset=self.queryset,
-        ).get_order(self.kwargs["pk"])
+        return self.get_service().get_order(self.kwargs["pk"])
 
 
-class OrderUpdateAPI(generics.UpdateAPIView):
+class OrderUpdateAPI(BaseOrderView, generics.UpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderUpdateSerializer
-    permission_classes = (HasAccessToLoadBoardPanel,)
-
-    def get_service(self):
-        return OrderService(
-            serializer=self.serializer_class,
-            queryset=self.queryset,
-        )
 
     def get_object(self):
         return self.get_service().get_order(self.kwargs["pk"])
@@ -76,16 +68,9 @@ class OrderUpdateAPI(generics.UpdateAPIView):
         return self.update(request, *args, **kwargs)
 
 
-class OrderDeleteAPI(generics.DestroyAPIView):
+class OrderDeleteAPI(BaseOrderView, generics.DestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderDetailSerializer
-    permission_classes = (HasAccessToLoadBoardPanel,)
-
-    def get_service(self):
-        return OrderService(
-            serializer=self.serializer_class,
-            queryset=self.queryset,
-        )
 
     def get_object(self):
         return self.get_service().get_order(self.kwargs["pk"])
@@ -97,17 +82,13 @@ class OrderDeleteAPI(generics.DestroyAPIView):
         return Response(result, status=status.HTTP_204_NO_CONTENT)
 
 
-class OrderRefuseAPI(generics.GenericAPIView):
+class OrderRefuseAPI(BaseOrderView):
     queryset = Order.objects.all()
-    serializer_class = OrderDetailSerializer
-    permission_classes = (HasAccessToLoadBoardPanel,)
+    serializer_class = RefuseSerializer
 
     def post(self, request, *args, **kwargs):
         order_id = request.data.get("order", None)
         if order_id is None:
             raise ValidationError({"detail": "order field is required."})
-        service = OrderService(
-            serializer=self.serializer_class,
-            queryset=self.queryset,
-        ).refuse_order(order_id=self.request.data["order"])
+        service = self.get_service().refuse_order(order_id=self.request.data["order"])
         return Response(service, status=status.HTTP_200_OK)

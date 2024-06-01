@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
+from apps.common.locations import get_haversine_distance
 from apps.driver.models import Driver
 from apps.order.models import Order, Template
 from apps.vehicle.models import Vehicle
-from apps.common.locations import get_haversine_distance
 
 
 class NearByDriverSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class NearByDriverSerializer(serializers.ModelSerializer):
 class NearByOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'status', 'broker', 'pick_up_location', 'delivery_location')
+        fields = ("id", "status", "broker", "pick_up_location", "delivery_location")
         ref_name = "NearByOrder"
 
 
@@ -163,7 +163,7 @@ def _update_match(order, distance_threshold=2000):
     vehicles = Vehicle.objects.filter(
         location_latitude__isnull=False,
         location_longitude__isnull=False,
-    ).only('location_latitude', 'location_longitude')
+    ).only("location_latitude", "location_longitude")
     match = sum(
         1
         for vehicle in vehicles
@@ -184,7 +184,7 @@ def _get_nearby_drivers(order, distance_threshold=2000):
     vehicles = Vehicle.objects.filter(
         location_latitude__isnull=False,
         location_longitude__isnull=False,
-    ).only('location_latitude', 'location_longitude')
+    ).only("location_latitude", "location_longitude")
 
     nearby_drivers = []
     for vehicle in vehicles:
@@ -209,7 +209,7 @@ def _get_nearby_orders(order, radius=2000):
         status="COMPLETED",
         pick_up_latitude__isnull=False,
         pick_up_location__isnull=False,
-    ).only('pick_up_latitude', 'pick_up_longitude', 'delivery_latitude', 'delivery_longitude')
+    ).only("pick_up_latitude", "pick_up_longitude", "delivery_latitude", "delivery_longitude")
 
     nearby_orders = []
 

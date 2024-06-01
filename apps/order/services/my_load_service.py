@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
 from apps.common.enums import SubStatus
+
 from .order_service import OrderService
 
 
@@ -32,7 +33,7 @@ class MyLoadService(OrderService):
         elif current_status < SubStatus.PAID_OFF and order.status != "ACTIVE":
             order.status = "CHECKOUT"
 
-        order.save()
+        order.save(update_fields=["status", "updated_at"])
 
         return self.serializer(order.my_load_status).data
 

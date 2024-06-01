@@ -24,6 +24,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "status",
+            "id",
         )
         ref_name = "OrderCreate"
 
