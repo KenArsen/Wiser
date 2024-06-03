@@ -5,47 +5,71 @@ from apps.order.models import Order
 from .common_serializer import MyLoadStatusSerializer
 
 
-class MyLoadListSerializer(serializers.ModelSerializer):
+class MyLoadBaseSerializer(serializers.ModelSerializer):
     my_load_status = MyLoadStatusSerializer(many=False, read_only=True)
+    pick_up_coordinate = serializers.SerializerMethodField()
+    delivery_coordinate = serializers.SerializerMethodField()
+    dispatcher_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = (
             "id",
+            "order_number",
             "created_at",
             "updated_at",
             "status",
             "my_load_status",
             "broker",
             "pick_up_location",
+            "pick_up_coordinate",
+            "pick_up_date",
             "delivery_location",
+            "delivery_coordinate",
+            "delivery_date",
+            "dispatcher_name",
         )
+        ref_name = 'MyLoadBase'
+
+    def get_pick_up_coordinate(self, instance):
+        return (
+            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
+            if instance.pick_up_latitude and instance.pick_up_longitude
+            else None
+        )
+
+    def get_delivery_coordinate(self, instance):
+        return (
+            f"{instance.delivery_latitude},{instance.delivery_longitude}"
+            if instance.delivery_latitude and instance.delivery_longitude
+            else None
+        )
+
+    def get_dispatcher_name(self, instance):
+        return (
+            f"{instance.user.first_name} {instance.user.last_name}"
+            if instance.user.first_name and instance.user.last_name
+            else None
+        )
+
+
+class MyLoadListSerializer(MyLoadBaseSerializer):
+    class Meta:
+        model = Order
+        fields = MyLoadBaseSerializer.Meta.fields
         ref_name = "MyLoadList"
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        dispatcher = instance.user
 
-        dispatcher_info = get_dispatcher_info(dispatcher)
-        representation.update(dispatcher_info)
-
-        return representation
-
-
-class MyLoadDetailSerializer(serializers.ModelSerializer):
-    my_load_status = MyLoadStatusSerializer(many=False, read_only=True)
+class MyLoadDetailSerializer(MyLoadBaseSerializer):
+    broker_price = serializers.SerializerMethodField()
+    driver_price = serializers.SerializerMethodField()
+    driver_name = serializers.SerializerMethodField()
+    driver_email = serializers.SerializerMethodField()
+    driver_phone = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
-        fields = (
-            "created_at",
-            "updated_at",
-            "status",
-            "my_load_status",
-            "pick_up_location",
-            "pick_up_date",
-            "delivery_location",
-            "delivery_date",
+        fields = MyLoadBaseSerializer.Meta.fields + (
             "stops",
             "broker",
             "broker_phone",
@@ -63,69 +87,33 @@ class MyLoadDetailSerializer(serializers.ModelSerializer):
             "weight",
             "dimensions",
             "stackable",
+            "broker_price",
+            "driver_price",
+            "driver_name",
+            "driver_email",
+            "driver_phone",
         )
         ref_name = "MyLoadDetail"
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
+    def get_broker_price(self, instance):
+        return (
+            instance.letter.broker_price if getattr(instance, "letter", None) else None
+        )
 
-        letter = getattr(instance, "letter", None)
-        driver = getattr(letter, "driver", None) if letter else None
+    def get_driver_price(self, instance):
+        return (
+            instance.letter.driver_price if getattr(instance, "letter", None) else None
+        )
 
-        letter_info = get_letter_info(letter)
-        representation.update(letter_info)
-
-        driver_info = get_driver_info(driver)
-        representation.update(driver_info)
-
-        return representation
-
-
-def get_coordinates(instance):
-    return {
-        "pick_up_coordinate": (
-            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
-            if instance.pick_up_latitude and instance.pick_up_longitude
+    def get_driver_name(self, instance):
+        return (
+            f"{instance.letter.driver.first_name} {instance.letter.driver.last_name}"
+            if instance.letter.driver.first_name and instance.letter.driver.last_name
             else None
-        ),
-        "delivery_coordinate": (
-            f"{instance.delivery_latitude},{instance.delivery_longitude}"
-            if instance.delivery_latitude and instance.delivery_longitude
-            else None
-        ),
-    }
+        )
 
+    def get_driver_email(self, instance):
+        return instance.letter.driver.email if getattr(instance, "letter", None) else None
 
-def get_dispatcher_info(dispatcher):
-    if dispatcher:
-        return {
-            "dispatcher_name": (
-                f"{dispatcher.first_name} {dispatcher.last_name}"
-                if dispatcher.first_name and dispatcher.last_name
-                else None
-            ),
-        }
-    return {"dispatcher_name": None}
-
-
-def get_driver_info(driver):
-    if driver:
-        return {
-            "driver_name": (
-                f"{driver.first_name} {driver.last_name}" if driver.first_name and driver.last_name else None
-            ),
-            "driver_phone": driver.phone_number,
-            "driver_email": driver.email,
-        }
-    else:
-        return {"driver_name": None, "driver_phone": None, "driver_email": None}
-
-
-def get_letter_info(letter):
-    if letter:
-        return {
-            "broker_price": letter.broker_price,
-            "driver_price": letter.driver_price,
-        }
-    else:
-        return {"broker_price": None, "driver_price": None}
+    def get_driver_phone(self, instance):
+        return instance.letter.driver.phone_number if getattr(instance, "letter", None) else None

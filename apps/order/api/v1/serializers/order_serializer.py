@@ -6,7 +6,10 @@ from apps.order.models import Order
 class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = (
+            "id",
+            "status",
+        )
         ref_name = "OrderList"
 
 

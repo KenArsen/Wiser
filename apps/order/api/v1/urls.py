@@ -51,7 +51,7 @@ urlpatterns += [
 
 # my loads
 urlpatterns += [
-    path("my_loads/", MyLoadListAPI.as_view(), name="my-loads"),
+    path("my_loads/", MyLoadListAPI.as_view(), name="my-loads-list"),
     path("my_loads/<int:pk>/", MyLoadDetailAPI.as_view(), name="my-load-detail"),
     path("my_loads/history/", MyLoadHistoryAPI.as_view(), name="my-loads-history"),
     path("my_loads/checkout/", MyCheckoutListAPI.as_view(), name="my-checkouts"),

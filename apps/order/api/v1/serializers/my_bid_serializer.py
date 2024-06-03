@@ -3,79 +3,97 @@ from rest_framework import serializers
 from apps.order.models import Order
 
 
-class MyBidListSerializer(serializers.ModelSerializer):
+class MiBidBaseSerializer(serializers.ModelSerializer):
+    pick_up_coordinate = serializers.SerializerMethodField()
+    delivery_coordinate = serializers.SerializerMethodField()
+    dispatcher_name = serializers.SerializerMethodField()
+    dispatcher_phone = serializers.SerializerMethodField()
+    dispatcher_email = serializers.SerializerMethodField()
+
     class Meta:
         model = Order
         fields = (
             "id",
-            "status",
-            "created_at",
             "order_number",
+            "created_at",
+            "status",
             "broker",
             "pick_up_location",
-            "delivery_location",
-        )
-        ref_name = "MyBidDetail"
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-
-        letter = getattr(instance, "letter", None)
-        dispatcher = instance.user or None
-
-        coordinates = get_coordinates(instance)
-        representation.update(coordinates)
-
-        dispatcher_info = get_dispatcher_info(dispatcher)
-        representation.update(dispatcher_info)
-
-        representation["broker_price"] = letter.broker_price if letter else None
-
-        return representation
-
-
-class MyBidHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = (
-            "id",
-            "status",
-            "created_at",
-            "order_number",
-            "broker",
-            "status",
-            "pick_up_location",
-            "delivery_location",
-        )
-        ref_name = "MyBidHistory"
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-
-        letter = getattr(instance, "letter", None)
-        dispatcher = instance.user
-
-        coordinates = get_coordinates(instance)
-        representation.update(coordinates)
-
-        dispatcher_info = get_dispatcher_info(dispatcher)
-        representation.update(dispatcher_info)
-
-        representation["broker_price"] = letter.broker_price if letter else None
-
-        return representation
-
-
-class MyBidDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = (
-            "status",
-            "order_number",
-            "pick_up_location",
+            "pick_up_coordinate",
             "pick_up_date",
             "delivery_location",
+            "delivery_coordinate",
             "delivery_date",
+            "dispatcher_name",
+            "dispatcher_email",
+            "dispatcher_phone",
+        )
+        ref_name = 'MyBidBase'
+
+    def get_pick_up_coordinate(self, instance):
+        return (
+            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
+            if instance.pick_up_latitude and instance.pick_up_longitude
+            else None
+        )
+
+    def get_delivery_coordinate(self, instance):
+        return (
+            f"{instance.delivery_latitude},{instance.delivery_longitude}"
+            if instance.delivery_latitude and instance.delivery_longitude
+            else None
+        )
+
+    def get_dispatcher_name(self, instance):
+        return (
+            f"{instance.user.first_name} {instance.user.last_name}"
+            if instance.user.first_name and instance.user.last_name
+            else None
+        )
+
+    def get_dispatcher_email(self, instance):
+        return instance.user.email
+
+    def get_dispatcher_phone(self, instance):
+        return instance.user.phone_number
+
+
+class MyBidListSerializer(MiBidBaseSerializer):
+    broker_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = MiBidBaseSerializer.Meta.fields + ("broker_price",)
+        ref_name = "MyBidList"
+
+    def get_broker_price(self, instance):
+        return (
+            instance.letter.broker_price if getattr(instance, "letter", None) else None
+        )
+
+
+class MyBidHistorySerializer(MiBidBaseSerializer):
+    broker_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = MiBidBaseSerializer.Meta.fields + ("broker_price",)
+        ref_name = "MyBidHistory"
+
+    def get_broker_price(self, instance):
+        return (
+            instance.letter.broker_price if getattr(instance, "letter", None) else None
+        )
+
+
+class MyBidDetailSerializer(MiBidBaseSerializer):
+    broker_price = serializers.SerializerMethodField()
+    driver_price = serializers.SerializerMethodField()
+    message = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = MiBidBaseSerializer.Meta.fields + (
             "stops",
             "broker",
             "broker_phone",
@@ -93,58 +111,23 @@ class MyBidDetailSerializer(serializers.ModelSerializer):
             "weight",
             "dimensions",
             "stackable",
+            "broker_price",
+            "driver_price",
+            "message",
         )
         ref_name = "MyBidDetail"
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
+    def get_broker_price(self, instance):
+        return (
+            instance.letter.broker_price if getattr(instance, "letter", None) else None
+        )
 
-        dispatcher = instance.user
+    def get_driver_price(self, instance):
+        return (
+            instance.letter.driver_price if getattr(instance, "letter", None) else None
+        )
 
-        coordinates = get_coordinates(instance)
-        representation.update(coordinates)
-
-        dispatcher_info = get_dispatcher_info(dispatcher)
-        representation.update(dispatcher_info)
-
-        letter = getattr(instance, "letter", None)
-
-        if letter:
-            representation["broker_price"] = letter.broker_price
-            representation["driver_price"] = letter.driver_price
-            representation["message"] = letter.comment
-        else:
-            representation["broker_price"] = None
-            representation["driver_price"] = None
-            representation["message"] = None
-
-        return representation
-
-
-def get_coordinates(instance):
-    return {
-        "pick_up_coordinate": (
-            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
-            if instance.pick_up_latitude and instance.pick_up_longitude
-            else None
-        ),
-        "delivery_coordinate": (
-            f"{instance.delivery_latitude},{instance.delivery_longitude}"
-            if instance.delivery_latitude and instance.delivery_longitude
-            else None
-        ),
-    }
-
-
-def get_dispatcher_info(dispatcher):
-    if dispatcher:
-        return {
-            "dispatcher_name": (
-                f"{dispatcher.first_name} {dispatcher.last_name}"
-                if dispatcher.first_name and dispatcher.last_name
-                else None
-            ),
-            "dispatcher_phone": dispatcher.phone_number,
-            "dispatcher_email": dispatcher.email,
-        }
-    return {"dispatcher_name": None, "dispatcher_phone": None, "dispatcher_email": None}
+    def get_message(self, instance):
+        return (
+            instance.letter.comment if getattr(instance, "letter", None) else None
+        )
