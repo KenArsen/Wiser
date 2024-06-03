@@ -83,6 +83,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "wiser_load_board.wsgi.application"
+ASGI_APPLICATION = "wiser_load_board.asgi.application"
 
 DATABASES = {
     "default": {

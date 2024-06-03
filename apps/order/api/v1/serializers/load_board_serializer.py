@@ -49,7 +49,7 @@ class LoadBoardBaseSerializer(serializers.ModelSerializer):
             "broker",
             "match",
         )
-        ref_name = 'LoadBoardBase'
+        ref_name = "LoadBoardBase"
 
     def get_pick_up_coordinate(self, instance):
         return (

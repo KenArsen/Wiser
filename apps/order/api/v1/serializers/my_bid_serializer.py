@@ -28,7 +28,7 @@ class MiBidBaseSerializer(serializers.ModelSerializer):
             "dispatcher_email",
             "dispatcher_phone",
         )
-        ref_name = 'MyBidBase'
+        ref_name = "MyBidBase"
 
     def get_pick_up_coordinate(self, instance):
         return (
@@ -67,9 +67,7 @@ class MyBidListSerializer(MiBidBaseSerializer):
         ref_name = "MyBidList"
 
     def get_broker_price(self, instance):
-        return (
-            instance.letter.broker_price if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.broker_price if getattr(instance, "letter", None) else None
 
 
 class MyBidHistorySerializer(MiBidBaseSerializer):
@@ -81,9 +79,7 @@ class MyBidHistorySerializer(MiBidBaseSerializer):
         ref_name = "MyBidHistory"
 
     def get_broker_price(self, instance):
-        return (
-            instance.letter.broker_price if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.broker_price if getattr(instance, "letter", None) else None
 
 
 class MyBidDetailSerializer(MiBidBaseSerializer):
@@ -118,16 +114,10 @@ class MyBidDetailSerializer(MiBidBaseSerializer):
         ref_name = "MyBidDetail"
 
     def get_broker_price(self, instance):
-        return (
-            instance.letter.broker_price if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.broker_price if getattr(instance, "letter", None) else None
 
     def get_driver_price(self, instance):
-        return (
-            instance.letter.driver_price if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.driver_price if getattr(instance, "letter", None) else None
 
     def get_message(self, instance):
-        return (
-            instance.letter.comment if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.comment if getattr(instance, "letter", None) else None

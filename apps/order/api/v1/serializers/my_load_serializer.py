@@ -29,7 +29,7 @@ class MyLoadBaseSerializer(serializers.ModelSerializer):
             "delivery_date",
             "dispatcher_name",
         )
-        ref_name = 'MyLoadBase'
+        ref_name = "MyLoadBase"
 
     def get_pick_up_coordinate(self, instance):
         return (
@@ -96,14 +96,10 @@ class MyLoadDetailSerializer(MyLoadBaseSerializer):
         ref_name = "MyLoadDetail"
 
     def get_broker_price(self, instance):
-        return (
-            instance.letter.broker_price if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.broker_price if getattr(instance, "letter", None) else None
 
     def get_driver_price(self, instance):
-        return (
-            instance.letter.driver_price if getattr(instance, "letter", None) else None
-        )
+        return instance.letter.driver_price if getattr(instance, "letter", None) else None
 
     def get_driver_name(self, instance):
         return (
