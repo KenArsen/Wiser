@@ -2,7 +2,7 @@ from rest_framework import generics
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import IsSuperAdmin
-from apps.vehicle.api.v1.serializers import (
+from apps.vehicle.api.v1.serializers.vehicle import (
     VehicleCreateSerializer,
     VehicleDetailSerializer,
     VehicleListSerializer,

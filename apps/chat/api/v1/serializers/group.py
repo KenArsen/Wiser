@@ -27,7 +27,7 @@ class GroupListSerializer(serializers.ModelSerializer):
         ref_name = "GroupList"
 
     def get_last_message(self, obj):
-        last_message = obj.messages.order_by('-date_posted').first()
+        last_message = obj.messages.order_by("-date_posted").first()
         if last_message:
             return last_message.content
         return None
@@ -62,7 +62,7 @@ class AddUserToGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ('user_id',)
+        fields = ("user_id",)
         ref_name = "AddUserToGroup"
 
 
@@ -71,5 +71,5 @@ class RemoveUserFromGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ('user_id',)
+        fields = ("user_id",)
         ref_name = "RemoveUserFromGroup"

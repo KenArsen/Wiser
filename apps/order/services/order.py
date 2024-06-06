@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from apps.order.models import Order
-from apps.order.repositories import OrderRepository
+from apps.order.repositories.order import OrderRepository
 
 
 class OrderService(OrderRepository):

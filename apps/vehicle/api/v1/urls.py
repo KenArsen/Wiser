@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.vehicle.api.v1.apis import (
+from apps.vehicle.api.v1.views.vehicle import (
     VehicleCreateAPI,
     VehicleDeleteAPI,
     VehicleDetailAPI,

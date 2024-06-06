@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.driver.api.v1.apis import (
+from apps.driver.api.v1.views.driver import (
     DriverAvailabilityUpdateAPI,
     DriverCreateAPI,
     DriverDeleteAPI,

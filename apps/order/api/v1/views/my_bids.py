@@ -3,14 +3,14 @@ from rest_framework import generics
 
 from apps.common import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToMyBidsPanel
-from apps.order.api.v1.serializers import (
-    AssignSerializer,
+from apps.order.api.v1.serializers.common import AssignSerializer
+from apps.order.api.v1.serializers.my_bid import (
     MyBidDetailSerializer,
     MyBidHistorySerializer,
     MyBidListSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import MyBidService
+from apps.order.services.my_bid import MyBidService
 
 
 class BaseMyBidsView(generics.GenericAPIView):

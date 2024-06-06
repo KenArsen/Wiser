@@ -1,14 +1,15 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from apps.chat.models import Group
-from apps.chat.api.v1.serializers import (
-    GroupListSerializer,
-    GroupDetailSerializer,
-    GroupCreateSerializer,
-    GroupUpdateSerializer,
+
+from apps.chat.api.v1.serializers.group import (
     AddUserToGroupSerializer,
+    GroupCreateSerializer,
+    GroupDetailSerializer,
+    GroupListSerializer,
+    GroupUpdateSerializer,
     RemoveUserFromGroupSerializer,
 )
+from apps.chat.models import Group
 
 
 class GroupBaseAPI(generics.GenericAPIView):
@@ -62,7 +63,7 @@ class AddUserToGroupAPI(GroupBaseAPI):
     def post(self, request, pk):
         try:
             group = Group.objects.get(pk=pk)
-            user_id = request.data.get('user_id')
+            user_id = request.data.get("user_id")
             group.members.add(user_id)
             group.save()
             serializer = self.serializer_class(group)
@@ -77,7 +78,7 @@ class RemoveUserFromGroupAPI(GroupBaseAPI):
     def post(self, request, pk):
         try:
             group = Group.objects.get(pk=pk)
-            user_id = request.data.get('user_id')
+            user_id = request.data.get("user_id")
             group.members.remove(user_id)
             group.save()
             serializer = self.serializer_class(group)

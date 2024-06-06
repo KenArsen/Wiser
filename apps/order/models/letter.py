@@ -3,7 +3,7 @@ from django.db import models
 from apps.common.models import BaseModel
 from apps.driver.models import Driver
 
-from .order_model import Order
+from .order import Order
 
 
 class Letter(BaseModel):

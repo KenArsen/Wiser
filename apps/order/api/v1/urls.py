@@ -1,27 +1,30 @@
 from django.urls import path
 
-from apps.order.api.v1.apis import (
+from apps.order.api.v1.views.letter import SendEmailView
+from apps.order.api.v1.views.load_board import LoadBoardDetailAPI, LoadBoardListAPI
+from apps.order.api.v1.views.my_bids import (
     AssignAPI,
-    LoadBoardDetailAPI,
-    LoadBoardListAPI,
     MyBidDetailAPI,
     MyBidHistoryAPI,
     MyBidListAPI,
+)
+from apps.order.api.v1.views.my_loads import (
     MyCheckoutListAPI,
     MyCompletedListAPI,
+    MyLoadDetailAPI,
     MyLoadHistoryAPI,
     MyLoadListAPI,
     NextStatusAPI,
+    PreviousStatusAPI,
+)
+from apps.order.api.v1.views.order import (
     OrderCreateAPI,
     OrderDeleteAPI,
     OrderDetailAPI,
     OrderListAPI,
     OrderRefuseAPI,
     OrderUpdateAPI,
-    PreviousStatusAPI,
-    SendEmailView,
 )
-from apps.order.api.v1.apis.my_loads_apis import MyLoadDetailAPI
 
 app_name = "orders"
 

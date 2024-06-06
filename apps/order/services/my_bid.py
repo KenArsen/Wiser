@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.common.enums import SubStatus
 from apps.order.models import MyLoadStatus
 
-from .order_service import OrderService
+from .order import OrderService
 
 
 class MyBidService(OrderService):

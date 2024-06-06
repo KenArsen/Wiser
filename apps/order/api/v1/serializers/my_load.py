@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.order.models import Order
 
-from .common_serializer import MyLoadStatusSerializer
+from .common import MyLoadStatusSerializer
 
 
 class MyLoadBaseSerializer(serializers.ModelSerializer):

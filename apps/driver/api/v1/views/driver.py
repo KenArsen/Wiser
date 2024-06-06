@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import IsSuperAdmin
-from apps.driver.api.v1.serializers import (
+from apps.driver.api.v1.serializers.driver import (
     DriverAvailabilityUpdateSerializer,
     DriverCreateSerializer,
     DriverDetailSerializer,

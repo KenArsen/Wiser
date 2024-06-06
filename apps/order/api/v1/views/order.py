@@ -4,15 +4,15 @@ from rest_framework.response import Response
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToLoadBoardPanel
-from apps.order.api.v1.serializers import (
+from apps.order.api.v1.serializers.common import RefuseSerializer
+from apps.order.api.v1.serializers.order import (
     OrderCreateSerializer,
     OrderDetailSerializer,
     OrderListSerializer,
     OrderUpdateSerializer,
-    RefuseSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import OrderService
+from apps.order.services.order import OrderService
 
 
 class BaseOrderView(generics.GenericAPIView):

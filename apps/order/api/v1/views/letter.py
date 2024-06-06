@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from apps.common.permissions import HasAccessToMyBidsPanel
-from apps.order.api.v1.serializers import LetterSerializer
+from apps.order.api.v1.serializers.common import LetterSerializer
 from apps.order.models import Order
 
 

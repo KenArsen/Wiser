@@ -1,12 +1,12 @@
 from rest_framework import generics
 
 from apps.common import HasAccessToLoadBoardPanel, LargeResultsSetPagination
-from apps.order.api.v1.serializers import (
+from apps.order.api.v1.serializers.load_board import (
     LoadBoardDetailSerializer,
     LoadBoardListSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import OrderService
+from apps.order.services.order import OrderService
 
 
 class BaseLoadBoardView(generics.GenericAPIView):

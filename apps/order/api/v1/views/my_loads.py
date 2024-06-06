@@ -4,13 +4,13 @@ from rest_framework.response import Response
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToMyLoadsPanel
-from apps.order.api.v1.serializers import (
+from apps.order.api.v1.serializers.my_load import (
     MyLoadDetailSerializer,
     MyLoadListSerializer,
     MyLoadStatusSerializer,
 )
 from apps.order.models import Order
-from apps.order.services import MyLoadService
+from apps.order.services.my_load import MyLoadService
 
 
 class BaseMyLoadAPIView(generics.GenericAPIView):

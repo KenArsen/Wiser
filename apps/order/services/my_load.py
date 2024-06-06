@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.common.enums import SubStatus
 
-from .order_service import OrderService
+from .order import OrderService
 
 
 class MyLoadService(OrderService):
