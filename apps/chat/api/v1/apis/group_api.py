@@ -13,7 +13,6 @@ from apps.chat.api.v1.serializers import (
 
 class GroupBaseAPI(generics.GenericAPIView):
     queryset = Group.objects.all()
-    permission_classes = None
 
     def get_service(self):
         pass

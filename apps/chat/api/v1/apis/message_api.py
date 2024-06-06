@@ -1,5 +1,5 @@
 from rest_framework import generics
-from apps.chat.models import Message
+from apps.chat.models import Message    
 from apps.chat.api.v1.serializers import (
     MessageListSerializer,
     MessageDetailSerializer,

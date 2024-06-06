@@ -16,4 +16,5 @@ celery -A wiser_load_board worker -l info --without-gossip --without-mingle --wi
 celery -A wiser_load_board beat -l info &
 
 # Start Gunicorn server
-exec gunicorn --bind :8080 wiser_load_board.wsgi:application
+#exec gunicorn --bind :8080 wiser_load_board.wsgi:application
+exec daphne -b 0.0.0.0 -p 8080 wiser_load_board.asgi:application

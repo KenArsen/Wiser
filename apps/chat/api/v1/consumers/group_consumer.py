@@ -2,11 +2,12 @@ import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from apps.chat.models import Group, Message
 from channels.db import database_sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class GroupChatConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, kwargs)
+        super().__init__(*args, **kwargs)
         self.user = None
         self.group_id = None
         self.group_name = None
@@ -15,8 +16,13 @@ class GroupChatConsumer(AsyncJsonWebsocketConsumer):
         self.group_id = self.scope['url_route']['kwargs']['group_id']
         self.group_name = f"group_{self.group_id}"
 
+        # Проверяем, аутентифицирован ли пользователь
+        if not self.scope['user'].is_authenticated:
+            await self.close()
+            return
+
         # Проверяем, имеет ли пользователь доступ к этой группе
-        if not self.scope['user'].joined_groups.filter(id=self.group_id).exists():
+        if not await self.user_in_group(self.scope['user'], self.group_id):
             await self.close()
             return
 
@@ -36,11 +42,16 @@ class GroupChatConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
-        data = json.loads(text_data)
-        message_content = data['message']
+        if bytes_data:
+            file_content = bytes_data
+            message_content = None
+        else:
+            data = json.loads(text_data)
+            message_content = data.get('message')
+            file_content = None
 
         # Сохраняем сообщение в базе данных
-        message = await self.save_message(message_content)
+        message = await self.save_message(message_content, file_content)
 
         # Отправляем сообщение обратно клиенту
         await self.channel_layer.group_send(
@@ -48,10 +59,11 @@ class GroupChatConsumer(AsyncJsonWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': message_content,
+                'file': file_content,
                 'sender': f'{self.scope["user"].first_name} {self.scope["user"].last_name}',
                 'sender_role': self.scope['user'].role,
                 'sender_phone': self.scope['user'].phone_number,
-                'date': message.date_posted
+                'date': message.date_posted.isoformat(),
             }
         )
 
@@ -59,12 +71,22 @@ class GroupChatConsumer(AsyncJsonWebsocketConsumer):
         # Отправляем сообщение клиенту
         await self.send_json(event)
 
-    async def save_message(self, message):
-        # Сохраняем сообщение в базе данных
-        group = await self.get_group()
-        sender = self.scope['user']
-        return await database_sync_to_async(Message.objects.create)(group=group, sender=sender, content=message)
+    @database_sync_to_async
+    def save_message(self, message_content, file_content):
+        try:
+            group = Group.objects.get(id=self.group_id)
+            sender = self.scope['user']
+            message = Message.objects.create(
+                group=group,
+                sender=sender,
+                content=message_content,
+                file=file_content
+            )
+            return message
+        except ObjectDoesNotExist:
+            # Обработка случая, когда группа не существует
+            return None
 
-    async def get_group(self):
-        # Получаем группу чата
-        return await database_sync_to_async(Group.objects.get)(id=self.group_id)
+    @database_sync_to_async
+    def user_in_group(self, user, group_id):
+        return user.chat_groups.filter(id=group_id).exists()

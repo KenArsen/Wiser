@@ -19,6 +19,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 DOMAIN_NAME = env.str("DOMAIN_NAME", "http://localhost:8000")
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "celery",
+    "channels",
     "drf_yasg",
     "corsheaders",
     "social_django",
@@ -34,6 +36,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "rest_framework_simplejwt",
     "apps.user.apps.UserConfig",
+    "apps.chat.apps.ChatConfig",
     "apps.order.apps.OrderConfig",
     "apps.driver.apps.DriverConfig",
     "apps.vehicle.apps.VehicleConfig",
@@ -110,6 +113,15 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        }
+    }
+}
 
 LANGUAGE_CODE = "en"
 
