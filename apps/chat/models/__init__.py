@@ -1,1 +1,2 @@
-from .group_model import Group, Message
+from .group import Group, GroupMessage
+from .private import Private, PrivateMessage

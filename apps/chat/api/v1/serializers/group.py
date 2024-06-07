@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from apps.chat.models import Group, Message
+from apps.chat.models import Group, GroupMessage
 from apps.user.models import User
 
 
 class InnerMessageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Message
-        fields = ("id", "sender", "content", "file", "date_posted")
+        model = GroupMessage
+        fields = ("id", "sender", "content", "file", "posted_at")
         ref_name = "InnerMessage"
 
 
@@ -27,7 +27,7 @@ class GroupListSerializer(serializers.ModelSerializer):
         ref_name = "GroupList"
 
     def get_last_message(self, obj):
-        last_message = obj.messages.order_by("-date_posted").first()
+        last_message = obj.messages.order_by("-posted_at").first()
         if last_message:
             return last_message.content
         return None

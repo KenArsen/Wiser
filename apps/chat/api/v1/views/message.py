@@ -1,16 +1,16 @@
 from rest_framework import generics
 
-from apps.chat.api.v1.serializers.message import (
+from apps.chat.api.v1.serializers.group_message import (
     MessageCreateSerializer,
     MessageDetailSerializer,
     MessageListSerializer,
     MessageUpdateSerializer,
 )
-from apps.chat.models import Message
+from apps.chat.models import GroupMessage
 
 
 class MessageBaseAPI(generics.GenericAPIView):
-    queryset = Message.objects.all()
+    queryset = GroupMessage.objects.all()
     permission_classes = None
 
 

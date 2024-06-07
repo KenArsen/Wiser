@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat</title>
+    <style>
+        #chat-log {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        .message .sender {
+            font-weight: bold;
+            color: #333;
+        }
+        .message .content {
+            margin-top: 5px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-log"></div>
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+
+    <script>
+        const chatLog = document.getElementById('chat-log');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        const chatSocket = new WebSocket('ws://localhost:8080/ws/chats/group/3/'); // Замените на ваш адрес WebSocket
+
+        chatSocket.onmessage = function(event) {
+            console.log(event.data)
+            const data = JSON.parse(event.data);
+            appendMessage(data.sender, data.message);
+        };
+
+        function appendMessage(sender, message) {
+            console.log('appendMessage')
+            console.log(sender)
+            console.log(message)
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.innerHTML = `<span class="sender">${sender}:</span> <span class="content">${message}</span>`;
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', function() {
+            const message = messageInput.value;
+            console.log('sendButton')
+            console.log(message)
+            if (message.trim() !== '') {
+                chatSocket.send(JSON.stringify({'message': message}));
+                messageInput.value = '';
+            }
+        });
+
+        messageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

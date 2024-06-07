@@ -8,6 +8,7 @@ from .views.group import (
     GroupListAPI,
     GroupUpdateAPI,
     RemoveUserFromGroupAPI,
+    chat_view,
 )
 from .views.message import (
     MessageCreateAPI,
@@ -28,6 +29,7 @@ urlpatterns = [
     path("groups/<int:pk>/delete/", GroupDeleteAPI.as_view(), name="group-delete"),
     path("groups/<int:pk>/add_user/", AddUserToGroupAPI.as_view(), name="add-user-to-group"),
     path("groups/<int:pk>/remove_user/", RemoveUserFromGroupAPI.as_view(), name="remove-user-from-group"),
+    path("conect/<int:group_id>/", chat_view, name="chat-conect"),
 ]
 
 # message group chat
