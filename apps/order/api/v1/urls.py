@@ -1,7 +1,10 @@
 from django.urls import path
 
-from apps.order.api.v1.views.letter import SendEmailView
-from apps.order.api.v1.views.load_board import LoadBoardDetailAPI, LoadBoardListAPI
+from apps.order.api.v1.views.load_board import (
+    LoadBoardDetailAPI,
+    LoadBoardListAPI,
+    SendEmailView,
+)
 from apps.order.api.v1.views.my_bids import (
     AssignAPI,
     MyBidDetailAPI,

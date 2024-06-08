@@ -1,7 +1,11 @@
-from django.db.models import Q
-from rest_framework import generics
+from rest_framework.generics import (
+    CreateAPIView,
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+)
 
-from apps.common import LargeResultsSetPagination
+from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToMyBidsPanel
 from apps.order.api.v1.serializers.common import AssignSerializer
 from apps.order.api.v1.serializers.my_bid import (
@@ -9,47 +13,41 @@ from apps.order.api.v1.serializers.my_bid import (
     MyBidHistorySerializer,
     MyBidListSerializer,
 )
-from apps.order.models import Order
-from apps.order.services.my_bid import MyBidService
+from apps.order.repositories.implementations.assign import AssignRepository
+from apps.order.repositories.implementations.order import MyBidRepository
+from apps.order.services.implementations.order import AssignOrderService
 
 
-class BaseMyBidsView(generics.GenericAPIView):
+class BaseMyBidsView(GenericAPIView):
+    queryset = MyBidRepository().none()
     permission_classes = (HasAccessToMyBidsPanel,)
     pagination_class = LargeResultsSetPagination
 
-    def get_service(self):
-        return MyBidService(serializer=self.serializer_class, queryset=self.queryset)
 
-
-class MyBidListAPI(BaseMyBidsView, generics.ListAPIView):
-    queryset = Order.objects.filter(status="AWAITING_BID")
+class MyBidListAPI(BaseMyBidsView, ListAPIView):
     serializer_class = MyBidListSerializer
 
     def get_queryset(self):
-        return self.get_service().get_orders()
+        return MyBidRepository().list()
 
 
-class MyBidDetailAPI(BaseMyBidsView, generics.RetrieveAPIView):
-    queryset = Order.objects.filter(status="AWAITING_BID")
+class MyBidDetailAPI(BaseMyBidsView, RetrieveAPIView):
     serializer_class = MyBidDetailSerializer
 
     def get_object(self):
-        return self.get_service().get_order(pk=self.kwargs["pk"])
+        return MyBidRepository().get_by_id(pk=self.kwargs["pk"])
 
 
-class MyBidHistoryAPI(BaseMyBidsView, generics.ListAPIView):
-    queryset = Order.objects.filter(
-        Q(status="REFUSED") | Q(status="ACTIVE") | Q(status="CHECKOUT") | Q(status="COMPLETED")
-    )
+class MyBidHistoryAPI(BaseMyBidsView, ListAPIView):
     serializer_class = MyBidHistorySerializer
 
     def get_queryset(self):
-        return self.get_service().get_orders()
+        return MyBidRepository().history_list()
 
 
-class AssignAPI(BaseMyBidsView):
-    queryset = Order.objects.filter(status="AWAITING_BID")
+class AssignAPI(BaseMyBidsView, CreateAPIView):
     serializer_class = AssignSerializer
 
-    def post(self, request, *args, **kwargs):
-        return self.get_service().assign(data=request.data)
+    def perform_create(self, serializer):
+        service = AssignOrderService(assign_repository=AssignRepository())
+        serializer.instance = service.assign(data=serializer.validated_data)

@@ -1,6 +1,13 @@
-from rest_framework import generics, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.generics import (
+    CreateAPIView,
+    DestroyAPIView,
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+)
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import HasAccessToLoadBoardPanel
@@ -11,84 +18,70 @@ from apps.order.api.v1.serializers.order import (
     OrderListSerializer,
     OrderUpdateSerializer,
 )
-from apps.order.models import Order
-from apps.order.services.order import OrderService
+from apps.order.repositories.implementations.order import OrderRepository
+from apps.order.services.implementations.order import (
+    CreateOrderService,
+    DeleteOrderService,
+    RefuseOrderService,
+    UpdateOrderService,
+)
 
 
-class BaseOrderView(generics.GenericAPIView):
+class BaseOrderView(GenericAPIView):
+    queryset = OrderRepository().none()
     permission_classes = (HasAccessToLoadBoardPanel,)
     pagination_class = LargeResultsSetPagination
 
-    def get_service(self):
-        return OrderService(serializer=self.serializer_class, queryset=self.queryset)
 
-
-class OrderListAPI(BaseOrderView, generics.ListAPIView):
-    queryset = Order.objects.all()
+class OrderListAPI(BaseOrderView, ListAPIView):
     serializer_class = OrderListSerializer
 
     def get_queryset(self):
-        return self.get_service().get_orders()
+        return OrderRepository().list()
 
 
-class OrderCreateAPI(BaseOrderView, generics.CreateAPIView):
-    queryset = Order.objects.all()
+class OrderCreateAPI(BaseOrderView, CreateAPIView):
     serializer_class = OrderCreateSerializer
 
-    def post(self, request, *args, **kwargs):
-        data = request.data.copy()
-        data["user"] = request.user.id
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        service = CreateOrderService(order_repository=OrderRepository())
+        serializer.instance = service.create(data=serializer.validated_data, user=self.request.user)
 
 
-class OrderDetailAPI(BaseOrderView, generics.RetrieveAPIView):
-    queryset = Order.objects.all()
+class OrderDetailAPI(BaseOrderView, RetrieveAPIView):
     serializer_class = OrderDetailSerializer
 
     def get_object(self):
-        return self.get_service().get_order(self.kwargs["pk"])
+        return OrderRepository().get_by_id(pk=self.kwargs["pk"])
 
 
-class OrderUpdateAPI(BaseOrderView, generics.UpdateAPIView):
-    queryset = Order.objects.all()
+class OrderUpdateAPI(BaseOrderView, UpdateAPIView):
     serializer_class = OrderUpdateSerializer
 
     def get_object(self):
-        return self.get_service().get_order(self.kwargs["pk"])
+        return OrderRepository().get_by_id(pk=self.kwargs["pk"])
 
-    def update(self, request, *args, **kwargs):
-        order_service = self.get_service()
-        updated_data = order_service.update_order(self.get_object(), request.data)
-        return Response(updated_data, status=status.HTTP_200_OK)
-
-    def partial_update(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        service = UpdateOrderService(order_repository=OrderRepository())
+        serializer.instance = service.update(order=self.get_object(), data=serializer.validated_data)
 
 
-class OrderDeleteAPI(BaseOrderView, generics.DestroyAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderDetailSerializer
-
+class OrderDeleteAPI(BaseOrderView, DestroyAPIView):
     def get_object(self):
-        return self.get_service().get_order(self.kwargs["pk"])
+        return OrderRepository().get_by_id(pk=self.kwargs["pk"])
 
-    def destroy(self, request, *args, **kwargs):
-        service = self.get_service()
-        instance = self.get_object()
-        result = service.delete_order(instance)
-        return Response(result, status=status.HTTP_204_NO_CONTENT)
+    def perform_destroy(self, serializer):
+        service = DeleteOrderService(order_repository=OrderRepository())
+        service.delete(order=self.get_object())
 
 
 class OrderRefuseAPI(BaseOrderView):
-    queryset = Order.objects.all()
     serializer_class = RefuseSerializer
 
+    def get_object(self):
+        return OrderRepository().get_by_id(pk=self.request.data.get("order", None))
+
     def post(self, request, *args, **kwargs):
-        order_id = request.data.get("order", None)
-        if order_id is None:
-            raise ValidationError({"detail": "order field is required."})
-        service = self.get_service().refuse_order(order_id=self.request.data["order"])
-        return Response(service, status=status.HTTP_200_OK)
+        service = RefuseOrderService(order_repository=OrderRepository())
+        service.refuse(order=self.get_object())
+        return Response({"detail": "The order has been moved to HISTORY"}, status=HTTP_200_OK)

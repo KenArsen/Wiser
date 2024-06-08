@@ -1,8 +1,4 @@
-import io
-
-from django.core.files.storage import default_storage as storage
 from django.db import models
-from PIL import Image
 
 from apps.user.models import User
 

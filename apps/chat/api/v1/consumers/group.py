@@ -72,7 +72,9 @@ class GroupChatConsumer(AsyncJsonWebsocketConsumer):
         try:
             group = Group.objects.get(id=self.group_id)
             sender = self.scope["user"]
-            message = GroupMessage.objects.create(group=group, sender=sender, content=message_content, file=file_content)
+            message = GroupMessage.objects.create(
+                group=group, sender=sender, content=message_content, file=file_content
+            )
             return message
         except ObjectDoesNotExist:
             # Обработка случая, когда группа не существует

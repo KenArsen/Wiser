@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, status
 from rest_framework.response import Response
 
@@ -87,12 +88,6 @@ class RemoveUserFromGroupAPI(GroupBaseAPI):
             return Response({"error": "Group does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
 
-from django.shortcuts import render, get_object_or_404
-from apps.chat.models import Group
-
-
 def chat_view(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    return render(request, 'socet.html', {
-        'group': group
-    })
+    return render(request, "socet.html", {"group": group})

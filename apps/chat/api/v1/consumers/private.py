@@ -66,12 +66,8 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
         try:
             sender = self.scope["user"]
             receiver = get_object_or_404(User, pk=self.receiver)
-            private, created = Private.objects.get_or_create(
-                sender=sender, receiver=receiver
-            )
-            message = PrivateMessage.objects.create(
-                private=private, content=message_content, file=file_content
-            )
+            private, created = Private.objects.get_or_create(sender=sender, receiver=receiver)
+            message = PrivateMessage.objects.create(private=private, content=message_content, file=file_content)
             return message
         except ObjectDoesNotExist:
             # Обработка случая, когда пользователь не существует

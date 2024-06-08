@@ -18,6 +18,17 @@ class LetterSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
         ref_name = "Letter"
 
+    def is_valid(self, raise_exception=False):
+        order_id = self.initial_data.get("order")
+        try:
+            order = Order.objects.get(id=order_id)
+            if order and hasattr(order, "letter"):
+                order.letter.delete()
+
+            return super().is_valid(raise_exception=raise_exception)
+        except Order.DoesNotExist:
+            pass
+
 
 class RefuseSerializer(serializers.ModelSerializer):
     order = serializers.PrimaryKeyRelatedField(
@@ -45,10 +56,36 @@ class MyLoadStatusSerializer(serializers.ModelSerializer):
 
 
 class AssignSerializer(serializers.ModelSerializer):
+    broker_price = serializers.IntegerField(required=False, write_only=True, allow_null=True)
+    driver_price = serializers.IntegerField(required=False, write_only=True, allow_null=True)
+
     class Meta:
         model = Assign
-        fields = ("id", "order", "broker_company", "rate_confirmation")
+        fields = ("id", "order", "broker_company", "rate_confirmation", "broker_price", "driver_price")
         read_only_fields = ("id",)
+
+    def is_valid(self, raise_exception=False):
+        order_id = self.initial_data.get("order")
+        try:
+            order = Order.objects.get(id=order_id)
+            if order and hasattr(order, "assign"):
+                order.assign.delete()
+
+            return super().is_valid(raise_exception=raise_exception)
+        except Order.DoesNotExist:
+            pass
+
+    def validate(self, data):
+        broker_price = data.get("broker_price")
+        driver_price = data.get("driver_price")
+
+        if broker_price is not None and broker_price <= 0:
+            raise serializers.ValidationError({"broker_price": "Broker price must be a positive value."})
+
+        if driver_price is not None and driver_price <= 0:
+            raise serializers.ValidationError({"driver_price": "Driver price must be a positive value."})
+
+        return data
 
 
 class FileSerializer(serializers.ModelSerializer):
