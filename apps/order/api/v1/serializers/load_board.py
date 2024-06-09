@@ -30,9 +30,6 @@ class NearByOrderSerializer(serializers.ModelSerializer):
 
 
 class LoadBoardBaseSerializer(serializers.ModelSerializer):
-    pick_up_coordinate = serializers.SerializerMethodField()
-    delivery_coordinate = serializers.SerializerMethodField()
-
     class Meta:
         model = Order
         fields = (
@@ -50,20 +47,6 @@ class LoadBoardBaseSerializer(serializers.ModelSerializer):
             "match",
         )
         ref_name = "LoadBoardBase"
-
-    def get_pick_up_coordinate(self, instance):
-        return (
-            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
-            if instance.pick_up_latitude and instance.pick_up_longitude
-            else None
-        )
-
-    def get_delivery_coordinate(self, instance):
-        return (
-            f"{instance.delivery_latitude},{instance.delivery_longitude}"
-            if instance.delivery_latitude and instance.delivery_longitude
-            else None
-        )
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

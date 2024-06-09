@@ -19,12 +19,14 @@ class DriversVehicleSerializer(serializers.ModelSerializer):
         )
 
 
-class DriverAvailabilityUpdateSerializer(serializers.ModelSerializer):
+class DriverStatusSerializer(serializers.ModelSerializer):
+    driver = serializers.IntegerField(write_only=True, required=True)
+
     class Meta:
         model = Driver
-        fields = ("id", "is_available", "updated_at")
-        read_only_fields = ("id", "is_available", "updated_at")
-        ref_name = "DriverAvailabilityUpdate"
+        fields = ("id", "is_active", "updated_at", "driver")
+        read_only_fields = ("id", "is_active", "updated_at")
+        ref_name = "DriverStatus"
 
 
 class DriverListSerializer(serializers.ModelSerializer):

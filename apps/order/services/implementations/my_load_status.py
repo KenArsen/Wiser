@@ -11,11 +11,11 @@ from apps.order.services.interfaces.my_load_status import (
 
 
 class MyLoadStatusService(IMyLoadStatusService):
-    def __init__(self, my_load_status_repository: IMyLoadStatusRepository):
-        self._my_load_status_repository = my_load_status_repository
+    def __init__(self, repository: IMyLoadStatusRepository):
+        self._repository = repository
 
-    def create(self, data, order) -> MyLoadStatus:
-        return self._my_load_status_repository.create(data, order)
+    def create_status(self, order, data) -> MyLoadStatus:
+        return self._repository.create_status(order, data)
 
 
 class MyLoadNextStatusService(IMyLoadNextStatusService):
@@ -23,12 +23,15 @@ class MyLoadNextStatusService(IMyLoadNextStatusService):
         self._repository = repository
 
     def next_status(self, order):
-        current_status = order.my_load_status.current_status
+        if order.my_load_status:
+            current_status = order.my_load_status.current_status
 
-        if current_status < SubStatus.PAID_OFF:
-            return self._repository.update(order, current_status + 1)
+            if current_status < SubStatus.PAID_OFF:
+                return self._repository.update_status(order, current_status + 1)
+            else:
+                raise ValidationError({"detail": "Cannot update status."})
         else:
-            raise ValidationError({"detail": "Cannot update status."})
+            raise ValidationError({"detail": "MyLoadStatus not found."})
 
 
 class MyLoadPreviousStatusService(IMyLoadPreviousStatusService):
@@ -36,9 +39,12 @@ class MyLoadPreviousStatusService(IMyLoadPreviousStatusService):
         self._repository = repository
 
     def previous_status(self, order):
-        current_status = order.my_load_status.current_status
+        if order.my_load_status:
+            current_status = order.my_load_status.current_status
 
-        if current_status > SubStatus.POINT_A:
-            return self._repository.update(order, current_status - 1)
+            if current_status > SubStatus.POINT_A:
+                return self._repository.update_status(order, current_status - 1)
+            else:
+                raise ValidationError({"detail": "Cannot update status."})
         else:
-            raise ValidationError({"detail": "Cannot update status."})
+            raise ValidationError({"detail": "MyLoadStatus not found."})

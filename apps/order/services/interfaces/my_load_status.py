@@ -5,7 +5,7 @@ from apps.order.models import MyLoadStatus
 
 class IMyLoadStatusService(abc.ABC):
     @abc.abstractmethod
-    def create(self, data, order) -> MyLoadStatus: ...
+    def create_status(self, data: dict, order) -> MyLoadStatus: ...
 
 
 class IMyLoadNextStatusService(abc.ABC):

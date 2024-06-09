@@ -21,13 +21,17 @@ class Driver(BaseModel, ImageService):
     second_driver = models.BooleanField(default=False)
 
     # driver license
-    lisense_number = models.CharField(max_length=255, blank=True, null=True)
-    lisense_state = models.CharField(max_length=255, blank=True, null=True)
+    license_number = models.CharField(max_length=255, blank=True, null=True)
+    license_state = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     expiration_date = models.DateField(blank=True, null=True)
 
-    # driver status
-    is_available = models.BooleanField(default=True)
-
     def __str__(self):
-        return f"{self.email}"
+        return f"{self.first_name} {self.last_name} ({self.email})"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}" if self.last_name and self.first_name else None
+
+    def get_license_info(self):
+        return f"{self.license_number} ({self.license_state})" if self.license_state and self.license_state else None

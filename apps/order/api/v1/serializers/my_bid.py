@@ -4,8 +4,6 @@ from apps.order.models import Order
 
 
 class MiBidBaseSerializer(serializers.ModelSerializer):
-    pick_up_coordinate = serializers.SerializerMethodField()
-    delivery_coordinate = serializers.SerializerMethodField()
     dispatcher_name = serializers.SerializerMethodField()
     dispatcher_phone = serializers.SerializerMethodField()
     dispatcher_email = serializers.SerializerMethodField()
@@ -30,26 +28,8 @@ class MiBidBaseSerializer(serializers.ModelSerializer):
         )
         ref_name = "MyBidBase"
 
-    def get_pick_up_coordinate(self, instance):
-        return (
-            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
-            if instance.pick_up_latitude and instance.pick_up_longitude
-            else None
-        )
-
-    def get_delivery_coordinate(self, instance):
-        return (
-            f"{instance.delivery_latitude},{instance.delivery_longitude}"
-            if instance.delivery_latitude and instance.delivery_longitude
-            else None
-        )
-
     def get_dispatcher_name(self, instance):
-        return (
-            f"{instance.user.first_name} {instance.user.last_name}"
-            if instance.user.first_name and instance.user.last_name
-            else None
-        )
+        return instance.user.full_name
 
     def get_dispatcher_email(self, instance):
         return instance.user.email

@@ -20,6 +20,7 @@ class Order(BaseModel):
     pick_up_latitude = models.FloatField(blank=True, null=True)
     pick_up_longitude = models.FloatField(blank=True, null=True)
     pick_up_date = models.DateTimeField(blank=True, null=True)
+
     delivery_location = models.CharField(max_length=255, blank=True, null=True)
     delivery_latitude = models.FloatField(blank=True, null=True)
     delivery_longitude = models.FloatField(blank=True, null=True)
@@ -67,17 +68,33 @@ class Order(BaseModel):
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.expires <= timezone.localtime(timezone.now()) and self.status == "PENDING":
+        if self.expires <= timezone.localtime(timezone.now()) and self.status == OrderStatus.PENDING:
             raise ValidationError({"error": f"This {self.order_number} order has already expired!"})
 
     def move_to_history(self):
         if self.user is not None:
-            self.status = "EXPIRED"
+            self.status = OrderStatus.EXPIRED
             self.save()
             logging.info(f"------ Order {self.id} moved to history --------")
         else:
             logging.info(f"------ Order {self.id} deleted --------")
             self.delete()
+
+    @property
+    def pick_up_coordinate(self):
+        return (
+            f"{self.pick_up_latitude},{self.pick_up_longitude}"
+            if self.pick_up_latitude and self.pick_up_longitude
+            else None
+        )
+
+    @property
+    def delivery_coordinate(self):
+        return (
+            f"{self.delivery_latitude},{self.delivery_longitude}"
+            if self.delivery_latitude and self.delivery_longitude
+            else None
+        )
 
 
 class Assign(BaseModel):

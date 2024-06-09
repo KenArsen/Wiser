@@ -6,13 +6,13 @@ from apps.order.repositories.interfaces.my_load_status import IMyLoadStatusRepos
 
 
 class MyLoadStatusRepository(IMyLoadStatusRepository):
-    def list(self) -> list[MyLoadStatus]:
+    def list_statuses(self) -> QuerySet[MyLoadStatus]:
         pass
 
-    def get_by_id(self, pk) -> MyLoadStatus:
+    def retrieve_status(self, pk) -> MyLoadStatus:
         pass
 
-    def update(self, order, current_status) -> MyLoadStatus:
+    def update_status(self, order, current_status: SubStatus) -> MyLoadStatus:
         next_status = current_status + 1
         previous_status = current_status - 1 if current_status > SubStatus.POINT_A else None
 
@@ -34,13 +34,13 @@ class MyLoadStatusRepository(IMyLoadStatusRepository):
 
         return order.my_load_status
 
-    def delete(self, order):
+    def delete_status(self, order):
         pass
 
     def none(self) -> QuerySet[MyLoadStatus]:
         pass
 
-    def create(self, data, order) -> MyLoadStatus:
+    def create_status(self, order, data: dict) -> MyLoadStatus:
         if hasattr(order, "my_load_status"):
             order.my_load_status.delete()
         return MyLoadStatus.objects.create(

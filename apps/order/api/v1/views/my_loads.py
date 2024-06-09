@@ -32,42 +32,42 @@ class MyLoadListAPI(BaseMyLoadAPIView, ListAPIView):
     serializer_class = MyLoadListSerializer
 
     def get_queryset(self):
-        return MyLoadRepository().list()
+        return MyLoadRepository().list_orders()
 
 
 class MyLoadDetailAPI(BaseMyLoadAPIView, RetrieveAPIView):
     serializer_class = MyLoadDetailSerializer
 
     def get_object(self):
-        return MyLoadRepository().get_by_id(pk=self.kwargs["pk"])
+        return MyLoadRepository().retrieve_order(pk=self.kwargs["pk"])
 
 
 class MyLoadHistoryAPI(BaseMyLoadAPIView, ListAPIView):
     serializer_class = MyLoadListSerializer
 
     def get_queryset(self):
-        return MyLoadRepository().history_list()
+        return MyLoadRepository().get_history_orders()
 
 
 class MyCheckoutListAPI(BaseMyLoadAPIView, ListAPIView):
     serializer_class = MyLoadListSerializer
 
     def get_queryset(self):
-        return MyLoadRepository().checkout_list()
+        return MyLoadRepository().get_checkout_orders()
 
 
 class MyCompletedListAPI(BaseMyLoadAPIView, ListAPIView):
     serializer_class = MyLoadListSerializer
 
     def get_queryset(self):
-        return MyLoadRepository().completed_list()
+        return MyLoadRepository().get_completed_orders()
 
 
 class NextStatusAPI(BaseMyLoadAPIView, UpdateAPIView):
     serializer_class = MyLoadStatusSerializer
 
     def get_object(self):
-        return MyLoadRepository().get_by_id_for_my_load_status(pk=self.request.data["order"])
+        return MyLoadRepository().get_order_for_update_substatus(pk=self.request.data["order"])
 
     def perform_update(self, serializer):
         service = MyLoadNextStatusService(repository=MyLoadStatusRepository())
@@ -78,7 +78,7 @@ class PreviousStatusAPI(BaseMyLoadAPIView, UpdateAPIView):
     serializer_class = MyLoadStatusSerializer
 
     def get_object(self):
-        return MyLoadRepository().get_by_id_for_my_load_status(pk=self.request.data["order"])
+        return MyLoadRepository().get_order_for_update_substatus(pk=self.request.data["order"])
 
     def perform_update(self, serializer):
         service = MyLoadPreviousStatusService(repository=MyLoadStatusRepository())

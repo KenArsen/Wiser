@@ -28,26 +28,27 @@ class MyBidListAPI(BaseMyBidsView, ListAPIView):
     serializer_class = MyBidListSerializer
 
     def get_queryset(self):
-        return MyBidRepository().list()
+        return MyBidRepository().list_orders()
 
 
 class MyBidDetailAPI(BaseMyBidsView, RetrieveAPIView):
     serializer_class = MyBidDetailSerializer
 
     def get_object(self):
-        return MyBidRepository().get_by_id(pk=self.kwargs["pk"])
+        return MyBidRepository().retrieve_order(pk=self.kwargs["pk"])
 
 
 class MyBidHistoryAPI(BaseMyBidsView, ListAPIView):
     serializer_class = MyBidHistorySerializer
 
     def get_queryset(self):
-        return MyBidRepository().history_list()
+        return MyBidRepository().get_history_orders()
 
 
-class AssignAPI(BaseMyBidsView, CreateAPIView):
+class AssignAPI(CreateAPIView):
+    permission_classes = (HasAccessToMyBidsPanel,)
     serializer_class = AssignSerializer
 
     def perform_create(self, serializer):
-        service = AssignOrderService(assign_repository=AssignRepository())
-        serializer.instance = service.assign(data=serializer.validated_data)
+        service = AssignOrderService(repository=AssignRepository())
+        serializer.instance = service.assign_order(data=serializer.validated_data)

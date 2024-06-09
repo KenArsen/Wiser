@@ -1,10 +1,12 @@
-from django.db.models import Q
-from django.db.models.query import QuerySet
+from typing import Any
+
+from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 
 from apps.order.models import Order
-from apps.order.repositories.interfaces.order import (
-    IloadBoardRepository,
+
+from ..interfaces.order import (
+    ILoadBoardRepository,
     IMyBidRepository,
     IMyLoadRepository,
     IOrderRepository,
@@ -12,45 +14,45 @@ from apps.order.repositories.interfaces.order import (
 
 
 class OrderRepository(IOrderRepository):
-    def get_by_id(self, pk) -> Order:
+    def list_orders(self) -> list[Order]:
+        return Order.objects.all()
+
+    def retrieve_order(self, pk: int) -> Order:
         try:
             return Order.objects.get(id=pk)
         except Order.DoesNotExist:
             raise ValidationError({"detail": "Order not found"})
 
-    def create(self, data, user) -> Order:
+    def create_order(self, data: dict, user: Any) -> Order:
         data["user"] = user
         return Order.objects.create(**data)
 
-    def update(self, order, data) -> Order:
+    def update_order(self, order: Order, data: dict) -> Order:
         for key, value in data.items():
             setattr(order, key, value)
         order.save()
         return order
 
-    def delete(self, order) -> None:
+    def delete_order(self, order: Order) -> None:
         if order.user:
             order.status = "EXPIRED"
             order.save(update_fields=["status", "updated_at"])
         else:
             order.delete()
 
-    def refuse(self, order) -> None:
+    def refuse_order(self, order: Order) -> None:
         order.status = "REFUSED"
         order.save(update_fields=["status", "updated_at"])
 
     def none(self) -> QuerySet[Order]:
         return Order.objects.none()
 
-    def list(self) -> list[Order]:
-        return Order.objects.filter().order_by("-updated_at", "-id")
 
-
-class LoadBoardRepository(IloadBoardRepository):
-    def list(self) -> list[Order]:
+class LoadBoardRepository(ILoadBoardRepository):
+    def list_orders(self) -> list[Order]:
         return Order.objects.filter(status="PENDING")
 
-    def get_by_id(self, pk) -> Order:
+    def retrieve_order(self, pk: int) -> Order:
         try:
             return Order.objects.get(id=pk, status="PENDING")
         except Order.DoesNotExist:
@@ -61,15 +63,15 @@ class LoadBoardRepository(IloadBoardRepository):
 
 
 class MyBidRepository(IMyBidRepository):
-    def history_list(self) -> list[Order]:
+    def get_history_orders(self) -> list[Order]:
         return Order.objects.filter(
             Q(status="REFUSED") | Q(status="ACTIVE") | Q(status="CHECKOUT") | Q(status="COMPLETED")
         )
 
-    def list(self) -> list[Order]:
+    def list_orders(self) -> list[Order]:
         return Order.objects.filter(status="AWAITING_BID")
 
-    def get_by_id(self, pk) -> Order:
+    def retrieve_order(self, pk: int) -> Order:
         try:
             return Order.objects.get(id=pk, status="AWAITING_BID")
         except Order.DoesNotExist:
@@ -80,19 +82,7 @@ class MyBidRepository(IMyBidRepository):
 
 
 class MyLoadRepository(IMyLoadRepository):
-    def history_list(self) -> list[Order]:
-        return Order.objects.filter(Q(status="REFUSED", assign__isnull=False) | Q(status="COMPLETED"))
-
-    def checkout_list(self) -> list[Order]:
-        return Order.objects.filter(status="CHECKOUT")
-
-    def completed_list(self) -> list[Order]:
-        return Order.objects.filter(status="COMPLETED")
-
-    def list(self) -> list[Order]:
-        return Order.objects.filter(status="ACTIVE")
-
-    def get_by_id(self, pk) -> Order:
+    def retrieve_order(self, pk: int) -> Order:
         try:
             return Order.objects.get(
                 Q(status="COMPLETED")
@@ -104,14 +94,23 @@ class MyLoadRepository(IMyLoadRepository):
         except Order.DoesNotExist:
             raise ValidationError({"detail": "Order not found"})
 
-    def get_by_id_for_my_load_status(self, pk) -> Order:
-        try:
-            return Order.objects.get(
-                Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE"),
-                id=pk,
-            )
-        except Order.DoesNotExist:
-            raise ValidationError({"detail": "Order not found"})
+    def get_order_for_update_substatus(self, pk: int) -> Order:
+        return Order.objects.get(
+            Q(status="COMPLETED") | Q(status="CHECKOUT") | Q(status="ACTIVE"),
+            id=pk,
+        )
+
+    def get_history_orders(self) -> list[Order]:
+        return Order.objects.filter(Q(status="REFUSED", assign__isnull=False) | Q(status="COMPLETED"))
+
+    def get_checkout_orders(self) -> list[Order]:
+        return Order.objects.filter(status="CHECKOUT")
+
+    def get_completed_orders(self) -> list[Order]:
+        return Order.objects.filter(status="COMPLETED")
+
+    def list_orders(self) -> list[Order]:
+        return Order.objects.filter(status="ACTIVE")
 
     def none(self) -> QuerySet[Order]:
         return Order.objects.none()

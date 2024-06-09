@@ -1,6 +1,8 @@
+from typing import Dict
+
 from django.db import transaction
 
-from apps.order.models import Order
+from apps.order.models import Assign, Order
 from apps.order.repositories.implementations.my_load_status import (
     MyLoadStatusRepository,
 )
@@ -16,48 +18,48 @@ from apps.order.services.interfaces.order import (
 
 
 class CreateOrderService(ICreateOrderService):
-    def __init__(self, order_repository: IOrderRepository):
-        self.order_repository = order_repository
+    def __init__(self, repository: IOrderRepository):
+        self._repository = repository
 
-    def create(self, data, user) -> Order:
-        return self.order_repository.create(data, user)
+    def create_order(self, data: Dict[str, any], user: any) -> Order:
+        return self._repository.create_order(data, user)
 
 
 class UpdateOrderService(IUpdateOrderService):
-    def __init__(self, order_repository: IOrderRepository):
-        self._order_repository = order_repository
+    def __init__(self, repository: IOrderRepository):
+        self._repository = repository
 
-    def update(self, order, data) -> Order:
-        return self._order_repository.update(order, data)
+    def update_order(self, order: Order, data: Dict[str, any]) -> Order:
+        return self._repository.update_order(order, data)
 
 
 class DeleteOrderService(IDeleteOrderService):
-    def __init__(self, order_repository: IOrderRepository):
-        self._order_repository = order_repository
+    def __init__(self, repository: IOrderRepository):
+        self._repository = repository
 
-    def delete(self, order) -> Order:
-        return self._order_repository.delete(order)
+    def delete_order(self, order: Order) -> None:
+        self._repository.delete_order(order)
 
 
 class RefuseOrderService(IRefuseOrderService):
-    def __init__(self, order_repository: IOrderRepository):
-        self._order_repository = order_repository
+    def __init__(self, repository: IOrderRepository):
+        self._repository = repository
 
-    def refuse(self, order):
-        self._order_repository.refuse(order)
+    def refuse_order(self, order: Order) -> None:
+        self._repository.refuse_order(order)
 
 
 class AssignOrderService(IAssignOrderService):
-    def __init__(self, assign_repository: IAssignRepository):
-        self._assign_repository = assign_repository
+    def __init__(self, repository: IAssignRepository):
+        self._repository = repository
 
-    def assign(self, data):
+    def assign_order(self, data: Dict[str, Order]) -> Assign:
         order = data.get("order", None)
         with transaction.atomic():
             order.status = "ACTIVE"
             order.save(update_fields=["status", "updated_at"])
 
-            MyLoadStatusRepository().create(data=data, order=order)
+            MyLoadStatusRepository().create_status(data=data, order=order)
 
             broker_price = data.pop("broker_price", None)
             driver_price = data.pop("driver_price", None)
@@ -70,4 +72,4 @@ class AssignOrderService(IAssignOrderService):
                 order.letter.driver_price = driver_price
                 order.letter.save(update_fields=["driver_price", "updated_at"])
 
-            self._assign_repository.create(data)
+            return self._repository.create(data)

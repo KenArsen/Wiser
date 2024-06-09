@@ -19,20 +19,21 @@ class Vehicle(BaseModel):
     vehicle_year = models.CharField(max_length=4, blank=True, null=True)
 
     # vehicle sizes
-    width = models.SmallIntegerField(blank=True, null=True)
-    height = models.SmallIntegerField(blank=True, null=True)
-    length = models.SmallIntegerField(blank=True, null=True)
-    payload = models.SmallIntegerField(blank=True, null=True)
+    width = models.PositiveSmallIntegerField(blank=True, null=True)
+    height = models.PositiveSmallIntegerField(blank=True, null=True)
+    length = models.PositiveSmallIntegerField(blank=True, null=True)
+    payload = models.PositiveSmallIntegerField(blank=True, null=True)
 
     # vehicle details
     vin = models.CharField(max_length=255, blank=True, null=True)
 
-    # lisense info
-    lisense_plate = models.CharField(max_length=255, blank=True, null=True)
-    lisense_state = models.CharField(max_length=255, blank=True, null=True)
-    lisense_expiry_date = models.DateTimeField(blank=True, null=True)
+    # license info
+    license_plate = models.CharField(max_length=255, blank=True, null=True)
+    license_state = models.CharField(max_length=255, blank=True, null=True)
+    license_expiry_date = models.DateTimeField(blank=True, null=True)
     insurance_expiry_date = models.DateTimeField(blank=True, null=True)
 
+    # location info
     location = models.CharField(max_length=255, blank=True, null=True)
     location_latitude = models.FloatField(blank=True, null=True)
     location_longitude = models.FloatField(blank=True, null=True)
@@ -64,10 +65,16 @@ class Vehicle(BaseModel):
         return f"{self.unit_id}"
 
     def save(self, *args, **kwargs):
-        if self.driver.address:
+        if self.driver and self.driver.address:
             location = get_location(self.driver.address)
             self.location = self.driver.address
             self.location_latitude = location.latitude
             self.location_longitude = location.longitude
 
         super().save(*args, **kwargs)
+
+    @property
+    def coordinate(self):
+        if self.location_latitude is not None and self.location_longitude is not None:
+            return f"{self.location_latitude},{self.location_longitude}"
+        return None

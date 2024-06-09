@@ -7,8 +7,6 @@ from .common import MyLoadStatusSerializer
 
 class MyLoadBaseSerializer(serializers.ModelSerializer):
     my_load_status = MyLoadStatusSerializer(many=False, read_only=True)
-    pick_up_coordinate = serializers.SerializerMethodField()
-    delivery_coordinate = serializers.SerializerMethodField()
     dispatcher_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -31,26 +29,8 @@ class MyLoadBaseSerializer(serializers.ModelSerializer):
         )
         ref_name = "MyLoadBase"
 
-    def get_pick_up_coordinate(self, instance):
-        return (
-            f"{instance.pick_up_latitude},{instance.pick_up_longitude}"
-            if instance.pick_up_latitude and instance.pick_up_longitude
-            else None
-        )
-
-    def get_delivery_coordinate(self, instance):
-        return (
-            f"{instance.delivery_latitude},{instance.delivery_longitude}"
-            if instance.delivery_latitude and instance.delivery_longitude
-            else None
-        )
-
     def get_dispatcher_name(self, instance):
-        return (
-            f"{instance.user.first_name} {instance.user.last_name}"
-            if instance.user.first_name and instance.user.last_name
-            else None
-        )
+        return instance.user.full_name
 
 
 class MyLoadListSerializer(MyLoadBaseSerializer):
@@ -102,11 +82,7 @@ class MyLoadDetailSerializer(MyLoadBaseSerializer):
         return instance.letter.driver_price if getattr(instance, "letter", None) else None
 
     def get_driver_name(self, instance):
-        return (
-            f"{instance.letter.driver.first_name} {instance.letter.driver.last_name}"
-            if instance.letter.driver.first_name and instance.letter.driver.last_name
-            else None
-        )
+        return instance.letter.driver.full_name
 
     def get_driver_email(self, instance):
         return instance.letter.driver.email if getattr(instance, "letter", None) else None

@@ -16,5 +16,5 @@ class DriverAdmin(admin.ModelAdmin):
     list_display_links = ("id", "email", "first_name", "last_name", "ssn")
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("email", "first_name", "last_name", "ssn", "city")
-    list_filter = ("type", "is_available")
+    list_filter = ("type", "is_active")
     inlines = [VehicleInline]

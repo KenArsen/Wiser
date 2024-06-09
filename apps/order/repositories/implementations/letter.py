@@ -1,30 +1,30 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
-from rest_framework.exceptions import ValidationError
 
 from apps.order.models import Letter
 from apps.order.repositories.interfaces.letter import ILetterRepository
 
 
 class LetterRepository(ILetterRepository):
-    def list(self) -> list[Letter]:
-        return Letter.objects.filter()
+    def list_letters(self) -> QuerySet[Letter]:
+        return Letter.objects.all()
 
-    def get_by_id(self, pk) -> Letter:
+    def retrieve_letter(self, pk: int) -> Letter:
         try:
             return Letter.objects.get(id=pk)
-        except Letter.DoesNotExist:
-            raise ValidationError({"detail": "Letter not found"})
+        except ObjectDoesNotExist:
+            raise Letter.DoesNotExist("Letter not found")
 
-    def create(self, data) -> Letter:
+    def create_letter(self, data: dict) -> Letter:
         return Letter.objects.create(**data)
 
-    def update(self, letter, data) -> Letter:
+    def update_letter(self, letter: Letter, data: dict) -> Letter:
         for key, value in data.items():
             setattr(letter, key, value)
         letter.save()
         return letter
 
-    def delete(self, letter):
+    def delete_letter(self, letter: Letter) -> None:
         letter.delete()
 
     def none(self) -> QuerySet[Letter]:

@@ -13,6 +13,7 @@ def send_email(data, order):
     try:
         order.status = "AWAITING_BID"
         order.save(update_fields=["status", "updated_at"])
+
         if order.broker_email:
             subject = "New comment added"
             message = "A new comment has been added:\n\n"
@@ -24,26 +25,32 @@ def send_email(data, order):
                 fail_silently=False,
                 html_message=data["comment"],
             )
-            logging.info(f"***** Email to {order.broker_email} sent successfully *****")
+            logging.info(f"Email sent successfully to {order.broker_email}")
         else:
             logging.warning(f"No email address found for order {order.id}")
-    except (SMTPAuthenticationError, SMTPException) as e:
-        raise ValidationError({"error": str(e)})
+    except SMTPAuthenticationError as e:
+        logging.error(f"SMTP authentication failed: {str(e)}")
+        raise ValidationError({"error": "SMTP authentication failed"})
+    except SMTPException as e:
+        logging.error(f"SMTP exception occurred: {str(e)}")
+        raise ValidationError({"error": "Failed to send email"})
     except Exception as e:
-        raise ValidationError({"error": str(e)})
+        logging.error(f"An unexpected error occurred: {str(e)}")
+        raise ValidationError({"error": "Unexpected error occurred"})
 
 
 class SendLetterService(ISendLetterService):
-    def __init__(self, letter_repository: ILetterRepository):
-        self._letter_repository = letter_repository
+    def __init__(self, repository: ILetterRepository):
+        self._repository = repository
 
     def send_letter(self, data, user):
-        order = data.get("order", None)
+        order = data.get("order")
 
         if hasattr(order, "letter"):
             order.letter.delete()
 
-        self._letter_repository.create(data)
+        self._repository.create_letter(data)
         order.user = user
         order.save(update_fields=["user", "updated_at"])
+
         send_email(data, order)

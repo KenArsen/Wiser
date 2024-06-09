@@ -1,75 +1,103 @@
-from rest_framework import generics
+from django.utils.decorators import method_decorator
+from rest_framework.decorators import action
+from rest_framework.generics import (
+    CreateAPIView,
+    DestroyAPIView,
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+)
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
 
 from apps.common.paginations import LargeResultsSetPagination
 from apps.common.permissions import IsSuperAdmin
 from apps.driver.api.v1.serializers.driver import (
-    DriverAvailabilityUpdateSerializer,
     DriverCreateSerializer,
     DriverDetailSerializer,
     DriverListSerializer,
+    DriverStatusSerializer,
     DriverUpdateSerializer,
 )
-from apps.driver.models import Driver
+from apps.driver.repositories.implementations.driver import DriverRepository
+from apps.driver.services.implementations.driver import (
+    DriverActivateService,
+    DriverCreateService,
+    DriverDeactivateService,
+    DriverDeleteService,
+    DriverUpdateService,
+)
 
 
-class BaseDriverView(generics.GenericAPIView):
-    queryset = Driver.objects.all()
+class BaseDriverView(GenericAPIView):
+    queryset = DriverRepository().none()
     permission_classes = (IsSuperAdmin,)
     pagination_class = LargeResultsSetPagination
 
+    def get_repository(self):
+        if not hasattr(self, "_repository"):
+            self._repository = DriverRepository()
+        return self._repository
 
-class DriverListAPI(BaseDriverView, generics.ListAPIView):
+    def get_object(self):
+        return self.get_repository().retrieve(self.kwargs["pk"])
+
+
+class DriverListAPI(BaseDriverView, ListAPIView):
     serializer_class = DriverListSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get_queryset(self):
+        return self.get_repository().list()
 
 
-class DriverDetailAPI(BaseDriverView, generics.RetrieveAPIView):
+class DriverDetailAPI(BaseDriverView, RetrieveAPIView):
     serializer_class = DriverDetailSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
 
-
-class DriverCreateAPI(BaseDriverView, generics.CreateAPIView):
+class DriverCreateAPI(BaseDriverView, CreateAPIView):
     serializer_class = DriverCreateSerializer
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        service = DriverCreateService(repository=self.get_repository())
+        serializer.instance = service.create(data=serializer.validated_data)
 
 
-class DriverUpdateAPI(BaseDriverView, generics.UpdateAPIView):
+class DriverUpdateAPI(BaseDriverView, UpdateAPIView):
     serializer_class = DriverUpdateSerializer
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        service = DriverUpdateService(repository=self.get_repository())
+        serializer.instance = service.update(driver=self.get_object(), data=serializer.validated_data)
 
 
-class DriverDeleteAPI(BaseDriverView, generics.DestroyAPIView):
+class DriverDeleteAPI(BaseDriverView, DestroyAPIView):
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def perform_destroy(self, instance):
+        service = DriverDeleteService(repository=self.get_repository())
+        service.delete(instance)
 
 
-class DriverFilterAPI(BaseDriverView, generics.ListAPIView):
-    queryset = Driver.objects.filter(is_available=True)
+class DriverFilterAPI(BaseDriverView, ListAPIView):
     serializer_class = DriverListSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get_queryset(self):
+        return self.get_repository().get_all_active_drivers()
 
 
-class DriverAvailabilityUpdateAPI(BaseDriverView, generics.UpdateAPIView):
-    serializer_class = DriverAvailabilityUpdateSerializer
+@method_decorator(action(detail=True, methods=["post"]), name="dispatch")
+class DriverActivateAPI(BaseDriverView):
+    serializer_class = DriverStatusSerializer
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_available = not instance.is_available  # Измените значение на противоположное
-        instance.save(update_fields=["is_available", "updated_at"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    def post(self, request, *args, **kwargs):
+        DriverActivateService().activate(driver=self.get_object())
+        return Response(status=HTTP_200_OK)
+
+
+@method_decorator(action(detail=True, methods=["post"]), name="dispatch")
+class DriverDeactivateAPI(BaseDriverView):
+    serializer_class = DriverStatusSerializer
+
+    def post(self, request, *args, **kwargs):
+        DriverDeactivateService().deactivate(driver=self.get_object())
+        return Response(status=HTTP_200_OK)

@@ -27,20 +27,20 @@ class LoadBoardListAPI(BaseLoadBoardView, ListAPIView):
     serializer_class = LoadBoardListSerializer
 
     def get_queryset(self):
-        return LoadBoardRepository().list()
+        return LoadBoardRepository().list_orders()
 
 
 class LoadBoardDetailAPI(BaseLoadBoardView, RetrieveAPIView):
     serializer_class = LoadBoardDetailSerializer
 
     def get_object(self):
-        return LoadBoardRepository().get_by_id(pk=self.kwargs["pk"])
+        return LoadBoardRepository().retrieve_order(pk=self.kwargs["pk"])
 
 
 class SendEmailView(CreateAPIView):
     serializer_class = LetterSerializer
 
     def perform_create(self, serializer):
-        SendLetterService(letter_repository=LetterRepository()).send_letter(
+        SendLetterService(repository=LetterRepository()).send_letter(
             data=serializer.validated_data, user=self.request.user
         )

@@ -1,14 +1,6 @@
 from django.db import models
 
 
-class Role(models.TextChoices):
-    GUEST = "GUEST", "GUEST"
-    DISPATCHER = "DISPATCHER", "DISPATCHER"
-    HR = "HR", "HR"
-    ACCOUNTANT = "ACCOUNTANT", "ACCOUNTANT"
-    DRIVER = "DRIVER", "DRIVER"
-
-
 class OrderStatus(models.TextChoices):
     PENDING = "PENDING", "PENDING"
     AWAITING_BID = "AWAITING_BID", "AWAITING BID"

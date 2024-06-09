@@ -5,17 +5,17 @@ from apps.order.models import Letter
 
 class ICreateLetterService(abc.ABC):
     @abc.abstractmethod
-    def create(self, data, user) -> Letter: ...
+    def create_letter(self, data, user) -> Letter: ...
 
 
 class IUpdateLetterService(abc.ABC):
     @abc.abstractmethod
-    def update(self, letter, data) -> Letter: ...
+    def update_letter(self, letter, data) -> Letter: ...
 
 
-class IDeleteOrderService(abc.ABC):
+class IDeleteLetterService(abc.ABC):
     @abc.abstractmethod
-    def delete(self, letter) -> None: ...
+    def delete_letter(self, letter) -> None: ...
 
 
 class ISendLetterService(abc.ABC):
