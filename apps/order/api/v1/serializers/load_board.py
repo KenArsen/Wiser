@@ -56,10 +56,10 @@ class LoadBoardBaseSerializer(serializers.ModelSerializer):
         )
         ref_name = "LoadBoardBase"
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        _update_match(instance)
-        return representation
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     _update_match(instance)
+    #     return representation
 
 
 class LoadBoardListSerializer(LoadBoardBaseSerializer):
@@ -81,8 +81,8 @@ class LoadBoardDetailSerializer(LoadBoardBaseSerializer):
             "broker",
             "broker_phone",
             "broker_email",
-            "posted",
-            "expires",
+            "posted_date",
+            "expires_date",
             "dock_level",
             "hazmat",
             "amount",

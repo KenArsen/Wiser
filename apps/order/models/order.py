@@ -30,8 +30,8 @@ class Order(BaseModel):
     broker = models.CharField(max_length=255, blank=True, null=True)
     broker_phone = models.CharField(max_length=255, blank=True, null=True)
     broker_email = models.EmailField(null=True, blank=True)
-    posted = models.DateTimeField(blank=True, null=True)
-    expires = models.DateTimeField(default=timezone.now)
+    posted_date = models.DateTimeField(blank=True, null=True)
+    expires_date = models.DateTimeField(default=timezone.now)
     dock_level = models.BooleanField(default=False)
     hazmat = models.BooleanField(default=False)
     amount = models.CharField(max_length=255, blank=True, null=True)
@@ -68,7 +68,7 @@ class Order(BaseModel):
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.expires <= timezone.localtime(timezone.now()) and self.status == OrderStatus.PENDING:
+        if self.expires_date <= timezone.localtime(timezone.now()) and self.status == OrderStatus.PENDING:
             raise ValidationError({"error": f"This {self.order_number} order has already expired!"})
 
     def move_to_history(self):
