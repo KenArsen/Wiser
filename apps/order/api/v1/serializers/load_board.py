@@ -7,19 +7,27 @@ from apps.vehicle.models import Vehicle
 
 
 class NearByDriverSerializer(serializers.ModelSerializer):
+    transport_type = serializers.SerializerMethodField()
+    payload = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
+    coordinate = serializers.SerializerMethodField()
+
     class Meta:
         model = Driver
-        fields = ("id", "last_name", "first_name", "phone_number")
+        fields = ("id", "full_name", "phone_number", "transport_type", "payload", "location", "coordinate")
         ref_name = "NearByDriver"
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        vehicle = getattr(instance, "vehicle", None)
+    def get_transport_type(self, obj):
+        return obj.vehicle.transport_type if getattr(obj, "vehicle", None) else None
 
-        vehicle_info = get_vehicle_info(vehicle)
-        representation.update(vehicle_info)
+    def get_payload(self, obj):
+        return obj.vehicle.payload if getattr(obj, "vehicle", None) else None
 
-        return representation
+    def get_location(self, obj):
+        return obj.vehicle.location if getattr(obj, "vehicle", None) else None
+
+    def get_coordinate(self, obj):
+        return obj.vehicle.coordinate if getattr(obj, "vehicle", None) else None
 
 
 class NearByOrderSerializer(serializers.ModelSerializer):
@@ -151,28 +159,8 @@ class LoadBoardDetailSerializer(LoadBoardBaseSerializer):
         return template.content if template else None
 
 
-def get_vehicle_info(vehicle):
-    if vehicle:
-        return {
-            "transport_type": vehicle.transport_type,
-            "payload": vehicle.payload,
-            "location": vehicle.location,
-            "coordinates": (
-                f"{vehicle.location_latitude},{vehicle.location_longitude}"
-                if vehicle.location_latitude and vehicle.location_longitude
-                else None
-            ),
-        }
-    else:
-        return {
-            "transport_type": None,
-            "payload": None,
-            "location": None,
-            "coordinates": None,
-        }
-
-
 def _update_match(order, distance_threshold=2000):
+    
     if not order.pick_up_latitude or not order.pick_up_longitude:
         return
 

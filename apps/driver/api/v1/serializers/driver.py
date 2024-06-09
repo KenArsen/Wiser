@@ -5,18 +5,9 @@ from apps.vehicle.models import Vehicle
 
 
 class DriversVehicleSerializer(serializers.ModelSerializer):
-    coordinate = serializers.SerializerMethodField()
-
     class Meta:
         model = Vehicle
         fields = ("id", "dispatcher", "owner", "location", "coordinate")
-
-    def get_coordinate(self, instance):
-        return (
-            f"{instance.location_latitude},{instance.location_longitude}"
-            if instance.location_latitude and instance.location_longitude
-            else None
-        )
 
 
 class DriverStatusSerializer(serializers.ModelSerializer):
@@ -32,7 +23,7 @@ class DriverStatusSerializer(serializers.ModelSerializer):
 class DriverListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
-        fields = ("id", "first_name", "last_name", "email", "phone_number", "ssn", "lisense_number")
+        fields = ("id", "first_name", "last_name", "email", "phone_number", "ssn", "license_number")
         ref_name = "DriverList"
 
 

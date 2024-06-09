@@ -23,26 +23,30 @@ class BaseMyBidsView(GenericAPIView):
     permission_classes = (HasAccessToMyBidsPanel,)
     pagination_class = LargeResultsSetPagination
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.my_bid_repository = MyBidRepository()
+
+    def get_object(self):
+        return self.my_bid_repository.retrieve_order(pk=self.kwargs["pk"])
+
 
 class MyBidListAPI(BaseMyBidsView, ListAPIView):
     serializer_class = MyBidListSerializer
 
     def get_queryset(self):
-        return MyBidRepository().list_orders()
+        return self.my_bid_repository.list_orders()
 
 
 class MyBidDetailAPI(BaseMyBidsView, RetrieveAPIView):
     serializer_class = MyBidDetailSerializer
-
-    def get_object(self):
-        return MyBidRepository().retrieve_order(pk=self.kwargs["pk"])
 
 
 class MyBidHistoryAPI(BaseMyBidsView, ListAPIView):
     serializer_class = MyBidHistorySerializer
 
     def get_queryset(self):
-        return MyBidRepository().get_history_orders()
+        return self.my_bid_repository.get_history_orders()
 
 
 class AssignAPI(CreateAPIView):

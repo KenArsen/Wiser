@@ -22,19 +22,23 @@ class BaseLoadBoardView(GenericAPIView):
     pagination_class = LargeResultsSetPagination
     permission_classes = (HasAccessToLoadBoardPanel,)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.load_board_repository = LoadBoardRepository()
+
+    def get_object(self):
+        return self.load_board_repository.retrieve_order(pk=self.kwargs["pk"])
+
 
 class LoadBoardListAPI(BaseLoadBoardView, ListAPIView):
     serializer_class = LoadBoardListSerializer
 
     def get_queryset(self):
-        return LoadBoardRepository().list_orders()
+        return self.load_board_repository.list_orders()
 
 
 class LoadBoardDetailAPI(BaseLoadBoardView, RetrieveAPIView):
     serializer_class = LoadBoardDetailSerializer
-
-    def get_object(self):
-        return LoadBoardRepository().retrieve_order(pk=self.kwargs["pk"])
 
 
 class SendEmailView(CreateAPIView):
