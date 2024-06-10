@@ -1,9 +1,9 @@
 import email
 import imaplib
 import logging
-import pytz
 from datetime import datetime, timedelta
 
+import pytz
 from bs4 import BeautifulSoup
 from celery import shared_task
 from django.conf import settings
@@ -79,34 +79,34 @@ def extract_order_data(soup):
     order_data = {}
 
     try:
-        target_div = soup.select('div[class*=content]')
-        div_text = target_div[0].get_text(separator='\n', strip=True)
-        lines = div_text.split('\n')
+        target_div = soup.select("div[class*=content]")
+        div_text = target_div[0].get_text(separator="\n", strip=True)
+        lines = div_text.split("\n")
 
         # Извлечение данных
-        order_data["order_number"] = int(lines[0].split('#')[1].strip())
+        order_data["order_number"] = int(lines[0].split("#")[1].strip())
         order_data["pick_up_location"] = lines[2].strip()
         pick_up_datetime = lines[3].strip()
         order_data["delivery_location"] = lines[5].strip()
         delivery_datetime = lines[6].strip()
         order_data["stops"] = lines[7].strip()
 
-        order_data["broker"] = _extract_data(lines, 'Broker:')
-        order_data["broker_email"] = _extract_data(lines, 'Email:')
-        order_data["broker_phone"] = _extract_data(lines, 'Broker Phone:')
-        posted_datetime = _extract_data(lines, 'Posted:')
-        expires_datetime = _extract_data(lines, 'Expires:')
-        order_data["dock_level"] = _extract_data(lines, 'Dock Level:').lower() == 'yes'
-        order_data["hazmat"] = _extract_data(lines, 'Hazmat:').lower() == 'yes'
-        order_data["amount"] = float(_extract_data(lines, 'Posted Amount:').replace('$', '').replace(' USD', ''))
-        order_data["fast_load"] = _extract_data(lines, 'CSA/Fast Load:').lower() == 'yes'
-        order_data["notes"] = _extract_data(lines, 'Notes:')
-        order_data["load_type"] = _extract_data(lines, 'Load Type:')
-        order_data["vehicle_required"] = _extract_data(lines, 'Vehicle required:')
-        order_data["pieces"] = int(_extract_data(lines, 'Pieces:'))
-        order_data["weight"] = int(_extract_data(lines, 'Weight:').split(' ')[0].strip())
-        order_data["dimensions"] = _extract_data(lines, 'Dimensions:')
-        order_data["stackable"] = _extract_data(lines, 'Stackable:').lower() == 'yes'
+        order_data["broker"] = _extract_data(lines, "Broker:")
+        order_data["broker_email"] = _extract_data(lines, "Email:")
+        order_data["broker_phone"] = _extract_data(lines, "Broker Phone:")
+        posted_datetime = _extract_data(lines, "Posted:")
+        expires_datetime = _extract_data(lines, "Expires:")
+        order_data["dock_level"] = _extract_data(lines, "Dock Level:").lower() == "yes"
+        order_data["hazmat"] = _extract_data(lines, "Hazmat:").lower() == "yes"
+        order_data["amount"] = float(_extract_data(lines, "Posted Amount:").replace("$", "").replace(" USD", ""))
+        order_data["fast_load"] = _extract_data(lines, "CSA/Fast Load:").lower() == "yes"
+        order_data["notes"] = _extract_data(lines, "Notes:")
+        order_data["load_type"] = _extract_data(lines, "Load Type:")
+        order_data["vehicle_required"] = _extract_data(lines, "Vehicle required:")
+        order_data["pieces"] = int(_extract_data(lines, "Pieces:"))
+        order_data["weight"] = int(_extract_data(lines, "Weight:").split(" ")[0].strip())
+        order_data["dimensions"] = _extract_data(lines, "Dimensions:")
+        order_data["stackable"] = _extract_data(lines, "Stackable:").lower() == "yes"
 
         format_date = _determine_date_format(pick_up_datetime)
 
@@ -137,16 +137,15 @@ def _extract_data(data, keyword):
 
 
 def _parse_datetime_with_timezone(date_str, format_date):
-    timezone_suffix = 'UTC'
+    timezone_suffix = "UTC"
     if " EST" in date_str:
-        timezone_suffix = 'US/Eastern'
+        timezone_suffix = "US/Eastern"
     elif " CEN" in date_str:
-        timezone_suffix = 'US/Central'
+        timezone_suffix = "US/Central"
 
     date_str = date_str.replace(" EST", "").replace(" CEN", "")
     try:
-        return (pytz.timezone(timezone_suffix).localize(datetime.strptime(date_str, format_date))
-                + timedelta(hours=6))
+        return pytz.timezone(timezone_suffix).localize(datetime.strptime(date_str, format_date)) + timedelta(hours=6)
     except ValueError:
         return None
 

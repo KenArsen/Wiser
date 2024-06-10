@@ -70,8 +70,9 @@ class DriverUpdateAPI(BaseDriverView, UpdateAPIView):
     serializer_class = DriverUpdateSerializer
 
     def perform_update(self, serializer):
-        serializer.instance = self.update_driver_service.update(driver=self.get_object(),
-                                                                data=serializer.validated_data)
+        serializer.instance = self.update_driver_service.update(
+            driver=self.get_object(), data=serializer.validated_data
+        )
 
 
 class DriverDeleteAPI(BaseDriverView, DestroyAPIView):

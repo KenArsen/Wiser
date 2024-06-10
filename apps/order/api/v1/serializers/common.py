@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework import serializers
 
-from apps.order.models import Assign, File, Letter, MyLoadStatus, Order, Template
+from apps.order.models import Assign, Letter, MyLoadStatus, Order, Template
 
 
 class LetterSerializer(serializers.ModelSerializer):
@@ -86,13 +86,6 @@ class AssignSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"driver_price": "Driver price must be a positive value."})
 
         return data
-
-
-class FileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = File
-        fields = "__all__"
-        ref_name = "File"
 
 
 class TemplateSerializer(serializers.ModelSerializer):

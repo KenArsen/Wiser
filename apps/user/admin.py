@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
-from apps.user.models import Invitation, User, Role
+from apps.user.models import Invitation, Role, User
 
 admin.site.register(Role)
 

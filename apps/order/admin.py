@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from apps.order.models import Assign, File, Letter, Order, Template
+from apps.file.models import File
+from apps.order.models import Assign, Letter, Order, Template
 
 
 class LetterInline(admin.StackedInline):

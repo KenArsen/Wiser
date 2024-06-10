@@ -118,11 +118,3 @@ class MyLoadStatus(BaseModel):
 
     def __str__(self):
         return f"{self.order}"
-
-
-class File(BaseModel):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="files")
-    file = models.FileField(upload_to="order_files/%Y/%m/%d")
-
-    def __str__(self):
-        return f"{self.order}"

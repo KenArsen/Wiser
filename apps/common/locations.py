@@ -1,12 +1,20 @@
 from math import atan2, cos, radians, sin, sqrt
 
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
 
 
 def get_location(address):
-    geolocator = Nominatim(user_agent="Wiser")
-    location = geolocator.geocode(address)
-    return location
+    try:
+        geolocator = Nominatim(user_agent="Wiser")
+        location = geolocator.geocode(address)
+        return location.latitude, location.longitude
+    except GeocoderTimedOut:
+        return "Geocoding service timed out"
+    except GeocoderServiceError as e:
+        return f"Geocoding service error: {e}"
+    except Exception as e:
+        return f"An error occurred: {e}"
 
 
 def get_haversine_distance(lat1, lon1, lat2, lon2):

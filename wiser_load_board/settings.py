@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "apps.user.apps.UserConfig",
     "apps.chat.apps.ChatConfig",
+    "apps.file.apps.FileConfig",
     "apps.order.apps.OrderConfig",
     "apps.driver.apps.DriverConfig",
     "apps.vehicle.apps.VehicleConfig",

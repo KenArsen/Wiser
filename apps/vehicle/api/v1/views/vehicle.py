@@ -62,8 +62,9 @@ class VehicleUpdateAPI(BaseVehicleView, UpdateAPIView):
     serializer_class = VehicleUpdateSerializer
 
     def perform_update(self, serializer):
-        serializer.instance = self.update_vehicle_service.update(vehicle=self.get_object(),
-                                                                 data=serializer.validated_data)
+        serializer.instance = self.update_vehicle_service.update(
+            vehicle=self.get_object(), data=serializer.validated_data
+        )
 
 
 class VehicleDeleteAPI(BaseVehicleView, DestroyAPIView):

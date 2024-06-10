@@ -1,1 +1,1 @@
-from .user import Invitation, User, Role
+from .user import Invitation, Role, User

@@ -27,34 +27,32 @@ class IsHR(BasePermission):
 
 class HasAccessToDashboardPanel(BasePermission):
     def has_permission(self, request, view):
-        return any([
-            IsSuperAdmin().has_permission(request, view),
-            IsDispatcher().has_permission(request, view),
-            IsAccounting().has_permission(request, view),
-            IsHR().has_permission(request, view)
-        ])
+        return any(
+            [
+                IsSuperAdmin().has_permission(request, view),
+                IsDispatcher().has_permission(request, view),
+                IsAccounting().has_permission(request, view),
+                IsHR().has_permission(request, view),
+            ]
+        )
 
 
 class HasAccessToLoadBoardPanel(BasePermission):
     def has_permission(self, request, view):
-        return any([
-            IsSuperAdmin().has_permission(request, view),
-            IsDispatcher().has_permission(request, view)
-        ])
+        return any([IsSuperAdmin().has_permission(request, view), IsDispatcher().has_permission(request, view)])
 
 
 class HasAccessToMyBidsPanel(BasePermission):
     def has_permission(self, request, view):
-        return any([
-            IsSuperAdmin().has_permission(request, view),
-            IsDispatcher().has_permission(request, view)
-        ])
+        return any([IsSuperAdmin().has_permission(request, view), IsDispatcher().has_permission(request, view)])
 
 
 class HasAccessToMyLoadsPanel(BasePermission):
     def has_permission(self, request, view):
-        return any([
-            IsSuperAdmin().has_permission(request, view),
-            IsDispatcher().has_permission(request, view),
-            IsAccounting().has_permission(request, view)
-        ])
+        return any(
+            [
+                IsSuperAdmin().has_permission(request, view),
+                IsDispatcher().has_permission(request, view),
+                IsAccounting().has_permission(request, view),
+            ]
+        )
