@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
-from apps.common.locations import get_haversine_distance
 from apps.driver.models import Driver
 from apps.order.models import Order, Template
-from apps.vehicle.models import Vehicle
 
 
 class NearByDriverSerializer(serializers.ModelSerializer):
@@ -42,6 +40,7 @@ class LoadBoardBaseSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             "id",
+            "order_number",
             "created_at",
             "status",
             "pick_up_location",
@@ -55,11 +54,6 @@ class LoadBoardBaseSerializer(serializers.ModelSerializer):
             "match",
         )
         ref_name = "LoadBoardBase"
-
-    # def to_representation(self, instance):
-    #     representation = super().to_representation(instance)
-    #     _update_match(instance)
-    #     return representation
 
 
 class LoadBoardListSerializer(LoadBoardBaseSerializer):
@@ -102,80 +96,59 @@ class LoadBoardDetailSerializer(LoadBoardBaseSerializer):
         ref_name = "LoadBoardDetail"
 
     def get_nearby_drivers(self, order, distance_threshold=2000):
-        if not order.pick_up_latitude or not order.pick_up_longitude:
-            return []
-
-        vehicles = Vehicle.objects.filter(
-            location_latitude__isnull=False,
-            location_longitude__isnull=False,
-        ).only("location_latitude", "location_longitude")
-
-        nearby_drivers = []
-        for vehicle in vehicles:
-            distance = get_haversine_distance(
-                order.pick_up_latitude,
-                order.pick_up_longitude,
-                vehicle.location_latitude,
-                vehicle.location_longitude,
-            )
-
-            if distance <= distance_threshold:
-                nearby_drivers.append(NearByDriverSerializer(vehicle.driver).data)
-
-        return nearby_drivers
+        # if not order.pick_up_latitude or not order.pick_up_longitude:
+        #     return []
+        #
+        # vehicles = Vehicle.objects.filter(
+        #     location_latitude__isnull=False,
+        #     location_longitude__isnull=False,
+        # ).only("location_latitude", "location_longitude")
+        #
+        # nearby_drivers = []
+        # for vehicle in vehicles:
+        #     distance = get_haversine_distance(
+        #         order.pick_up_latitude,
+        #         order.pick_up_longitude,
+        #         vehicle.location_latitude,
+        #         vehicle.location_longitude,
+        #     )
+        #
+        #     if distance <= distance_threshold:
+        #         nearby_drivers.append(NearByDriverSerializer(vehicle.driver).data)
+        # return nearby_drivers
+        return []
 
     def get_nearby_orders(self, order, radius=2000):
-        if not order.pick_up_latitude or not order.pick_up_longitude:
-            return []
+        # if not order.pick_up_latitude or not order.pick_up_longitude:
+        #     return []
+        #
+        # orders = Order.objects.filter(
+        #     status="COMPLETED",
+        #     pick_up_latitude__isnull=False,
+        #     pick_up_location__isnull=False,
+        # ).only("pick_up_latitude", "pick_up_longitude", "delivery_latitude", "delivery_longitude")
+        #
+        # nearby_orders = []
+        #
+        # for obj in orders:
+        #     distance_from = get_haversine_distance(
+        #         order.pick_up_latitude,
+        #         order.pick_up_longitude,
+        #         obj.delivery_latitude,
+        #         obj.delivery_longitude,
+        #     )
+        #     distance_to = get_haversine_distance(
+        #         order.delivery_latitude,
+        #         order.delivery_longitude,
+        #         obj.delivery_latitude,
+        #         obj.delivery_longitude,
+        #     )
+        #
+        #     if distance_from <= radius and distance_to <= radius:
+        #         nearby_orders.append(NearByOrderSerializer(obj).data)
+        # return nearby_orders
+        return []
 
-        orders = Order.objects.filter(
-            status="COMPLETED",
-            pick_up_latitude__isnull=False,
-            pick_up_location__isnull=False,
-        ).only("pick_up_latitude", "pick_up_longitude", "delivery_latitude", "delivery_longitude")
-
-        nearby_orders = []
-
-        for obj in orders:
-            distance_from = get_haversine_distance(
-                order.pick_up_latitude,
-                order.pick_up_longitude,
-                obj.delivery_latitude,
-                obj.delivery_longitude,
-            )
-            distance_to = get_haversine_distance(
-                order.delivery_latitude,
-                order.delivery_longitude,
-                obj.delivery_latitude,
-                obj.delivery_longitude,
-            )
-
-            if distance_from <= radius and distance_to <= radius:
-                nearby_orders.append(NearByOrderSerializer(obj).data)
-        return nearby_orders
-
-    def get_message_template(self, instance):
+    def get_message_template(self, _):
         template = Template.objects.filter(is_active=True).first()
         return template.content if template else None
-
-
-def _update_match(order, distance_threshold=2000):
-    
-    if not order.pick_up_latitude or not order.pick_up_longitude:
-        return
-
-    vehicles = Vehicle.objects.filter(
-        location_latitude__isnull=False,
-        location_longitude__isnull=False,
-    ).only("location_latitude", "location_longitude")
-    match = sum(
-        1
-        for vehicle in vehicles
-        if get_haversine_distance(
-            order.pick_up_latitude, order.pick_up_longitude, vehicle.location_latitude, vehicle.location_longitude
-        )
-        <= distance_threshold
-    )
-
-    order.match = match
-    order.save(update_fields=["match"])

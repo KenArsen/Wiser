@@ -14,7 +14,7 @@ class Order(BaseModel):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.PENDING)
 
-    order_number = models.CharField(max_length=255, blank=True, null=True)
+    order_number = models.PositiveIntegerField(blank=True, null=True)
 
     pick_up_location = models.CharField(max_length=255, blank=True, null=True)
     pick_up_latitude = models.FloatField(blank=True, null=True)
@@ -34,13 +34,13 @@ class Order(BaseModel):
     expires_date = models.DateTimeField(default=timezone.now)
     dock_level = models.BooleanField(default=False)
     hazmat = models.BooleanField(default=False)
-    amount = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.FloatField(blank=True, null=True)
     fast_load = models.BooleanField(default=False)
     notes = models.TextField(max_length=400, blank=True, null=True)
     load_type = models.CharField(max_length=255, blank=True, null=True)
     vehicle_required = models.CharField(max_length=255, blank=True, null=True)
-    pieces = models.CharField(max_length=255, blank=True, null=True)
-    weight = models.CharField(max_length=255, blank=True, null=True)
+    pieces = models.PositiveSmallIntegerField(blank=True, null=True)
+    weight = models.PositiveSmallIntegerField(blank=True, null=True)
     dimensions = models.CharField(max_length=255, blank=True, null=True)
     stackable = models.BooleanField(default=False)
 

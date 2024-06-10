@@ -84,7 +84,7 @@ def extract_order_data(soup):
         lines = div_text.split('\n')
 
         # Извлечение данных
-        order_data["order_number"] = lines[0].split('#')[1].strip()
+        order_data["order_number"] = int(lines[0].split('#')[1].strip())
         order_data["pick_up_location"] = lines[2].strip()
         pick_up_datetime = lines[3].strip()
         order_data["delivery_location"] = lines[5].strip()
@@ -98,13 +98,13 @@ def extract_order_data(soup):
         expires_datetime = _extract_data(lines, 'Expires:')
         order_data["dock_level"] = _extract_data(lines, 'Dock Level:').lower() == 'yes'
         order_data["hazmat"] = _extract_data(lines, 'Hazmat:').lower() == 'yes'
-        order_data["amount"] = _extract_data(lines, 'Posted Amount:')
+        order_data["amount"] = float(_extract_data(lines, 'Posted Amount:').replace('$', '').replace(' USD', ''))
         order_data["fast_load"] = _extract_data(lines, 'CSA/Fast Load:').lower() == 'yes'
         order_data["notes"] = _extract_data(lines, 'Notes:')
         order_data["load_type"] = _extract_data(lines, 'Load Type:')
         order_data["vehicle_required"] = _extract_data(lines, 'Vehicle required:')
-        order_data["pieces"] = _extract_data(lines, 'Pieces:')
-        order_data["weight"] = _extract_data(lines, 'Weight:')
+        order_data["pieces"] = int(_extract_data(lines, 'Pieces:'))
+        order_data["weight"] = int(_extract_data(lines, 'Weight:').split(' ')[0].strip())
         order_data["dimensions"] = _extract_data(lines, 'Dimensions:')
         order_data["stackable"] = _extract_data(lines, 'Stackable:').lower() == 'yes'
 
